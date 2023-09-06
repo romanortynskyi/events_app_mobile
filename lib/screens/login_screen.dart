@@ -108,9 +108,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void onLoginWithGoogle() async {
     try {
       GoogleSignInAccount? googleSignInAccount = await GoogleSignIn().signIn();
-      print('try');
+      print(googleSignInAccount);
     } catch (error) {
-      print('catch');
+      print(error.toString());
     }
   }
 
@@ -119,7 +119,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (loginResult.status == LoginStatus.success) {
       _accessToken = loginResult.accessToken;
-      final userInfo = await FacebookAuth.instance.getUserData();
+      final userInfo = await FacebookAuth.instance
+          .getUserData(fields: 'first_name,last_name,email,picture.width(200)');
+
       _userData = userInfo;
     } else {
       print('ResultStatus: ${loginResult.status}');
