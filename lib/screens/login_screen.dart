@@ -5,6 +5,8 @@ import 'package:events_app_mobile/screens/home_screen.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
+import 'package:events_app_mobile/widgets/or_continue_with.dart';
+import 'package:events_app_mobile/widgets/sign_up_button.dart';
 import 'package:events_app_mobile/widgets/social_button.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
@@ -107,8 +109,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void onLoginWithGoogle() async {
     try {
-      GoogleSignInAccount? googleSignInAccount = await GoogleSignIn().signIn();
-      print(googleSignInAccount);
+      GoogleSignIn googleSignIn = GoogleSignIn();
+
+      GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+
+      final GoogleSignInAuthentication? googleAuth =
+          await googleSignInAccount?.authentication;
+
+      print(googleAuth?.idToken);
     } catch (error) {
       print(error.toString());
     }
@@ -198,33 +206,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         onPressed: () => onLoginPressed(runLoginMutation),
                         text: 'Login',
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 20.0),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Divider(
-                                thickness: 0.5,
-                                color: Colors.grey[400],
-                              ),
-                            ),
-                            Padding(
-                              padding:
-                                  const EdgeInsets.symmetric(horizontal: 10.0),
-                              child: Text(
-                                'Or continue with',
-                                style: TextStyle(color: LightThemeColors.text),
-                              ),
-                            ),
-                            Expanded(
-                              child: Divider(
-                                thickness: 0.5,
-                                color: Colors.grey[400],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      const OrContinueWith(),
                       const SizedBox(height: 15),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -241,23 +223,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
                       const SizedBox(height: 20),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Not a member?',
-                            style: TextStyle(color: LightThemeColors.text),
-                          ),
-                          const SizedBox(width: 5),
-                          TouchableOpacity(
-                            onTap: onSignUpPressed,
-                            child: Text(
-                              'Sign up',
-                              style: TextStyle(color: LightThemeColors.primary),
-                            ),
-                          ),
-                        ],
-                      ),
+                      SignUpButton(onPressed: onSignUpPressed),
                     ],
                   ),
                 ),
