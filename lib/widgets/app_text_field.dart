@@ -7,7 +7,12 @@ class AppTextField extends StatelessWidget {
   final bool obscureText;
   final void Function(String) onChanged;
   final String? Function(String?) validator;
-  final IconButton? suffixIcon;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+  final double? borderRadius;
+  final TextEditingController? controller;
+  final FocusNode? focusNode;
+  final void Function()? onTap;
 
   const AppTextField({
     super.key,
@@ -15,7 +20,12 @@ class AppTextField extends StatelessWidget {
     required this.obscureText,
     required this.onChanged,
     required this.validator,
+    this.prefixIcon,
     this.suffixIcon,
+    this.borderRadius,
+    this.controller,
+    this.focusNode,
+    this.onTap,
   });
 
   @override
@@ -23,20 +33,26 @@ class AppTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25.0),
       child: TextFormField(
+        focusNode: focusNode,
+        controller: controller,
         onChanged: onChanged,
+        onTap: onTap,
         validator: validator,
         obscureText: obscureText,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(color: LightThemeColors.hint),
-          enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.white),
+          enabledBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.white),
+            borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 10)),
           ),
-          focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFFC8C7C8)),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: LightThemeColors.darkGrey),
+            borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 10)),
           ),
-          fillColor: const Color(0xFFECEBEC),
+          fillColor: LightThemeColors.grey,
           filled: true,
+          prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
         ),
       ),

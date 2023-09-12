@@ -1,3 +1,4 @@
+import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:flutter/material.dart';
 
 class MonthTile extends StatelessWidget {
@@ -15,9 +16,9 @@ class MonthTile extends StatelessWidget {
       width: 80.0,
       color: Colors.transparent,
       child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.red,
-            borderRadius: BorderRadius.only(
+          decoration: BoxDecoration(
+            color: LightThemeColors.primary,
+            borderRadius: const BorderRadius.only(
               topRight: Radius.circular(30.0),
               bottomRight: Radius.circular(30.0),
             ),

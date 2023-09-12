@@ -5,4 +5,6 @@ class LightThemeColors {
   static Color text = const Color.fromARGB(255, 86, 84, 86);
   static Color hint = const Color.fromARGB(255, 161, 157, 161);
   static Color primary = const Color.fromARGB(255, 125, 96, 200);
+  static Color grey = const Color(0xFFECEBEC);
+  static Color darkGrey = const Color(0xFFC8C7C8);
 }
