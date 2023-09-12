@@ -20,18 +20,12 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final items = const [
-    Icon(Icons.home, size: 30),
-    Icon(Icons.search_outlined, size: 30),
-    Icon(Icons.person, size: 30),
-  ];
-
   List<Month> months = [
     Month(
       name: 'SEP',
       events: [
         Event(
-          title: 'Royal Blood',
+          title: 'some cool event',
           startDate: DateTime(2023, 9, 7, 9, 30),
           endDate: DateTime(2023, 9, 7, 12, 30),
           imgSrc: 'https://source.unsplash.com/random/',
@@ -41,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         Event(
-          title: 'Royal Blood',
+          title: 'some cool event',
           startDate: DateTime(2023),
           endDate: DateTime(2023),
           imgSrc: 'https://source.unsplash.com/random/',
@@ -51,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         Event(
-          title: 'Royal Blood',
+          title: 'some cool event',
           startDate: DateTime(2023),
           endDate: DateTime(2023),
           imgSrc: 'https://source.unsplash.com/random/',
@@ -66,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
       name: 'OCT',
       events: [
         Event(
-          title: 'Royal Blood',
+          title: 'some cool event',
           startDate: DateTime(2024),
           endDate: DateTime(2024),
           imgSrc: 'https://source.unsplash.com/random/',
@@ -76,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         Event(
-          title: 'Royal Blood',
+          title: 'some cool event',
           startDate: DateTime(2024),
           endDate: DateTime(2024),
           imgSrc: 'https://source.unsplash.com/random/',
@@ -145,73 +139,64 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      bottomNavigationBar: CurvedNavigationBar(
-        items: items,
-        color: const Color(0xFFA491D3),
-        backgroundColor: Colors.transparent,
-        height: 70,
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const HomeHeader(
-              imgSrc: 'https://source.unsplash.com/random/',
-              location: 'Lviv, Ukraine',
-            ),
-            const SizedBox(height: 20),
-            AppAutocomplete<String>(
-              textEditingController: _textEditingController,
-              focusNode: _focusNode,
-              borderRadius: 35,
-              prefixIcon: const Icon(Icons.search),
-              suffixIcon: _textEditingController.text.isNotEmpty
-                  ? TouchableOpacity(
-                      onTap: onClearSearch,
-                      child: const Icon(Icons.close),
-                    )
-                  : null,
-              hintText: 'Search for events...',
-              optionsBuilder: optionsBuilder,
-              optionsViewBuilder: optionsViewBuilder,
-              onSelected: (String selection) {
-                debugPrint('You just selected $selection');
-              },
-            ),
-            Expanded(
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: months.length,
-                itemBuilder: (context, index) {
-                  final month = months[index];
-
-                  return Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          MonthTile(text: month.name),
-                          EventsCounter(count: month.events.length),
-                        ],
-                      ),
-                      ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: month.events.length,
-                        itemBuilder: (context, eventIndex) {
-                          Event event = month.events[eventIndex];
-
-                          return EventCard(event: event);
-                        },
-                      ).build(context),
-                    ],
-                  );
-                },
-              ).build(context),
-            ),
-          ],
+    return Column(
+      children: [
+        const HomeHeader(
+          imgSrc: 'https://source.unsplash.com/random/',
+          location: 'Lviv, Ukraine',
         ),
-      ),
+        const SizedBox(height: 20),
+        AppAutocomplete<String>(
+          textEditingController: _textEditingController,
+          focusNode: _focusNode,
+          borderRadius: 35,
+          prefixIcon: const Icon(Icons.search),
+          suffixIcon: _textEditingController.text.isNotEmpty
+              ? TouchableOpacity(
+                  onTap: onClearSearch,
+                  child: const Icon(Icons.close),
+                )
+              : null,
+          hintText: 'Search for events...',
+          optionsBuilder: optionsBuilder,
+          optionsViewBuilder: optionsViewBuilder,
+          onSelected: (String selection) {
+            debugPrint('You just selected $selection');
+          },
+        ),
+        const SizedBox(height: 20),
+        Expanded(
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: months.length,
+            itemBuilder: (context, index) {
+              final month = months[index];
+
+              return Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      MonthTile(text: month.name),
+                      EventsCounter(count: month.events.length),
+                    ],
+                  ),
+                  ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: month.events.length,
+                    itemBuilder: (context, eventIndex) {
+                      Event event = month.events[eventIndex];
+
+                      return EventCard(event: event);
+                    },
+                  ).build(context),
+                ],
+              );
+            },
+          ).build(context),
+        ),
+      ],
     );
   }
 }

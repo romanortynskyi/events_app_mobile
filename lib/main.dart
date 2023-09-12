@@ -1,4 +1,4 @@
-import 'package:events_app_mobile/screens/home_screen.dart';
+import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/screens/login_screen.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           useMaterial3: true,
         ),
-        home: const HomeScreen(),
+        home: const MainScreen(),
       ),
     );
   }
