@@ -1,9 +1,9 @@
-import 'package:events_app_mobile/bloc/auth/auth_cubit.dart';
+import 'package:events_app_mobile/bloc/auth/google_sign_in/google_sign_in_bloc.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/mutations/login.dart';
-import 'package:events_app_mobile/graphql/mutations/login_with_google.dart';
 import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/screens/home_screen.dart';
+import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
@@ -14,7 +14,6 @@ import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -131,20 +130,8 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _password = value);
   }
 
-  void onLoginWithGoogle(RunMutation runLoginWithGoogleMutation) async {
-    try {
-      GoogleSignIn googleSignIn = GoogleSignIn();
-      GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
-      final GoogleSignInAuthentication? googleAuth =
-          await googleSignInAccount?.authentication;
-      final idToken = googleAuth?.idToken;
-
-      runLoginWithGoogleMutation({
-        'idToken': idToken,
-      });
-    } catch (error) {
-      print(error.toString());
-    }
+  void onLoginWithGoogle() async {
+    context.read<GoogleSignInBloc>().add(GoogleSignInRequested(context));
   }
 
   void onLoginWithFacebook() async {
@@ -162,110 +149,116 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Mutation(
-      options: MutationOptions(
-        document: gql(loginWithGoogle),
-        onCompleted: (dynamic resultData) =>
-            onLoginWithGoogleCompleted(context, resultData),
-        onError: onLoginError,
-      ),
-      builder: (RunMutation runLoginWithGoogleMutation, QueryResult? result) {
-        return Mutation(
-          options: MutationOptions(
-            document: gql(login),
-            onCompleted: (dynamic resultData) =>
-                onLoginCompleted(context, resultData),
-            onError: onLoginError,
-          ),
-          builder: (RunMutation runLoginMutation, QueryResult? result) {
-            return Scaffold(
-              backgroundColor: LightThemeColors.background,
-              body: SafeArea(
-                child: SingleChildScrollView(
-                  child: Center(
-                    // heightFactor: 1.3,
-                    child: Form(
-                      key: _formKey,
-                      autovalidateMode: AutovalidateMode.onUserInteraction,
-                      child: Column(
-                        children: [
-                          const SizedBox(height: 50),
-                          const Icon(
-                            Icons.lock,
-                            size: 100,
-                          ),
-                          const SizedBox(height: 50),
-                          AppTextField(
-                            validator: emailValidator,
-                            hintText: 'Email',
-                            obscureText: false,
-                            onChanged: onEmailChanged,
-                          ),
-                          const SizedBox(height: 20),
-                          AppTextField(
-                            validator: passwordValidator,
-                            hintText: 'Password',
-                            obscureText: _isPasswordHidden,
-                            onChanged: onPasswordChanged,
-                            suffixIcon: IconButton(
-                              onPressed: onPasswordHiddenPressed,
-                              icon: Icon(_isPasswordHidden
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined),
+    return BlocListener<GoogleSignInBloc, GoogleSignInState>(
+      listener: (context, state) {
+        if (state is Authenticated) {
+          Navigator.push<Type>(
+            context,
+            MaterialPageRoute(builder: (_) => const MainScreen()),
+          );
+        }
+      },
+      child: BlocBuilder<GoogleSignInBloc, GoogleSignInState>(
+        builder: (context, state) {
+          if (state is Loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return Mutation(
+            options: MutationOptions(
+              document: gql(login),
+              onCompleted: (dynamic resultData) =>
+                  onLoginCompleted(context, resultData),
+              onError: onLoginError,
+            ),
+            builder: (RunMutation runLoginMutation, QueryResult? result) {
+              return Scaffold(
+                backgroundColor: LightThemeColors.background,
+                body: SafeArea(
+                  child: SingleChildScrollView(
+                    child: Center(
+                      // heightFactor: 1.3,
+                      child: Form(
+                        key: _formKey,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 50),
+                            const Icon(
+                              Icons.lock,
+                              size: 100,
                             ),
-                          ),
-                          const SizedBox(height: 10),
-                          TouchableOpacity(
-                            onTap: onForgotPasswordPressed,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 25.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  GestureDetector(
-                                    child: Text(
-                                      'Forgot password?',
-                                      style: TextStyle(
-                                          color: LightThemeColors.text),
+                            const SizedBox(height: 50),
+                            AppTextField(
+                              validator: emailValidator,
+                              hintText: 'Email',
+                              obscureText: false,
+                              onChanged: onEmailChanged,
+                            ),
+                            const SizedBox(height: 20),
+                            AppTextField(
+                              validator: passwordValidator,
+                              hintText: 'Password',
+                              obscureText: _isPasswordHidden,
+                              onChanged: onPasswordChanged,
+                              suffixIcon: IconButton(
+                                onPressed: onPasswordHiddenPressed,
+                                icon: Icon(_isPasswordHidden
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined),
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            TouchableOpacity(
+                              onTap: onForgotPasswordPressed,
+                              child: Padding(
+                                padding: const EdgeInsets.only(right: 25.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    GestureDetector(
+                                      child: Text(
+                                        'Forgot password?',
+                                        style: TextStyle(
+                                            color: LightThemeColors.text),
+                                      ),
                                     ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                          AppButton(
-                            onPressed: () => onLoginPressed(runLoginMutation),
-                            text: 'Login',
-                          ),
-                          const OrContinueWith(),
-                          const SizedBox(height: 15),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              SocialButton(
-                                imgSrc: 'lib/images/google.png',
-                                onPressed: () => onLoginWithGoogle(
-                                    runLoginWithGoogleMutation),
-                              ),
-                              const SizedBox(width: 10),
-                              SocialButton(
-                                imgSrc: 'lib/images/facebook.png',
-                                onPressed: onLoginWithFacebook,
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 20),
-                          SignUpButton(onPressed: onSignUpPressed),
-                        ],
+                            AppButton(
+                              onPressed: () => onLoginPressed(runLoginMutation),
+                              text: 'Login',
+                            ),
+                            const OrContinueWith(),
+                            const SizedBox(height: 15),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SocialButton(
+                                  imgSrc: 'lib/images/google.png',
+                                  onPressed: onLoginWithGoogle,
+                                ),
+                                const SizedBox(width: 10),
+                                SocialButton(
+                                  imgSrc: 'lib/images/facebook.png',
+                                  onPressed: onLoginWithFacebook,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            SignUpButton(onPressed: onSignUpPressed),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      },
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

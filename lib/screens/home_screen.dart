@@ -1,8 +1,9 @@
-import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/models/asset.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/location.dart';
 import 'package:events_app_mobile/models/month.dart';
+import 'package:events_app_mobile/screens/event_screen.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/event_card.dart';
 import 'package:events_app_mobile/widgets/events_counter.dart';
@@ -25,30 +26,51 @@ class _HomeScreenState extends State<HomeScreen> {
       name: 'SEP',
       events: [
         Event(
+          id: 1,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
           title: 'some cool event',
+          description:
+              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
           startDate: DateTime(2023, 9, 7, 9, 30),
           endDate: DateTime(2023, 9, 7, 12, 30),
-          imgSrc: 'https://source.unsplash.com/random/',
+          image: Asset(
+            src: 'https://source.unsplash.com/random/',
+          ),
           location: Location(
             latLng: const LatLng(34, 45),
             name: 'some nice location',
           ),
         ),
         Event(
+          id: 2,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          description:
+              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
           title: 'some cool event',
           startDate: DateTime(2023),
           endDate: DateTime(2023),
-          imgSrc: 'https://source.unsplash.com/random/',
+          image: Asset(
+            src: 'https://source.unsplash.com/random/',
+          ),
           location: Location(
             latLng: const LatLng(34, 45),
             name: 'some nice location',
           ),
         ),
         Event(
+          id: 3,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          description:
+              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
           title: 'some cool event',
           startDate: DateTime(2023),
           endDate: DateTime(2023),
-          imgSrc: 'https://source.unsplash.com/random/',
+          image: Asset(
+            src: 'https://source.unsplash.com/random/',
+          ),
           location: Location(
             latLng: const LatLng(34, 45),
             name: 'some nice location',
@@ -60,20 +82,34 @@ class _HomeScreenState extends State<HomeScreen> {
       name: 'OCT',
       events: [
         Event(
+          id: 4,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          description:
+              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
           title: 'some cool event',
           startDate: DateTime(2024),
           endDate: DateTime(2024),
-          imgSrc: 'https://source.unsplash.com/random/',
+          image: Asset(
+            src: 'https://source.unsplash.com/random/',
+          ),
           location: Location(
             latLng: const LatLng(34, 45),
             name: 'some nice location',
           ),
         ),
         Event(
+          id: 5,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          description:
+              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
           title: 'some cool event',
           startDate: DateTime(2024),
           endDate: DateTime(2024),
-          imgSrc: 'https://source.unsplash.com/random/',
+          image: Asset(
+            src: 'https://source.unsplash.com/random/',
+          ),
           location: Location(
             latLng: const LatLng(34, 45),
             name: 'some nice location',
@@ -137,6 +173,13 @@ class _HomeScreenState extends State<HomeScreen> {
     _textEditingController.clear();
   }
 
+  void onEventPressed(BuildContext context, Event event) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => EventScreen(event.id)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -188,7 +231,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     itemBuilder: (context, eventIndex) {
                       Event event = month.events[eventIndex];
 
-                      return EventCard(event: event);
+                      return TouchableOpacity(
+                        onTap: () => onEventPressed(context, event),
+                        child: EventCard(event: event),
+                      );
                     },
                   ).build(context),
                 ],

@@ -77,43 +77,45 @@ class _MapScreenState extends State<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const HomeHeader(
-          imgSrc: 'https://source.unsplash.com/random/',
-          location: 'Lviv, Ukraine',
-        ),
-        const SizedBox(height: 20),
-        AppAutocomplete<String>(
-          textEditingController: _textEditingController,
-          focusNode: _focusNode,
-          borderRadius: 35,
-          prefixIcon: const Icon(Icons.location_on_outlined),
-          suffixIcon: _textEditingController.text.isNotEmpty
-              ? TouchableOpacity(
-                  onTap: onClearSearch,
-                  child: const Icon(Icons.close),
-                )
-              : null,
-          hintText: 'Search for locations...',
-          optionsBuilder: optionsBuilder,
-          optionsViewBuilder: optionsViewBuilder,
-          onSelected: (String selection) {
-            debugPrint('You just selected $selection');
-          },
-        ),
-        const SizedBox(height: 20),
-        SizedBox(
-          height: MediaQuery.of(context).size.height - 298,
-          child: GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: _center,
-              zoom: 11,
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          const HomeHeader(
+            imgSrc: 'https://source.unsplash.com/random/',
+            location: 'Lviv, Ukraine',
+          ),
+          const SizedBox(height: 20),
+          AppAutocomplete<String>(
+            textEditingController: _textEditingController,
+            focusNode: _focusNode,
+            borderRadius: 35,
+            prefixIcon: const Icon(Icons.location_on_outlined),
+            suffixIcon: _textEditingController.text.isNotEmpty
+                ? TouchableOpacity(
+                    onTap: onClearSearch,
+                    child: const Icon(Icons.close),
+                  )
+                : null,
+            hintText: 'Search for locations...',
+            optionsBuilder: optionsBuilder,
+            optionsViewBuilder: optionsViewBuilder,
+            onSelected: (String selection) {
+              debugPrint('You just selected $selection');
+            },
+          ),
+          const SizedBox(height: 20),
+          SizedBox(
+            height: MediaQuery.of(context).size.height - 298,
+            child: GoogleMap(
+              onMapCreated: _onMapCreated,
+              initialCameraPosition: CameraPosition(
+                target: _center,
+                zoom: 11,
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

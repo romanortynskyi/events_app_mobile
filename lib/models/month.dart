@@ -1,3 +1,5 @@
+import 'package:events_app_mobile/models/model.dart';
+
 import './event.dart';
 
 class Month {
