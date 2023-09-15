@@ -1,8 +1,9 @@
+import 'package:events_app_mobile/models/location.dart';
 import 'package:flutter/material.dart';
 
 class HomeHeader extends StatelessWidget {
   final String imgSrc;
-  final String location;
+  final Location? location;
 
   const HomeHeader({
     super.key,
@@ -12,6 +13,10 @@ class HomeHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    String locality = location?.locality ?? '';
+    String country = location?.country ?? '';
+    String locationStr = '$locality, $country';
+
     return Container(
       margin: const EdgeInsets.only(left: 20, right: 20, top: 20),
       child: Row(
@@ -35,7 +40,7 @@ class HomeHeader extends StatelessWidget {
                     color: Colors.grey,
                   ),
                   Text(
-                    location,
+                    locationStr,
                     style: const TextStyle(
                       color: Colors.grey,
                     ),

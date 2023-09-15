@@ -1,9 +1,13 @@
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
+import 'package:events_app_mobile/models/location.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -69,10 +73,60 @@ class _MapScreenState extends State<MapScreen> {
 
   late GoogleMapController mapController;
 
-  final LatLng _center = const LatLng(45.521563, -122.677433);
+  LatLng _center = const LatLng(0, 0);
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
+  }
+
+  void initState() {
+    super.initState();
+
+    _getCurrentLocation();
+  }
+
+  Location? _location;
+
+  void _getCurrentLocation() async {
+    LocationPermission permission;
+    Position? position;
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        print('Denied');
+      } else {
+        position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
+      }
+    } else {
+      position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+    }
+
+    if (position != null) {
+      // ignore: use_build_context_synchronously
+      GraphQLClient client = GraphQLProvider.of(context).value;
+      var response = await client.query(QueryOptions(
+        document: gql(getGeolocationByCoords),
+        variables: {
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+        },
+      ));
+
+      setState(() {
+        Map<String, dynamic> data = response.data ?? {};
+        Location location = Location.fromMap(data['getGeolocationByCoords']);
+
+        double latitude = location.latLng?.latitude ?? 0;
+        double longitude = location.latLng?.longitude ?? 0;
+        print(latitude);
+        _location = location;
+        _center = LatLng(latitude, longitude);
+      });
+    }
   }
 
   @override
@@ -80,9 +134,9 @@ class _MapScreenState extends State<MapScreen> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          const HomeHeader(
+          HomeHeader(
             imgSrc: 'https://source.unsplash.com/random/',
-            location: 'Lviv, Ukraine',
+            location: _location,
           ),
           const SizedBox(height: 20),
           AppAutocomplete<String>(

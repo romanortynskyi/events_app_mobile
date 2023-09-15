@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:equatable/equatable.dart';
 
 part of 'google_sign_in_bloc.dart';
 
@@ -16,3 +17,9 @@ class GoogleSignInRequested extends GoogleSignInEvent {
 }
 
 class GoogleSignOutRequested extends GoogleSignInEvent {}
+
+class GoogleGetMeRequested extends GoogleSignInEvent {
+  final BuildContext context;
+
+  const GoogleGetMeRequested(this.context);
+}

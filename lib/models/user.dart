@@ -8,12 +8,12 @@ class User extends Model {
 
   User({
     required int id,
-    required DateTime createdAt,
-    required DateTime updatedAt,
     required this.firstName,
     required this.lastName,
     this.email,
     this.token,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) : super(
           id: id,
           createdAt: createdAt,

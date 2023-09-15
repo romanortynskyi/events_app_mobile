@@ -30,7 +30,8 @@ class _EventScreenState extends State<EventScreen> {
     ),
     location: Location(
       latLng: const latlng.LatLng(34, 45),
-      name: 'some nice location',
+      locality: 'Kyiv',
+      country: 'Ukraine',
     ),
   );
 

@@ -1,4 +1,5 @@
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/models/asset.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/location.dart';
@@ -11,6 +12,9 @@ import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:events_app_mobile/widgets/month_tile.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:latlng/latlng.dart' as latlng;
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:latlng/latlng.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -26,79 +30,6 @@ class _HomeScreenState extends State<HomeScreen> {
       name: 'SEP',
       events: [
         Event(
-          id: 1,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          title: 'some cool event',
-          description:
-              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
-          startDate: DateTime(2023, 9, 7, 9, 30),
-          endDate: DateTime(2023, 9, 7, 12, 30),
-          image: Asset(
-            src: 'https://source.unsplash.com/random/',
-          ),
-          location: Location(
-            latLng: const LatLng(34, 45),
-            name: 'some nice location',
-          ),
-        ),
-        Event(
-          id: 2,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          description:
-              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
-          title: 'some cool event',
-          startDate: DateTime(2023),
-          endDate: DateTime(2023),
-          image: Asset(
-            src: 'https://source.unsplash.com/random/',
-          ),
-          location: Location(
-            latLng: const LatLng(34, 45),
-            name: 'some nice location',
-          ),
-        ),
-        Event(
-          id: 3,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          description:
-              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
-          title: 'some cool event',
-          startDate: DateTime(2023),
-          endDate: DateTime(2023),
-          image: Asset(
-            src: 'https://source.unsplash.com/random/',
-          ),
-          location: Location(
-            latLng: const LatLng(34, 45),
-            name: 'some nice location',
-          ),
-        ),
-      ],
-    ),
-    Month(
-      name: 'OCT',
-      events: [
-        Event(
-          id: 4,
-          createdAt: DateTime.now(),
-          updatedAt: DateTime.now(),
-          description:
-              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
-          title: 'some cool event',
-          startDate: DateTime(2024),
-          endDate: DateTime(2024),
-          image: Asset(
-            src: 'https://source.unsplash.com/random/',
-          ),
-          location: Location(
-            latLng: const LatLng(34, 45),
-            name: 'some nice location',
-          ),
-        ),
-        Event(
           id: 5,
           createdAt: DateTime.now(),
           updatedAt: DateTime.now(),
@@ -108,11 +39,37 @@ class _HomeScreenState extends State<HomeScreen> {
           startDate: DateTime(2024),
           endDate: DateTime(2024),
           image: Asset(
-            src: 'https://source.unsplash.com/random/',
+            src:
+                'https://images.unsplash.com/photo-1687360441387-0179af118555?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1854&q=80',
           ),
           location: Location(
-            latLng: const LatLng(34, 45),
-            name: 'some nice location',
+            latLng: const latlng.LatLng(34, 45),
+            locality: 'Kyiv',
+            country: 'Ukraine',
+          ),
+        ),
+      ],
+    ),
+    Month(
+      name: 'OCT',
+      events: [
+        Event(
+          id: 6,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+          description:
+              '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
+          title: 'some cool event',
+          startDate: DateTime(2024),
+          endDate: DateTime(2024),
+          image: Asset(
+            src:
+                'https://images.unsplash.com/photo-1687360441387-0179af118555?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1854&q=80',
+          ),
+          location: Location(
+            latLng: const latlng.LatLng(34, 45),
+            locality: 'Kyiv',
+            country: 'Ukraine',
           ),
         ),
       ],
@@ -121,6 +78,50 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  Location? _location;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _getCurrentLocation();
+  }
+
+  void _getCurrentLocation() async {
+    LocationPermission permission;
+    Position? position;
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        print('Denied');
+      } else {
+        position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
+      }
+    } else {
+      position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+    }
+
+    if (position != null) {
+      // ignore: use_build_context_synchronously
+      GraphQLClient client = GraphQLProvider.of(context).value;
+      var response = await client.query(QueryOptions(
+        document: gql(getGeolocationByCoords),
+        variables: {
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+        },
+      ));
+
+      setState(() {
+        Map<String, dynamic> data = response.data ?? {};
+        _location = Location.fromMap(data['getGeolocationByCoords']);
+      });
+    }
+  }
 
   Iterable<String> optionsBuilder(TextEditingValue textEditingValue) {
     if (textEditingValue.text == '') {
@@ -184,9 +185,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const HomeHeader(
+        HomeHeader(
           imgSrc: 'https://source.unsplash.com/random/',
-          location: 'Lviv, Ukraine',
+          location: _location,
         ),
         const SizedBox(height: 20),
         AppAutocomplete<String>(

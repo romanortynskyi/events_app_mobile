@@ -1,11 +1,7 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
-import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/screens/home_screen.dart';
 import 'package:events_app_mobile/screens/map_screen.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+import 'package:events_app_mobile/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 
 class MainScreen extends StatefulWidget {
@@ -27,48 +23,8 @@ class _MainScreenState extends State<MainScreen> {
   final items = const [
     HomeScreen(),
     MapScreen(),
-    Text('profile'),
+    ProfileScreen(),
   ];
-
-  void _getCurrentLocation() async {
-    LocationPermission permission;
-    Position? position;
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print('Denied');
-      } else {
-        position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
-      }
-    } else {
-      position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-    }
-
-    if (position != null) {
-      // ignore: use_build_context_synchronously
-      GraphQLClient client = GraphQLProvider.of(context).value;
-      var response = await client.query(QueryOptions(
-        document: gql(getGeolocationByCoords),
-        variables: {
-          'latitude': position.latitude,
-          'longitude': position.longitude,
-        },
-      ));
-
-      print(response);
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-
-    _getCurrentLocation();
-  }
 
   @override
   Widget build(BuildContext context) {
