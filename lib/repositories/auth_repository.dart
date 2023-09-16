@@ -89,11 +89,19 @@ class AuthRepository {
       required String password}) async {
     final QueryResult getMeResult =
         await GraphQLProvider.of(context).value.mutate(
-              MutationOptions(document: gql(login)),
+              MutationOptions(document: gql(login), variables: {
+                'input': {
+                  'email': email,
+                  'password': password,
+                },
+              }),
             );
 
     var data = getMeResult.data ?? {};
     final user = User.fromMap(data['login'] ?? {});
+
+    await SecureStorageUtils.setItem('token', user.token);
+    await SecureStorageUtils.setItem('provider', AuthProvider.email.value);
 
     return user;
   }

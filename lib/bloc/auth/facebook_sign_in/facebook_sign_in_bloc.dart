@@ -13,6 +13,7 @@ class FacebookSignInBloc
       : super(UnAuthenticated(null)) {
     on<FacebookSignInRequested>(_onFacebookSignInPressed);
     on<FacebookSignOutRequested>(_onFacebookSignOutPressed);
+    on<FacebookGetMeRequested>(_onGetMe);
   }
   final AuthRepository authRepository;
 
@@ -34,5 +35,16 @@ class FacebookSignInBloc
   ) {
     authRepository.signOutWithFacebook();
     emit(UnAuthenticated(null));
+  }
+
+  void _onGetMe(
+    FacebookGetMeRequested event,
+    Emitter<FacebookSignInState> emit,
+  ) async {
+    User? user = await authRepository.getMe(event.context);
+
+    if (user != null) {
+      Authenticated(user);
+    }
   }
 }

@@ -53,9 +53,15 @@ class _LoginScreenState extends State<LoginScreen> {
           break;
 
         case AuthProvider.facebook:
+          context
+              .read<facebook_sign_in_bloc.FacebookSignInBloc>()
+              .add(facebook_sign_in_bloc.FacebookGetMeRequested(context));
           break;
 
         default:
+          context
+              .read<email_sign_in_bloc.EmailSignInBloc>()
+              .add(email_sign_in_bloc.EmailGetMeRequested(context));
           break;
       }
     }
@@ -152,6 +158,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return MultiBlocListener(
       listeners: [
+        BlocListener<email_sign_in_bloc.EmailSignInBloc,
+            email_sign_in_bloc.EmailSignInState>(
+          listener: (context, state) {
+            if (state is email_sign_in_bloc.Authenticated) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MainScreen()),
+              );
+            }
+          },
+        ),
         BlocListener<google_sign_in_bloc.GoogleSignInBloc,
             google_sign_in_bloc.GoogleSignInState>(
           listener: (context, state) {

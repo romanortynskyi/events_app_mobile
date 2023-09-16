@@ -16,3 +16,9 @@ class FacebookSignInRequested extends FacebookSignInEvent {
 }
 
 class FacebookSignOutRequested extends FacebookSignInEvent {}
+
+class FacebookGetMeRequested extends FacebookSignInEvent {
+  final BuildContext context;
+
+  const FacebookGetMeRequested(this.context);
+}

@@ -12,6 +12,7 @@ class EmailSignInBloc extends Bloc<EmailSignInEvent, EmailSignInState> {
       : super(UnAuthenticated(null)) {
     on<EmailSignInRequested>(_onEmailSignInPressed);
     on<EmailSignOutRequested>(_onEmailSignOutPressed);
+    on<EmailGetMeRequested>(_onGetMe);
   }
   final AuthRepository authRepository;
 
@@ -34,8 +35,19 @@ class EmailSignInBloc extends Bloc<EmailSignInEvent, EmailSignInState> {
   void _onEmailSignOutPressed(
     EmailSignOutRequested event,
     Emitter<EmailSignInState> emit,
-  ) {
-    authRepository.signOut();
+  ) async {
+    await authRepository.signOut();
     emit(UnAuthenticated(null));
+  }
+
+  void _onGetMe(
+    EmailGetMeRequested event,
+    Emitter<EmailSignInState> emit,
+  ) async {
+    User? user = await authRepository.getMe(event.context);
+
+    if (user != null) {
+      Authenticated(user);
+    }
   }
 }

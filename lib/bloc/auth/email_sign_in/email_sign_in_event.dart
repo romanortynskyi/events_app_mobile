@@ -22,3 +22,9 @@ class EmailSignInRequested extends EmailSignInEvent {
 }
 
 class EmailSignOutRequested extends EmailSignInEvent {}
+
+class EmailGetMeRequested extends EmailSignInEvent {
+  final BuildContext context;
+
+  const EmailGetMeRequested(this.context);
+}

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/models/location.dart';
@@ -19,6 +21,8 @@ class MapScreen extends StatefulWidget {
 class _MapScreenState extends State<MapScreen> {
   final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  bool _isLoading = true;
 
   Iterable<String> optionsBuilder(TextEditingValue textEditingValue) {
     if (textEditingValue.text == '') {
@@ -71,14 +75,15 @@ class _MapScreenState extends State<MapScreen> {
     _textEditingController.clear();
   }
 
-  late GoogleMapController mapController;
+  Completer<GoogleMapController> _completer = Completer();
 
   LatLng _center = const LatLng(0, 0);
 
   void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+    _completer.complete(controller);
   }
 
+  @override
   void initState() {
     super.initState();
 
@@ -116,60 +121,73 @@ class _MapScreenState extends State<MapScreen> {
         },
       ));
 
-      setState(() {
-        Map<String, dynamic> data = response.data ?? {};
-        Location location = Location.fromMap(data['getGeolocationByCoords']);
+      Map<String, dynamic> data = response.data ?? {};
+      Location location = Location.fromMap(data['getGeolocationByCoords']);
 
-        double latitude = location.latLng?.latitude ?? 0;
-        double longitude = location.latLng?.longitude ?? 0;
-        print(latitude);
+      double latitude = location.latLng?.latitude ?? 0;
+      double longitude = location.latLng?.longitude ?? 0;
+
+      setState(() {
         _location = location;
-        _center = LatLng(latitude, longitude);
+        _isLoading = false;
       });
+
+      final GoogleMapController mapController = await _completer.future;
+
+      await mapController.moveCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(latitude, longitude),
+          zoom: 11,
+        ),
+      ));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          HomeHeader(
-            imgSrc: 'https://source.unsplash.com/random/',
-            location: _location,
-          ),
-          const SizedBox(height: 20),
-          AppAutocomplete<String>(
-            textEditingController: _textEditingController,
-            focusNode: _focusNode,
-            borderRadius: 35,
-            prefixIcon: const Icon(Icons.location_on_outlined),
-            suffixIcon: _textEditingController.text.isNotEmpty
-                ? TouchableOpacity(
-                    onTap: onClearSearch,
-                    child: const Icon(Icons.close),
-                  )
-                : null,
-            hintText: 'Search for locations...',
-            optionsBuilder: optionsBuilder,
-            optionsViewBuilder: optionsViewBuilder,
-            onSelected: (String selection) {
-              debugPrint('You just selected $selection');
-            },
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            height: MediaQuery.of(context).size.height - 298,
-            child: GoogleMap(
-              onMapCreated: _onMapCreated,
-              initialCameraPosition: CameraPosition(
-                target: _center,
-                zoom: 11,
-              ),
+    return _isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : SingleChildScrollView(
+            child: Column(
+              children: [
+                HomeHeader(
+                  imgSrc: 'https://source.unsplash.com/random/',
+                  location: _location,
+                ),
+                const SizedBox(height: 20),
+                AppAutocomplete<String>(
+                  textEditingController: _textEditingController,
+                  focusNode: _focusNode,
+                  borderRadius: 35,
+                  prefixIcon: const Icon(Icons.location_on_outlined),
+                  suffixIcon: _textEditingController.text.isNotEmpty
+                      ? TouchableOpacity(
+                          onTap: onClearSearch,
+                          child: const Icon(Icons.close),
+                        )
+                      : null,
+                  hintText: 'Search for locations...',
+                  optionsBuilder: optionsBuilder,
+                  optionsViewBuilder: optionsViewBuilder,
+                  onSelected: (String selection) {
+                    debugPrint('You just selected $selection');
+                  },
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height - 298,
+                  child: GoogleMap(
+                    onMapCreated: _onMapCreated,
+                    initialCameraPosition: CameraPosition(
+                      target: _center,
+                      zoom: 11,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
-    );
+          );
   }
 }
