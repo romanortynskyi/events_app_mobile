@@ -162,7 +162,7 @@ class _LoginScreenState extends State<LoginScreen> {
             email_sign_in_bloc.EmailSignInState>(
           listener: (context, state) {
             if (state is email_sign_in_bloc.Authenticated) {
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const MainScreen()),
               );
@@ -173,7 +173,7 @@ class _LoginScreenState extends State<LoginScreen> {
             google_sign_in_bloc.GoogleSignInState>(
           listener: (context, state) {
             if (state is google_sign_in_bloc.Authenticated) {
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const MainScreen()),
               );
@@ -184,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen> {
             facebook_sign_in_bloc.FacebookSignInState>(
           listener: (context, state) {
             if (state is facebook_sign_in_bloc.Authenticated) {
-              Navigator.push(
+              Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const MainScreen()),
               );
@@ -221,6 +221,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 20),
                           AppTextField(
+                            maxLines: 1,
+                            keyboardType: TextInputType.text,
                             validator: passwordValidator,
                             hintText: 'Password',
                             obscureText: _isPasswordHidden,

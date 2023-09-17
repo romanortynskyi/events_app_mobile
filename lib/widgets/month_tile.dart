@@ -26,7 +26,7 @@ class MonthTile extends StatelessWidget {
           child: Center(
             child: Text(
               text,
-              style: const TextStyle(fontSize: 22, color: Colors.white),
+              style: TextStyle(fontSize: 22, color: LightThemeColors.white),
               textAlign: TextAlign.center,
             ),
           )),

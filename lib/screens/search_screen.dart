@@ -1,27 +1,28 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:async';
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/models/location.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
+import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+class SearchScreen extends StatefulWidget {
+  const SearchScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _MapScreenState();
+  State<StatefulWidget> createState() => _SearchScreenState();
 }
 
-class _MapScreenState extends State<MapScreen> {
+class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  bool _isLoading = true;
 
   Iterable<String> optionsBuilder(TextEditingValue textEditingValue) {
     if (textEditingValue.text == '') {
@@ -111,74 +112,82 @@ class _MapScreenState extends State<MapScreen> {
 
     if (position != null) {
       // ignore: use_build_context_synchronously
+      GraphQLClient client = GraphQLProvider.of(context).value;
+      var response = await client.query(QueryOptions(
+        document: gql(getGeolocationByCoords),
+        variables: {
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+        },
+      ));
+
+      Map<String, dynamic> data = response.data ?? {};
+      Location location = Location.fromMap(data['getGeolocationByCoords']);
+
+      double latitude = location.latLng?.latitude ?? 0;
+      double longitude = location.latLng?.longitude ?? 0;
+
+      setState(() {
+        _location = location;
+        _isLoading = false;
+      });
+
       final GoogleMapController mapController = await _completer.future;
 
       await mapController.moveCamera(CameraUpdate.newCameraPosition(
         CameraPosition(
-          target: LatLng(position.latitude, position.longitude),
+          target: LatLng(latitude, longitude),
           zoom: 11,
         ),
       ));
     }
   }
 
-  void onLocationTap(LatLng latLng) async {
-    GraphQLClient client = GraphQLProvider.of(context).value;
-    var response = await client.query(QueryOptions(
-      document: gql(getGeolocationByCoords),
-      variables: {
-        'latitude': latLng.latitude,
-        'longitude': latLng.longitude,
-      },
-    ));
-
-    Map<String, dynamic> data = response.data ?? {};
-    Location location = Location.fromMap(data['getGeolocationByCoords']);
-
-    Navigator.pop(context, location);
-  }
-
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              AppAutocomplete<String>(
-                textEditingController: _textEditingController,
-                focusNode: _focusNode,
-                borderRadius: 35,
-                prefixIcon: const Icon(Icons.location_on_outlined),
-                suffixIcon: _textEditingController.text.isNotEmpty
-                    ? TouchableOpacity(
-                        onTap: onClearSearch,
-                        child: const Icon(Icons.close),
-                      )
-                    : null,
-                hintText: 'Search for locations...',
-                optionsBuilder: optionsBuilder,
-                optionsViewBuilder: optionsViewBuilder,
-                onSelected: (String selection) {
-                  debugPrint('You just selected $selection');
-                },
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                height: MediaQuery.of(context).size.height - 298,
-                child: GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  initialCameraPosition: CameraPosition(
-                    target: _center,
-                    zoom: 11,
-                  ),
-                  onTap: onLocationTap,
+    return _isLoading
+        ? const Center(
+            child: CircularProgressIndicator(),
+          )
+        : SingleChildScrollView(
+            child: Column(
+              children: [
+                HomeHeader(
+                  imgSrc: 'https://source.unsplash.com/random/',
+                  location: _location,
                 ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+                const SizedBox(height: 20),
+                AppAutocomplete<String>(
+                  textEditingController: _textEditingController,
+                  focusNode: _focusNode,
+                  borderRadius: 35,
+                  prefixIcon: const Icon(Icons.location_on_outlined),
+                  suffixIcon: _textEditingController.text.isNotEmpty
+                      ? TouchableOpacity(
+                          onTap: onClearSearch,
+                          child: const Icon(Icons.close),
+                        )
+                      : null,
+                  hintText: 'Search for locations...',
+                  optionsBuilder: optionsBuilder,
+                  optionsViewBuilder: optionsViewBuilder,
+                  onSelected: (String selection) {
+                    debugPrint('You just selected $selection');
+                  },
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: MediaQuery.of(context).size.height - 298,
+                  child: GoogleMap(
+                    onMapCreated: _onMapCreated,
+                    initialCameraPosition: CameraPosition(
+                      target: _center,
+                      zoom: 11,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
   }
 }

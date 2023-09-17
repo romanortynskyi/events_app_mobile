@@ -1,6 +1,8 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/screens/add_event_screen.dart';
 import 'package:events_app_mobile/screens/home_screen.dart';
-import 'package:events_app_mobile/screens/map_screen.dart';
+import 'package:events_app_mobile/screens/search_screen.dart';
 import 'package:events_app_mobile/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 
@@ -14,15 +16,33 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _index = 0;
 
-  final icons = const [
-    Icon(Icons.home, size: 30),
-    Icon(Icons.search_outlined, size: 30),
-    Icon(Icons.person, size: 30),
+  final icons = [
+    Icon(
+      Icons.home,
+      size: 30,
+      color: LightThemeColors.white,
+    ),
+    Icon(
+      Icons.search_outlined,
+      size: 30,
+      color: LightThemeColors.white,
+    ),
+    Icon(
+      Icons.add,
+      size: 30,
+      color: LightThemeColors.white,
+    ),
+    Icon(
+      Icons.person,
+      size: 30,
+      color: LightThemeColors.white,
+    ),
   ];
 
   final items = const [
     HomeScreen(),
-    MapScreen(),
+    SearchScreen(),
+    AddEventScreen(),
     ProfileScreen(),
   ];
 

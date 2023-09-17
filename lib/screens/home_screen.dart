@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/models/asset.dart';
@@ -15,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:latlng/latlng.dart' as latlng;
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:latlng/latlng.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -106,7 +107,6 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (position != null) {
-      // ignore: use_build_context_synchronously
       GraphQLClient client = GraphQLProvider.of(context).value;
       var response = await client.query(QueryOptions(
         document: gql(getGeolocationByCoords),
