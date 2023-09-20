@@ -200,8 +200,8 @@ class _LoginScreenState extends State<LoginScreen> {
             ? const Center(child: CircularProgressIndicator())
             : SafeArea(
                 child: SingleChildScrollView(
-                  child: Center(
-                    // heightFactor: 1.3,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Form(
                       key: _formKey,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -253,9 +253,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                           ),
-                          AppButton(
-                            onPressed: onLoginPressed,
-                            text: 'Login',
+                          Container(
+                            margin: const EdgeInsets.symmetric(vertical: 20),
+                            child: AppButton(
+                              onPressed: onLoginPressed,
+                              text: 'Login',
+                            ),
                           ),
                           const OrContinueWith(),
                           const SizedBox(height: 15),

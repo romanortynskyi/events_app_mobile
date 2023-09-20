@@ -205,7 +205,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
       GraphQLClient client = GraphQLProvider.of(context).value;
 
-      var response = await client.mutate(MutationOptions(
+      await client.mutate(MutationOptions(
         document: gql(addEvent),
         variables: {
           'input': {
@@ -233,7 +233,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
       backgroundColor: LightThemeColors.background,
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Center(
+          child: Container(
+            margin: const EdgeInsets.symmetric(horizontal: 20),
             child: Form(
               key: _formKey,
               autovalidateMode: AutovalidateMode.onUserInteraction,

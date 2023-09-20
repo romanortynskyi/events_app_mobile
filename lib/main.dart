@@ -11,19 +11,22 @@ import 'package:flutter/material.dart';
 main() async {
   await initHiveForFlutter();
 
-  final String? token = await SecureStorageUtils.getItem('token');
-
   final HttpLink httpLink = HttpLink(
-    'http://192.168.1.127:3000/graphql',
+    'http://192.168.1.232:3000/graphql',
     defaultHeaders: {
-      'Authorization': 'Bearer $token',
       'apollo-require-preflight': 'true',
     },
   );
 
+  final AuthLink authLink = AuthLink(getToken: () async {
+    String? token = await SecureStorageUtils.getItem('token');
+
+    return 'Bearer $token';
+  });
+
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
-      link: httpLink,
+      link: authLink.concat(httpLink),
       cache: GraphQLCache(store: HiveStore()),
     ),
   );

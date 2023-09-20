@@ -49,10 +49,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: LightThemeColors.white,
       bottomNavigationBar: CurvedNavigationBar(
         items: icons,
         color: const Color(0xFFA491D3),
-        backgroundColor: Colors.transparent,
+        backgroundColor: LightThemeColors.white,
         height: 70,
         index: _index,
         onTap: (value) {

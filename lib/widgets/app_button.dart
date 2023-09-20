@@ -20,7 +20,6 @@ class AppButton extends StatelessWidget {
       onTap: onPressed,
       child: Container(
         padding: const EdgeInsets.all(20.0),
-        margin: const EdgeInsets.all(20.0),
         decoration: BoxDecoration(
           color: type == ButtonType.primary
               ? const Color.fromARGB(255, 125, 96, 200)

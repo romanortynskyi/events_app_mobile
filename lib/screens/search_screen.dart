@@ -110,7 +110,7 @@ class _SearchScreenState extends State<SearchScreen> {
           desiredAccuracy: LocationAccuracy.high);
     }
 
-    if (position != null) {
+    if (position != null && mounted) {
       // ignore: use_build_context_synchronously
       GraphQLClient client = GraphQLProvider.of(context).value;
       var response = await client.query(QueryOptions(
@@ -127,11 +127,12 @@ class _SearchScreenState extends State<SearchScreen> {
       double latitude = location.latLng?.latitude ?? 0;
       double longitude = location.latLng?.longitude ?? 0;
 
-      setState(() {
-        _location = location;
-        _isLoading = false;
-      });
-
+      if (mounted) {
+        setState(() {
+          _location = location;
+          _isLoading = false;
+        });
+      }
       final GoogleMapController mapController = await _completer.future;
 
       await mapController.moveCamera(CameraUpdate.newCameraPosition(

@@ -37,34 +37,31 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25.0),
-      child: TextFormField(
-        inputFormatters: inputFormatters,
-        maxLines: maxLines,
-        keyboardType: keyboardType,
-        focusNode: focusNode,
-        controller: controller,
-        onChanged: onChanged,
-        onTap: onTap,
-        validator: validator,
-        obscureText: obscureText,
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(color: LightThemeColors.hint),
-          enabledBorder: OutlineInputBorder(
-            borderSide: const BorderSide(color: Colors.white),
-            borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 10)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: LightThemeColors.darkGrey),
-            borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 10)),
-          ),
-          fillColor: LightThemeColors.grey,
-          filled: true,
-          prefixIcon: prefixIcon,
-          suffixIcon: suffixIcon,
+    return TextFormField(
+      inputFormatters: inputFormatters,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      focusNode: focusNode,
+      controller: controller,
+      onChanged: onChanged,
+      onTap: onTap,
+      validator: validator,
+      obscureText: obscureText,
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(color: LightThemeColors.hint),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white),
+          borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 10)),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: LightThemeColors.darkGrey),
+          borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 10)),
+        ),
+        fillColor: LightThemeColors.grey,
+        filled: true,
+        prefixIcon: prefixIcon,
+        suffixIcon: suffixIcon,
       ),
     );
   }

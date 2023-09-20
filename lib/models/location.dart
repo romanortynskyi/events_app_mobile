@@ -4,8 +4,9 @@ class Location {
   late LatLng? latLng;
   late String? country;
   late String? locality;
+  late String? url;
 
-  Location({this.latLng, this.country, this.locality});
+  Location({this.latLng, this.country, this.locality, this.url});
 
   Location.fromMap(Map<String, dynamic> map) {
     double latitude = map['latitude'];

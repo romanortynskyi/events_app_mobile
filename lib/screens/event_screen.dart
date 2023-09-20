@@ -1,160 +1,232 @@
+import 'dart:async';
+
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/models/asset.dart';
 import 'package:events_app_mobile/models/event.dart';
-import 'package:events_app_mobile/models/location.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:latlng/latlng.dart' as latlng;
 
 class EventScreen extends StatefulWidget {
-  const EventScreen(int id, {super.key});
+  final int id;
+  const EventScreen({super.key, required this.id});
 
   @override
   State<StatefulWidget> createState() => _EventScreenState();
 }
 
-class _EventScreenState extends State<EventScreen> {
-  Event event = Event(
-    id: 5,
-    createdAt: DateTime.now(),
-    updatedAt: DateTime.now(),
-    description:
-        '''Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.''',
-    title: 'some cool event',
-    startDate: DateTime(2024),
-    endDate: DateTime(2024),
-    image: Asset(
-      src:
-          'https://images.unsplash.com/photo-1687360441387-0179af118555?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1854&q=80',
-    ),
-    location: Location(
-      latLng: const latlng.LatLng(34, 45),
-      locality: 'Kyiv',
-      country: 'Ukraine',
-    ),
-  );
+String getEventById = """
+  query GET_EVENT_BY_ID(\$id: Float!, \$latitude: Float!, \$longitude: Float!) {
+    getEventById(id: \$id, latitude: \$latitude, longitude: \$longitude) {
+      id
+      createdAt
+      updatedAt
+      placeId
+      distance
+      title
+      description
+      startDate
+      endDate
+      ticketPrice
+      image {
+        src
+      }
+      place {
+        name
+        url
+        geometry{
+          location {
+            lat
+            lng
+          }
+        }
+        country
+        locality
+      }
+    }
+  }
+""";
 
-  late GoogleMapController mapController;
-  final LatLng _center = const LatLng(45.521563, -122.677433);
+class _EventScreenState extends State<EventScreen> {
+  late Event _event;
+  final Completer _mapCompleter = Completer();
+  bool _isLoading = true;
+  final LatLng _center = const LatLng(0, 0);
+  final Set<Marker> _markers = {};
 
   void _onMapCreated(GoogleMapController controller) {
-    mapController = controller;
+    _mapCompleter.complete(controller);
+  }
+
+  Future<Position?> _getCurrentPosition() async {
+    LocationPermission permission;
+    Position? position;
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        print('Denied');
+      } else {
+        position = await Geolocator.getCurrentPosition(
+            desiredAccuracy: LocationAccuracy.high);
+      }
+    } else {
+      position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
+    }
+
+    return position;
+  }
+
+  void _getEventById() async {
+    GraphQLClient client = GraphQLProvider.of(context).value;
+
+    Position? position = await _getCurrentPosition();
+
+    if (position != null) {
+      var response = await client.query(QueryOptions(
+        document: gql(getEventById),
+        variables: {
+          'id': widget.id,
+          'latitude': position.latitude,
+          'longitude': position.longitude,
+        },
+      ));
+
+      Map<String, dynamic> data = response.data ?? {};
+      Event event = Event.fromMap(data['getEventById']);
+
+      setState(() {
+        _event = event;
+        _isLoading = false;
+        _markers.add(Marker(
+            markerId: MarkerId(event.placeId ?? ''),
+            position: LatLng(event.location.latLng?.latitude ?? 0,
+                event.location.latLng?.longitude ?? 0)));
+      });
+
+      final GoogleMapController mapController = await _mapCompleter.future;
+
+      await mapController.moveCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(event.location.latLng?.latitude ?? 0,
+              event.location.latLng?.longitude ?? 0),
+          zoom: 11,
+        ),
+      ));
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _getEventById();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(
-              children: <Widget>[
-                Image.network(event.image.src,
-                    height: 300,
-                    width: MediaQuery.of(context).size.width,
-                    fit: BoxFit.cover),
-                Positioned(
-                  bottom: 20,
-                  left: 20,
-                  child: Column(
-                    children: [
-                      Text(
-                        event.title,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: LightThemeColors.text,
-                        ),
-                      )
-                    ],
+      body: _isLoading
+          ? Center(
+              child: CircularProgressIndicator(
+              color: LightThemeColors.primary,
+            ))
+          : SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Image.network(_event.image.src,
+                      height: 300,
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.cover),
+                  Container(
+                      margin: const EdgeInsets.only(left: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            _event.title,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: LightThemeColors.text,
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(top: 10),
+                            child: Text(
+                              DateFormat('EEE, MMM dd yyyy hh:mm')
+                                  .format(_event.startDate),
+                              style: TextStyle(
+                                color: LightThemeColors.text,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(
+                              top: 10,
+                              bottom: 10,
+                            ),
+                            child: Text(
+                              'Description',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: LightThemeColors.text,
+                              ),
+                            ),
+                          ),
+                          Text(
+                            _event.description,
+                            style: TextStyle(
+                              color: LightThemeColors.text,
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(
+                              top: 10,
+                              bottom: 10,
+                            ),
+                            child: Text(
+                              'Location',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: LightThemeColors.text,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            margin: const EdgeInsets.only(
+                              bottom: 10,
+                            ),
+                            child: Text(
+                              '${_event.distance} m away',
+                              style: TextStyle(
+                                color: LightThemeColors.text,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      )),
+                  SizedBox(
+                    height: MediaQuery.of(context).size.width,
+                    child: GoogleMap(
+                      onMapCreated: _onMapCreated,
+                      initialCameraPosition: CameraPosition(
+                        target: _center,
+                        zoom: 11,
+                      ),
+                      markers: _markers,
+                    ),
                   ),
-                ),
-              ],
-            ),
-            Container(
-                margin: const EdgeInsets.only(left: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      margin: const EdgeInsets.only(top: 10),
-                      child: Text(
-                        DateFormat('EEE, MMM DD yyyy hh:mm')
-                            .format(event.startDate),
-                        style: TextStyle(
-                          color: LightThemeColors.text,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(
-                        top: 10,
-                        bottom: 10,
-                      ),
-                      child: Text(
-                        'Description',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: LightThemeColors.text,
-                        ),
-                      ),
-                    ),
-                    Text(
-                      event.description,
-                      style: TextStyle(
-                        color: LightThemeColors.text,
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(
-                        top: 10,
-                        bottom: 10,
-                      ),
-                      child: Text(
-                        'Location',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: LightThemeColors.text,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      margin: const EdgeInsets.only(
-                        bottom: 10,
-                      ),
-                      child: Text(
-                        '15.8 km away',
-                        style: TextStyle(
-                          color: LightThemeColors.text,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                )),
-            SizedBox(
-              height: MediaQuery.of(context).size.width,
-              child: GoogleMap(
-                onMapCreated: _onMapCreated,
-                initialCameraPosition: CameraPosition(
-                  target: _center,
-                  zoom: 11,
-                ),
-                markers: {
-                  Marker(
-                    markerId: const MarkerId(''),
-                    position: _center,
-                    // icon: BitmapDescriptor
-                  ),
-                },
+                ],
               ),
             ),
-          ],
-        ),
-      ),
     );
   }
 }
