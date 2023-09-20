@@ -229,101 +229,99 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: LightThemeColors.background,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Container(
-            margin: const EdgeInsets.symmetric(horizontal: 20),
-            child: Form(
-              key: _formKey,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              child: Column(
-                children: [
-                  const SizedBox(height: 20),
-                  Text(
-                    'Add Event',
-                    style: TextStyle(
-                      color: LightThemeColors.text,
-                      fontSize: 30,
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  AppTextField(
-                    validator: titleValidator,
-                    hintText: 'Title',
-                    obscureText: false,
-                    onChanged: onTitleChanged,
-                  ),
-                  const SizedBox(height: 10),
-                  AppTextField(
-                    validator: descriptionValidator,
-                    hintText: 'Description',
-                    obscureText: false,
-                    onChanged: onDescriptionChanged,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: null,
-                  ),
-                  const SizedBox(height: 10),
-                  _startDateTime == null
-                      ? AppButton(
-                          onPressed: onShowStartDatePicker,
-                          text: 'Select Start Date',
-                        )
-                      : Row(
-                          children: [
-                            Text(
-                              DateFormat('EEE, MMM DD yyyy hh:mm')
-                                  .format(_startDateTime ?? DateTime.now()),
-                            ),
-                            IconButton(
-                                onPressed: onShowStartDatePicker,
-                                icon: const Icon(Icons.edit))
-                          ],
-                        ),
-                  const SizedBox(height: 10),
-                  _endDateTime == null
-                      ? AppButton(
-                          onPressed: onShowEndDatePicker,
-                          text: 'Select End Date',
-                        )
-                      : Row(
-                          children: [
-                            Text(
-                              DateFormat('EEE, MMM DD yyyy hh:mm')
-                                  .format(_endDateTime ?? DateTime.now()),
-                            ),
-                            IconButton(
-                                onPressed: onShowEndDatePicker,
-                                icon: const Icon(Icons.edit))
-                          ],
-                        ),
-                  const SizedBox(height: 10),
-                  AppTextField(
-                    keyboardType: TextInputType.number,
-                    inputFormatters: <TextInputFormatter>[
-                      FilteringTextInputFormatter.digitsOnly,
-                    ],
-                    validator: ticketPriceValidator,
-                    hintText: 'Ticket Price',
-                    obscureText: false,
-                    onChanged: onTicketPriceChanged,
-                  ),
-                  AppButton(
-                      onPressed: onSelectImagePressed, text: 'Select Image'),
-                  Text(_imageFile?.path ?? ''),
-                  AppButton(
-                    onPressed: onSelectLocationPressed,
-                    text: 'Select Location',
-                  ),
-                  const SizedBox(height: 10),
-                  AppButton(
-                    onPressed: onSubmitPressed,
-                    text: 'Submit',
-                  ),
-                ],
+    return SingleChildScrollView(
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 20),
+        child: Form(
+          key: _formKey,
+          autovalidateMode: AutovalidateMode.onUserInteraction,
+          child: Column(
+            children: [
+              const SizedBox(height: 20),
+              Text(
+                'Add Event',
+                style: TextStyle(
+                  color: LightThemeColors.text,
+                  fontSize: 30,
+                ),
               ),
-            ),
+              const SizedBox(height: 20),
+              AppTextField(
+                validator: titleValidator,
+                hintText: 'Title',
+                obscureText: false,
+                onChanged: onTitleChanged,
+              ),
+              const SizedBox(height: 10),
+              AppTextField(
+                validator: descriptionValidator,
+                hintText: 'Description',
+                obscureText: false,
+                onChanged: onDescriptionChanged,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
+              ),
+              const SizedBox(height: 10),
+              _startDateTime == null
+                  ? AppButton(
+                      onPressed: onShowStartDatePicker,
+                      text: 'Select Start Date',
+                    )
+                  : Row(
+                      children: [
+                        Text(
+                          DateFormat('EEE, MMM DD yyyy hh:mm')
+                              .format(_startDateTime ?? DateTime.now()),
+                        ),
+                        IconButton(
+                            onPressed: onShowStartDatePicker,
+                            icon: const Icon(Icons.edit))
+                      ],
+                    ),
+              const SizedBox(height: 10),
+              _endDateTime == null
+                  ? AppButton(
+                      onPressed: onShowEndDatePicker,
+                      text: 'Select End Date',
+                    )
+                  : Row(
+                      children: [
+                        Text(
+                          DateFormat('EEE, MMM DD yyyy hh:mm')
+                              .format(_endDateTime ?? DateTime.now()),
+                        ),
+                        IconButton(
+                            onPressed: onShowEndDatePicker,
+                            icon: const Icon(Icons.edit))
+                      ],
+                    ),
+              const SizedBox(height: 10),
+              AppTextField(
+                keyboardType: TextInputType.number,
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                validator: ticketPriceValidator,
+                hintText: 'Ticket Price',
+                obscureText: false,
+                onChanged: onTicketPriceChanged,
+              ),
+              const SizedBox(height: 10),
+              AppButton(onPressed: onSelectImagePressed, text: 'Select Image'),
+              const SizedBox(height: 10),
+              _imageFile?.path == null
+                  ? Container()
+                  : Text(_imageFile?.path ?? ''),
+              AppButton(
+                onPressed: onSelectLocationPressed,
+                text: 'Select Location',
+              ),
+              const SizedBox(height: 10),
+              AppButton(
+                onPressed: onSubmitPressed,
+                text: 'Submit',
+              ),
+            ],
           ),
         ),
       ),
