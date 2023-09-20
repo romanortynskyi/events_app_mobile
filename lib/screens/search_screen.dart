@@ -153,30 +153,38 @@ class _SearchScreenState extends State<SearchScreen> {
         : SingleChildScrollView(
             child: Column(
               children: [
-                HomeHeader(
-                  imgSrc: 'https://source.unsplash.com/random/',
-                  location: _location,
+                Container(
+                  margin: const EdgeInsets.all(20),
+                  child: HomeHeader(
+                    imgSrc: 'https://source.unsplash.com/random/',
+                    location: _location,
+                  ),
                 ),
-                const SizedBox(height: 20),
-                AppAutocomplete<String>(
-                  textEditingController: _textEditingController,
-                  focusNode: _focusNode,
-                  borderRadius: 35,
-                  prefixIcon: const Icon(Icons.location_on_outlined),
-                  suffixIcon: _textEditingController.text.isNotEmpty
-                      ? TouchableOpacity(
-                          onTap: onClearSearch,
-                          child: const Icon(Icons.close),
-                        )
-                      : null,
-                  hintText: 'Search for locations...',
-                  optionsBuilder: optionsBuilder,
-                  optionsViewBuilder: optionsViewBuilder,
-                  onSelected: (String selection) {
-                    debugPrint('You just selected $selection');
-                  },
+                Container(
+                  margin: const EdgeInsets.only(
+                    right: 20,
+                    bottom: 20,
+                    left: 20,
+                  ),
+                  child: AppAutocomplete<String>(
+                    textEditingController: _textEditingController,
+                    focusNode: _focusNode,
+                    borderRadius: 35,
+                    prefixIcon: const Icon(Icons.location_on_outlined),
+                    suffixIcon: _textEditingController.text.isNotEmpty
+                        ? TouchableOpacity(
+                            onTap: onClearSearch,
+                            child: const Icon(Icons.close),
+                          )
+                        : null,
+                    hintText: 'Search for locations...',
+                    optionsBuilder: optionsBuilder,
+                    optionsViewBuilder: optionsViewBuilder,
+                    onSelected: (String selection) {
+                      debugPrint('You just selected $selection');
+                    },
+                  ),
                 ),
-                const SizedBox(height: 20),
                 SizedBox(
                   height: MediaQuery.of(context).size.height - 298,
                   child: GoogleMap(
