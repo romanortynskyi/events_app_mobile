@@ -12,7 +12,7 @@ main() async {
   await initHiveForFlutter();
 
   final HttpLink httpLink = HttpLink(
-    'http://192.168.1.232:3000/graphql',
+    'http://192.168.56.190:3000/graphql',
     defaultHeaders: {
       'apollo-require-preflight': 'true',
     },
