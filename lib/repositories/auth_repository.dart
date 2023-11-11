@@ -1,7 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:events_app_mobile/consts/enums/auth_provider.dart';
+import 'package:events_app_mobile/consts/enums/error_message.dart';
+import 'package:events_app_mobile/exceptions/wrong_email_or_password_exception.dart';
 import 'package:events_app_mobile/graphql/mutations/login.dart';
+import 'package:events_app_mobile/graphql/mutations/sign_up.dart' as sign_up;
 import 'package:events_app_mobile/graphql/mutations/login_with_google.dart';
 import 'package:events_app_mobile/graphql/mutations/login_with_facebook.dart';
 import 'package:events_app_mobile/models/user.dart';
@@ -36,8 +39,6 @@ class AuthRepository {
 
       return user;
     } catch (e) {
-      print('An Error Occurred $e');
-
       return null;
     }
   }
@@ -87,7 +88,7 @@ class AuthRepository {
       {required BuildContext context,
       required String email,
       required String password}) async {
-    final QueryResult getMeResult =
+    final QueryResult loginResult =
         await GraphQLProvider.of(context).value.mutate(
               MutationOptions(document: gql(login), variables: {
                 'input': {
@@ -97,8 +98,48 @@ class AuthRepository {
               }),
             );
 
-    var data = getMeResult.data ?? {};
+    String? message = loginResult.exception?.graphqlErrors[0].message;
+
+    if (message == ErrorMessage.wrongEmailOrPassword.value) {
+      throw WrongEmailOrPasswordException(context);
+    }
+
+    var data = loginResult.data ?? {};
     final user = User.fromMap(data['login'] ?? {});
+
+    await SecureStorageUtils.setItem('token', user.token);
+    await SecureStorageUtils.setItem('provider', AuthProvider.email.value);
+
+    return user;
+  }
+
+  Future<User?> signUp({
+    required BuildContext context,
+    required String email,
+    required String password,
+    required String firstName,
+    required String lastName,
+  }) async {
+    final QueryResult signUpResult =
+        await GraphQLProvider.of(context).value.mutate(
+              MutationOptions(document: gql(sign_up.signUp), variables: {
+                'input': {
+                  'email': email,
+                  'password': password,
+                  'firstName': firstName,
+                  'lastName': lastName,
+                },
+              }),
+            );
+
+    String? message = signUpResult.exception?.graphqlErrors[0].message;
+
+    if (message == ErrorMessage.emailAlreadyExists.value) {
+      throw WrongEmailOrPasswordException(context);
+    }
+
+    var data = signUpResult.data ?? {};
+    final user = User.fromMap(data['signUp'] ?? {});
 
     await SecureStorageUtils.setItem('token', user.token);
     await SecureStorageUtils.setItem('provider', AuthProvider.email.value);

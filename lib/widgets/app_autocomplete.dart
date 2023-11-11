@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
+import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
@@ -15,7 +16,6 @@ class AppAutocomplete<T extends Object> extends StatelessWidget {
   final TextEditingController textEditingController;
   final FocusNode focusNode;
   final Widget? prefixIcon;
-  final Widget? suffixIcon;
   final double? borderRadius;
 
   const AppAutocomplete({
@@ -27,7 +27,6 @@ class AppAutocomplete<T extends Object> extends StatelessWidget {
     required this.textEditingController,
     required this.focusNode,
     this.prefixIcon,
-    this.suffixIcon,
     this.borderRadius,
   });
 
@@ -44,7 +43,12 @@ class AppAutocomplete<T extends Object> extends StatelessWidget {
         return AppTextField(
           borderRadius: borderRadius,
           prefixIcon: prefixIcon,
-          suffixIcon: suffixIcon,
+          suffixIcon: textEditingController.value.text.isNotEmpty
+              ? TouchableOpacity(
+                  child: const Icon(Icons.close),
+                  onTap: () => textEditingController.clear(),
+                )
+              : null,
           focusNode: focusNode,
           onTap: onFieldSubmitted,
           controller: textEditingController,

@@ -7,7 +7,6 @@ import 'package:events_app_mobile/bloc/auth/google_sign_in/google_sign_in_bloc.d
 import 'package:events_app_mobile/bloc/auth/facebook_sign_in/facebook_sign_in_bloc.dart'
     as facebook_sign_in_bloc;
 import 'package:events_app_mobile/consts/enums/auth_provider.dart';
-import 'package:events_app_mobile/consts/enums/error_message.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
@@ -20,53 +19,20 @@ import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatefulWidget {
+  const SignUpScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _LoginScreenState();
+  State<StatefulWidget> createState() => _SignupScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
+class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordHidden = true;
   String _email = '';
   String _password = '';
-
-  @override
-  void initState() {
-    super.initState();
-
-    onInit();
-  }
-
-  Future<void> onInit() async {
-    String? providerStr = await SecureStorageUtils.getItem('provider');
-
-    if (providerStr != null) {
-      AuthProvider authProvider = AuthProvider.values.byName(providerStr);
-
-      switch (authProvider) {
-        case AuthProvider.google:
-          context
-              .read<google_sign_in_bloc.GoogleSignInBloc>()
-              .add(google_sign_in_bloc.GoogleGetMeRequested(context));
-          break;
-
-        case AuthProvider.facebook:
-          context
-              .read<facebook_sign_in_bloc.FacebookSignInBloc>()
-              .add(facebook_sign_in_bloc.FacebookGetMeRequested(context));
-          break;
-
-        default:
-          context
-              .read<email_sign_in_bloc.EmailSignInBloc>()
-              .add(email_sign_in_bloc.EmailGetMeRequested(context));
-          break;
-      }
-    }
-  }
+  String _firstName = '';
+  String _lastName = '';
 
   void onPasswordHiddenPressed() {
     setState(() {
@@ -76,11 +42,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void onForgotPasswordPressed() {}
 
-  void onLoginPressed() {
+  void onSignupPressed() {
     if (_formKey.currentState!.validate()) {
       context
           .read<email_sign_in_bloc.EmailSignInBloc>()
-          .add(email_sign_in_bloc.EmailSignInRequested(
+          .add(email_sign_in_bloc.EmailSignUpRequested(
             context: context,
             email: _email,
             password: _password,
@@ -88,7 +54,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void onSignUpPressed() {}
+  void onLoginPressed() {}
 
   void onLoginError(BuildContext context, String message) {
     final snackBar = SnackBar(
@@ -152,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
     var facebookSignInState = context.select(
         (facebook_sign_in_bloc.FacebookSignInBloc facebookSignInBloc) =>
             facebookSignInBloc.state);
-    var emailSignInState = context.select(
+    var emailSignUpState = context.select(
         (email_sign_in_bloc.EmailSignInBloc emailSignInBloc) =>
             emailSignInBloc.state);
 

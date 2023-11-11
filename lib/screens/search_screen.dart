@@ -5,7 +5,6 @@ import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart
 import 'package:events_app_mobile/models/location.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
-import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -69,10 +68,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 )),
           )),
     );
-  }
-
-  void onClearSearch() {
-    _textEditingController.clear();
   }
 
   Completer<GoogleMapController> _completer = Completer();
@@ -171,12 +166,6 @@ class _SearchScreenState extends State<SearchScreen> {
                     focusNode: _focusNode,
                     borderRadius: 35,
                     prefixIcon: const Icon(Icons.location_on_outlined),
-                    suffixIcon: _textEditingController.text.isNotEmpty
-                        ? TouchableOpacity(
-                            onTap: onClearSearch,
-                            child: const Icon(Icons.close),
-                          )
-                        : null,
                     hintText: 'Search for locations...',
                     optionsBuilder: optionsBuilder,
                     optionsViewBuilder: optionsViewBuilder,

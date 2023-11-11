@@ -5,17 +5,22 @@ abstract class EmailSignInState extends Equatable {
   List<Object?> get props => [];
 
   User? user;
-  EmailSignInState(this.user);
+  String? errorMessage;
+  EmailSignInState({this.user, this.errorMessage});
 }
 
 class UnAuthenticated extends EmailSignInState {
-  UnAuthenticated(super.user);
+  UnAuthenticated({super.user, super.errorMessage});
 }
 
 class Authenticated extends EmailSignInState {
-  Authenticated(super.user);
+  Authenticated({super.user, super.errorMessage});
 }
 
 class Loading extends EmailSignInState {
-  Loading(super.user);
+  Loading({super.user, super.errorMessage});
+}
+
+class Error extends EmailSignInState {
+  Error({super.user, super.errorMessage});
 }

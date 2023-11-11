@@ -2,7 +2,6 @@
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
-import 'package:events_app_mobile/models/asset.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/location.dart';
 import 'package:events_app_mobile/models/month.dart';
@@ -16,11 +15,9 @@ import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
-import 'package:latlng/latlng.dart' as latlng;
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-String getEvents =
-    """
+String getEvents = """
   query GET_EVENTS(\$skip: Float!, \$limit: Float!){
     getEvents(skip: \$skip, limit: \$limit) {
       items {
@@ -218,38 +215,35 @@ class _HomeScreenState extends State<HomeScreen> {
     onAutoCompleteSelect,
     Iterable<String> options,
   ) {
-    return Container(
-      margin: const EdgeInsets.only(left: 20),
-      child: Align(
-          alignment: Alignment.topLeft,
-          child: Material(
-            color: LightThemeColors.grey,
-            elevation: 4.0,
-            child: SizedBox(
-                width: MediaQuery.of(context).size.width - 40,
-                child: ListView.separated(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  controller: _scrollController,
-                  shrinkWrap: true,
-                  padding: const EdgeInsets.all(8.0),
-                  itemCount: options.length,
-                  separatorBuilder: (context, i) {
-                    return const Divider();
-                  },
-                  itemBuilder: (BuildContext context, int index) {
-                    if (options.isNotEmpty) {
-                      return GestureDetector(
-                        onTap: () =>
-                            onAutoCompleteSelect(options.elementAt(index)),
-                        child: Text(options.elementAt(index)),
-                      );
-                    }
+    return Align(
+        alignment: Alignment.topLeft,
+        child: Material(
+          color: LightThemeColors.grey,
+          elevation: 4.0,
+          child: SizedBox(
+              width: MediaQuery.of(context).size.width - 40,
+              child: ListView.separated(
+                physics: const AlwaysScrollableScrollPhysics(),
+                controller: _scrollController,
+                shrinkWrap: true,
+                padding: const EdgeInsets.all(8.0),
+                itemCount: options.length,
+                separatorBuilder: (context, i) {
+                  return const Divider();
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  if (options.isNotEmpty) {
+                    return GestureDetector(
+                      onTap: () =>
+                          onAutoCompleteSelect(options.elementAt(index)),
+                      child: Text(options.elementAt(index)),
+                    );
+                  }
 
-                    return null;
-                  },
-                )),
-          )),
-    );
+                  return null;
+                },
+              )),
+        ));
   }
 
   void onClearSearch() {
@@ -297,12 +291,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   focusNode: _focusNode,
                   borderRadius: 35,
                   prefixIcon: const Icon(Icons.search),
-                  suffixIcon: _textEditingController.text.isNotEmpty
-                      ? TouchableOpacity(
-                          onTap: onClearSearch,
-                          child: const Icon(Icons.close),
-                        )
-                      : null,
                   hintText: 'Search for events...',
                   optionsBuilder: optionsBuilder,
                   optionsViewBuilder: optionsViewBuilder,

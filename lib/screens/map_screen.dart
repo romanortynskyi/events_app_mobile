@@ -150,12 +150,6 @@ class _MapScreenState extends State<MapScreen> {
                 focusNode: _focusNode,
                 borderRadius: 35,
                 prefixIcon: const Icon(Icons.location_on_outlined),
-                suffixIcon: _textEditingController.text.isNotEmpty
-                    ? TouchableOpacity(
-                        onTap: onClearSearch,
-                        child: const Icon(Icons.close),
-                      )
-                    : null,
                 hintText: 'Search for locations...',
                 optionsBuilder: optionsBuilder,
                 optionsViewBuilder: optionsViewBuilder,
