@@ -4,9 +4,8 @@ import 'dart:async';
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
-import 'package:events_app_mobile/models/location.dart';
+import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
-import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -74,9 +73,9 @@ class _MapScreenState extends State<MapScreen> {
     _textEditingController.clear();
   }
 
-  Completer<GoogleMapController> _completer = Completer();
+  final Completer<GoogleMapController> _completer = Completer();
 
-  LatLng _center = const LatLng(0, 0);
+  final LatLng _center = const LatLng(0, 0);
 
   void _onMapCreated(GoogleMapController controller) {
     _completer.complete(controller);
@@ -89,7 +88,7 @@ class _MapScreenState extends State<MapScreen> {
     _getCurrentLocation();
   }
 
-  Location? _location;
+  Geolocation? _geolocation;
 
   void _getCurrentLocation() async {
     LocationPermission permission;
@@ -133,9 +132,10 @@ class _MapScreenState extends State<MapScreen> {
     ));
 
     Map<String, dynamic> data = response.data ?? {};
-    Location location = Location.fromMap(data['getGeolocationByCoords']);
+    Geolocation geolocation =
+        Geolocation.fromMap(data['getGeolocationByCoords']);
 
-    Navigator.pop(context, location);
+    Navigator.pop(context, geolocation);
   }
 
   @override

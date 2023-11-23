@@ -3,7 +3,7 @@
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/models/event.dart';
-import 'package:events_app_mobile/models/location.dart';
+import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/month.dart';
 import 'package:events_app_mobile/screens/event_screen.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
@@ -63,7 +63,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _skip = 0;
   final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
-  Location? _location;
+  Geolocation? _geolocation;
   late ScrollController _scrollController;
   bool _isLoadingEvents = true;
   bool _isLoadingLocation = true;
@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return months;
   }
 
-  void _getEvents() async {
+  Future<void> _getEvents(FetchPolicy fetchPolicy) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
     var response = await client.query(QueryOptions(
       document: gql(getEvents),
@@ -126,6 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'skip': _skip,
         'limit': 10,
       },
+      fetchPolicy: fetchPolicy,
     ));
 
     List<Month> months = _getMonths(response);
@@ -149,19 +150,19 @@ class _HomeScreenState extends State<HomeScreen> {
       var nextPageTrigger = 0.8 * _scrollController.position.maxScrollExtent;
       if (_scrollController.position.pixels >= nextPageTrigger &&
           !_isLoadingEvents) {
-        _getEvents();
+        _getEvents(FetchPolicy.networkOnly);
       }
     });
   }
 
   @override
   void didChangeDependencies() {
-    _getEvents();
+    _getEvents(FetchPolicy.cacheOnly);
 
     super.didChangeDependencies();
   }
 
-  void _getCurrentLocation() async {
+  Future<void> _getCurrentLocation() async {
     LocationPermission permission;
     Position? position;
 
@@ -193,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
       if (mounted) {
         setState(() {
-          _location = Location.fromMap(data['getGeolocationByCoords']);
+          _geolocation = Geolocation.fromMap(data['getGeolocationByCoords']);
           _isLoadingLocation = false;
         });
       }
@@ -257,6 +258,12 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Future<void> onRefresh(BuildContext context) async {
+    _getCurrentLocation();
+
+    return _getEvents(FetchPolicy.networkOnly);
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -271,73 +278,75 @@ class _HomeScreenState extends State<HomeScreen> {
               color: LightThemeColors.primary,
             ),
           )
-        : Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.all(20),
-                child: HomeHeader(
-                  imgSrc: 'https://source.unsplash.com/random/',
-                  location: _location,
+        : RefreshIndicator(
+            onRefresh: () => onRefresh(context),
+            child: Column(
+              children: [
+                Container(
+                  margin: const EdgeInsets.all(20),
+                  child: HomeHeader(
+                    imgSrc: 'https://source.unsplash.com/random/',
+                    geolocation: _geolocation,
+                  ),
                 ),
-              ),
-              Container(
-                margin: const EdgeInsets.only(
-                  right: 20,
-                  bottom: 20,
-                  left: 20,
+                Container(
+                  margin: const EdgeInsets.only(
+                    right: 20,
+                    bottom: 20,
+                    left: 20,
+                  ),
+                  child: AppAutocomplete<String>(
+                    textEditingController: _textEditingController,
+                    focusNode: _focusNode,
+                    borderRadius: 35,
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Search for events...',
+                    optionsBuilder: optionsBuilder,
+                    optionsViewBuilder: optionsViewBuilder,
+                    onSelected: (String selection) {
+                      debugPrint('You just selected $selection');
+                    },
+                  ),
                 ),
-                child: AppAutocomplete<String>(
-                  textEditingController: _textEditingController,
-                  focusNode: _focusNode,
-                  borderRadius: 35,
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: 'Search for events...',
-                  optionsBuilder: optionsBuilder,
-                  optionsViewBuilder: optionsViewBuilder,
-                  onSelected: (String selection) {
-                    debugPrint('You just selected $selection');
-                  },
-                ),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  shrinkWrap: true,
-                  itemCount: _months.length,
-                  itemBuilder: (context, index) {
-                    final month = _months[index];
+                Expanded(
+                  child: ListView.builder(
+                    controller: _scrollController,
+                    shrinkWrap: true,
+                    itemCount: _months.length,
+                    itemBuilder: (context, index) {
+                      final month = _months[index];
 
-                    return Column(
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              MonthTile(text: month.name),
-                              EventsCounter(count: month.events.length),
-                            ],
+                      return Column(
+                        children: [
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 20),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                MonthTile(text: month.name),
+                                EventsCounter(count: month.events.length),
+                              ],
+                            ),
                           ),
-                        ),
-                        ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: month.events.length,
-                          itemBuilder: (context, eventIndex) {
-                            Event event = month.events[eventIndex];
+                          ListView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: month.events.length,
+                            itemBuilder: (context, eventIndex) {
+                              Event event = month.events[eventIndex];
 
-                            return TouchableOpacity(
-                              onTap: () => onEventPressed(context, event),
-                              child: EventCard(event: event),
-                            );
-                          },
-                        ).build(context),
-                      ],
-                    );
-                  },
-                ).build(context),
-              ),
-            ],
-          );
+                              return TouchableOpacity(
+                                onTap: () => onEventPressed(context, event),
+                                child: EventCard(event: event),
+                              );
+                            },
+                          ).build(context),
+                        ],
+                      );
+                    },
+                  ).build(context),
+                ),
+              ],
+            ));
   }
 }

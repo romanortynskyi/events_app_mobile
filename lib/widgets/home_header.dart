@@ -1,20 +1,20 @@
-import 'package:events_app_mobile/models/location.dart';
+import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:flutter/material.dart';
 
 class HomeHeader extends StatelessWidget {
   final String imgSrc;
-  final Location? location;
+  final Geolocation? geolocation;
 
   const HomeHeader({
     super.key,
     required this.imgSrc,
-    required this.location,
+    required this.geolocation,
   });
 
   @override
   Widget build(BuildContext context) {
-    String locality = location?.locality ?? '';
-    String country = location?.country ?? '';
+    String locality = geolocation?.locality ?? '';
+    String country = geolocation?.country ?? '';
     String locationStr = '$locality, $country';
 
     return Row(

@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/mutations/add_event.dart';
-import 'package:events_app_mobile/models/location.dart';
+import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/screens/map_screen.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
@@ -46,7 +46,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
   void onSelectLocationPressed() async {
     if (_formKey.currentState!.validate()) {
-      Location location = await Navigator.push(
+      Geolocation location = await Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const MapScreen()),
       );

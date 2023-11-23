@@ -1,11 +1,15 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
 
+import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/event.dart';
+import 'package:events_app_mobile/models/geolocation.dart';
+import 'package:events_app_mobile/services/event_service.dart';
+import 'package:events_app_mobile/services/geolocation_service.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:intl/intl.dart';
 
 class EventScreen extends StatefulWidget {
@@ -17,8 +21,8 @@ class EventScreen extends StatefulWidget {
 }
 
 String getEventById = """
-  query GET_EVENT_BY_ID(\$id: Float!, \$latitude: Float!, \$longitude: Float!) {
-    getEventById(id: \$id, latitude: \$latitude, longitude: \$longitude) {
+  query GET_EVENT_BY_ID(\$id: Float!, \$originId: String!) {
+    getEventById(id: \$id, originId: \$originId) {
       id
       createdAt
       updatedAt
@@ -49,73 +53,67 @@ String getEventById = """
 """;
 
 class _EventScreenState extends State<EventScreen> {
-  late Event _event;
+  late Event? _event = null;
   final Completer _mapCompleter = Completer();
-  bool _isLoading = true;
+  bool _isLoadingEvent = true;
   final LatLng _center = const LatLng(0, 0);
   final Set<Marker> _markers = {};
+
+  bool _isLoadingGeolocation = true;
 
   void _onMapCreated(GoogleMapController controller) {
     _mapCompleter.complete(controller);
   }
 
-  Future<Position?> _getCurrentPosition() async {
-    LocationPermission permission;
-    Position? position;
+  Future<Geolocation?> _getCurrentLocation() async {
+    if (mounted) {
+      Geolocation? geolocation =
+          await GeolocationService().getCurrentGeolocation(
+        context: context,
+        graphqlDocument: getGeolocationByCoords,
+      );
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print('Denied');
-      } else {
-        position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
-      }
-    } else {
-      position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      return geolocation;
     }
 
-    return position;
+    return null;
   }
 
-  void _getEventById() async {
-    GraphQLClient client = GraphQLProvider.of(context).value;
+  Future<void> _getEventById() async {
+    Geolocation? geolocation = await _getCurrentLocation();
 
-    Position? position = await _getCurrentPosition();
+    setState(() {
+      _isLoadingGeolocation = false;
+    });
 
-    if (position != null) {
-      var response = await client.query(QueryOptions(
-        document: gql(getEventById),
-        variables: {
-          'id': widget.id,
-          'latitude': position.latitude,
-          'longitude': position.longitude,
-        },
-      ));
-
-      Map<String, dynamic> data = response.data ?? {};
-      Event event = Event.fromMap(data['getEventById']);
+    if (geolocation != null) {
+      Event? event = await EventService().getEventById(
+        id: widget.id,
+        originId: geolocation.placeId ?? '',
+        context: context,
+        graphqlDocument: getEventById,
+      );
 
       setState(() {
         _event = event;
-        _isLoading = false;
+        _isLoadingEvent = false;
         _markers.add(Marker(
-            markerId: MarkerId(event.placeId ?? ''),
-            position: LatLng(event.location.latLng?.latitude ?? 0,
-                event.location.latLng?.longitude ?? 0)));
+            markerId: MarkerId(event?.placeId ?? ''),
+            position: LatLng(event?.location.latLng?.latitude ?? 0,
+                event?.location.latLng?.longitude ?? 0)));
       });
 
       final GoogleMapController mapController = await _mapCompleter.future;
 
-      await mapController.moveCamera(CameraUpdate.newCameraPosition(
+      CameraUpdate cameraUpdate = CameraUpdate.newCameraPosition(
         CameraPosition(
-          target: LatLng(event.location.latLng?.latitude ?? 0,
-              event.location.latLng?.longitude ?? 0),
+          target: LatLng(event?.location.latLng?.latitude ?? 0,
+              event?.location.latLng?.longitude ?? 0),
           zoom: 11,
         ),
-      ));
+      );
+
+      await mapController.moveCamera(cameraUpdate);
     }
   }
 
@@ -128,8 +126,10 @@ class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print('event: ');
+    print(_event);
     return Scaffold(
-      body: _isLoading
+      body: _isLoadingEvent || _isLoadingGeolocation
           ? Center(
               child: CircularProgressIndicator(
               color: LightThemeColors.primary,
@@ -138,7 +138,7 @@ class _EventScreenState extends State<EventScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.network(_event.image.src,
+                  Image.network(_event?.image.src ?? '',
                       height: 300,
                       width: MediaQuery.of(context).size.width,
                       fit: BoxFit.cover),
@@ -148,7 +148,7 @@ class _EventScreenState extends State<EventScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _event.title,
+                            _event?.title ?? '',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
@@ -159,7 +159,7 @@ class _EventScreenState extends State<EventScreen> {
                             margin: const EdgeInsets.only(top: 10),
                             child: Text(
                               DateFormat('EEE, MMM dd yyyy hh:mm')
-                                  .format(_event.startDate),
+                                  .format(_event?.startDate ?? DateTime.now()),
                               style: TextStyle(
                                 color: LightThemeColors.text,
                               ),
@@ -180,7 +180,7 @@ class _EventScreenState extends State<EventScreen> {
                             ),
                           ),
                           Text(
-                            _event.description,
+                            _event?.description ?? '',
                             style: TextStyle(
                               color: LightThemeColors.text,
                             ),
@@ -204,7 +204,7 @@ class _EventScreenState extends State<EventScreen> {
                               bottom: 10,
                             ),
                             child: Text(
-                              '${_event.distance} m away',
+                              '${_event?.distance} m away',
                               style: TextStyle(
                                 color: LightThemeColors.text,
                                 fontWeight: FontWeight.bold,

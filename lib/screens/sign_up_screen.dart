@@ -23,7 +23,7 @@ class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
 
   @override
-  State<StatefulWidget> createState() => _SignupScreenState();
+  State<StatefulWidget> createState() => _SignUpScreenState();
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
@@ -50,6 +50,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
             context: context,
             email: _email,
             password: _password,
+            firstName: _firstName,
+            lastName: _lastName,
           ));
     }
   }
@@ -118,7 +120,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     var facebookSignInState = context.select(
         (facebook_sign_in_bloc.FacebookSignInBloc facebookSignInBloc) =>
             facebookSignInBloc.state);
-    var emailSignUpState = context.select(
+    var emailSignInState = context.select(
         (email_sign_in_bloc.EmailSignInBloc emailSignInBloc) =>
             emailSignInBloc.state);
 
@@ -247,7 +249,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             ],
                           ),
                           const SizedBox(height: 20),
-                          SignUpButton(onPressed: onSignUpPressed),
+                          SignUpButton(onPressed: () {}),
                         ],
                       ),
                     ),

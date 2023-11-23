@@ -1,5 +1,5 @@
 import 'package:events_app_mobile/models/asset.dart';
-import 'package:events_app_mobile/models/location.dart';
+import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/model.dart';
 import 'package:latlng/latlng.dart';
 
@@ -8,7 +8,7 @@ class Event extends Model {
   late String description;
   late DateTime startDate;
   late DateTime endDate;
-  late Location location;
+  late Geolocation location;
   late Asset image;
   late int distance;
   late String? placeId;
@@ -42,7 +42,7 @@ class Event extends Model {
     startDate = DateTime.parse(map['startDate']);
     endDate = DateTime.parse(map['endDate']);
     distance = map['distance'] ?? 0;
-    location = Location(
+    location = Geolocation(
       country: map['place']['country'],
       locality: map['place']['locality'],
       url: map['place']['url'],

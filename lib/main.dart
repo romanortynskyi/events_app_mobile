@@ -3,16 +3,22 @@ import 'package:events_app_mobile/bloc/auth/facebook_sign_in/facebook_sign_in_bl
 import 'package:events_app_mobile/bloc/auth/google_sign_in/google_sign_in_bloc.dart';
 import 'package:events_app_mobile/repositories/auth_repository.dart';
 import 'package:events_app_mobile/screens/login_screen.dart';
+import 'package:events_app_mobile/utils/env_utils.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 main() async {
+  await dotenv.load(fileName: '.env');
+
   await initHiveForFlutter();
 
   final HttpLink httpLink = HttpLink(
-    'http://192.168.1.247:3000/graphql',
+    EnvUtils.getEnv('API_URL'),
     defaultHeaders: {
       'apollo-require-preflight': 'true',
     },
@@ -70,6 +76,13 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Events App',
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: ThemeData(
             useMaterial3: true,
           ),
