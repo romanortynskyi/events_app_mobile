@@ -157,7 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void didChangeDependencies() {
-    _getEvents(FetchPolicy.cacheOnly);
+    _getEvents(FetchPolicy.cacheFirst);
 
     super.didChangeDependencies();
   }

@@ -120,8 +120,8 @@ class _SearchScreenState extends State<SearchScreen> {
       Geolocation geolocation =
           Geolocation.fromMap(data['getGeolocationByCoords']);
 
-      double latitude = geolocation.latLng?.latitude ?? 0;
-      double longitude = geolocation.latLng?.longitude ?? 0;
+      double latitude = position.latitude;
+      double longitude = position.longitude;
 
       if (mounted) {
         setState(() {
