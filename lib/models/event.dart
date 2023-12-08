@@ -4,26 +4,26 @@ import 'package:events_app_mobile/models/model.dart';
 import 'package:latlng/latlng.dart';
 
 class Event extends Model {
-  late String title;
-  late String description;
-  late DateTime startDate;
-  late DateTime endDate;
-  late Geolocation location;
-  late Asset image;
-  late int distance;
+  late String? title;
+  late String? description;
+  late DateTime? startDate;
+  late DateTime? endDate;
+  late Geolocation? location;
+  late Asset? image;
+  late int? distance;
   late String? placeId;
 
   Event({
-    required int id,
-    required DateTime createdAt,
-    required DateTime updatedAt,
-    required this.title,
-    required this.description,
-    required this.startDate,
-    required this.endDate,
-    required this.location,
-    required this.image,
-    required this.distance,
+    int? id,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    this.title,
+    this.description,
+    this.startDate,
+    this.endDate,
+    this.location,
+    this.image,
+    this.distance,
     this.placeId,
   }) : super(
           id: id,
@@ -34,25 +34,32 @@ class Event extends Model {
   Event.fromMap(Map<String, dynamic> map)
       : super(
           id: map['id'],
-          createdAt: DateTime.parse(map['createdAt']),
-          updatedAt: DateTime.parse(map['updatedAt']),
+          createdAt: map['createdAt'] == null
+              ? null
+              : DateTime.parse(map['createdAt']),
+          updatedAt: map['updatedAt'] == null
+              ? null
+              : DateTime.parse(map['updatedAt']),
         ) {
     title = map['title'];
     description = map['description'];
-    startDate = DateTime.parse(map['startDate']);
-    endDate = DateTime.parse(map['endDate']);
-    distance = map['distance'] ?? 0;
+    startDate =
+        map['startDate'] == null ? null : DateTime.parse(map['startDate']);
+    endDate = map['endDate'] == null ? null : DateTime.parse(map['endDate']);
+    distance = map['distance'];
     location = Geolocation(
-      country: map['place']['country'],
-      locality: map['place']['locality'],
-      url: map['place']['url'],
-      latLng: LatLng(
-        map['place']['geometry']['location']['lat'],
-        map['place']['geometry']['location']['lng'],
-      ),
+      country: map['place']?['country'],
+      locality: map['place']?['locality'],
+      url: map['place']?['url'],
+      latLng: map['place']?['geometry']?['location'] == null
+          ? null
+          : LatLng(
+              map['place']?['geometry']?['location']?['lat'],
+              map['place']?['geometry']?['location']?['lng'],
+            ),
     );
     image = Asset(
-      src: map['image']['src'],
+      src: map['image']?['src'] ?? '',
     );
     placeId = map['placeId'];
   }

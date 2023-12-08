@@ -145,7 +145,7 @@ class _MapScreenState extends State<MapScreen> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              AppAutocomplete<String>(
+              AppAutocomplete(
                 textEditingController: _textEditingController,
                 focusNode: _focusNode,
                 borderRadius: 35,

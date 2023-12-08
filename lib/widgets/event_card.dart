@@ -26,7 +26,7 @@ class EventCard extends StatelessWidget {
             child: Column(
               children: [
                 Text(
-                  event.startDate.day.toString(),
+                  event.startDate?.day.toString() ?? '',
                   style: TextStyle(
                     color: LightThemeColors.text,
                     fontWeight: FontWeight.bold,
@@ -34,7 +34,9 @@ class EventCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 15),
                 Text(
-                  DateFormat('MMM').format(event.startDate).toUpperCase(),
+                  DateFormat('MMM')
+                      .format(event.startDate ?? DateTime.now())
+                      .toUpperCase(),
                   style: const TextStyle(
                     color: Colors.grey,
                   ),
@@ -44,7 +46,7 @@ class EventCard extends StatelessWidget {
           ),
           const SizedBox(width: 30),
           EventImage(
-            src: event.image.src,
+            src: event.image?.src ?? '',
             width: 120,
             height: 180,
           ),

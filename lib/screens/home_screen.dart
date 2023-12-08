@@ -51,6 +51,14 @@ String getEvents = """
   }
 """;
 
+String autocompleteEvents = """
+  query GET_EVENTS(\$query: String!){
+    autocompleteEvents(query: \$query) {
+      title
+    }
+  }
+""";
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -61,12 +69,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<Month> _months = [];
   int _skip = 0;
-  final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   Geolocation? _geolocation;
   late ScrollController _scrollController;
   bool _isLoadingEvents = true;
   bool _isLoadingLocation = true;
+
+  final TextEditingController _textEditingController = TextEditingController();
 
   List<Month> _getMonths(response) {
     List<Event> events = response.data?['getEvents']['items']
@@ -79,13 +88,16 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     Set<String> uniqueMonthNames = events
-        .map((event) => DateFormat('MMM yyyy').format(event.startDate))
+        .map((event) =>
+            DateFormat('MMM yyyy').format(event.startDate ?? DateTime.now()))
         .toSet();
 
     List<Month> months = uniqueMonthNames.map((monthName) {
       List<Event> eventsByMonth = events
           .where((event) =>
-              DateFormat('MMM yyyy').format(event.startDate) == monthName)
+              DateFormat('MMM yyyy')
+                  .format(event.startDate ?? DateTime.now()) ==
+              monthName)
           .toList();
 
       return Month(
@@ -201,14 +213,33 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Iterable<String> optionsBuilder(TextEditingValue textEditingValue) {
-    if (textEditingValue.text == '') {
+  Future<Iterable<String>> optionsBuilder(
+      TextEditingValue textEditingValue) async {
+    String text = textEditingValue.text;
+
+    if (text == '') {
       return const Iterable<String>.empty();
     }
 
-    return ['hello', 'pryvito'].where((String option) {
-      return option.contains(textEditingValue.text.toLowerCase());
-    });
+    List<String> options = [];
+
+    GraphQLClient client = GraphQLProvider.of(context).value;
+    var response = await client.query(QueryOptions(
+      document: gql(autocompleteEvents),
+      variables: {
+        'query': text,
+      },
+    ));
+
+    Map<String, dynamic> data = response.data ?? {};
+
+    Set eventTitles = (data['autocompleteEvents'])
+        .map((eventMap) => Event.fromMap(eventMap).title)
+        .toSet();
+
+    eventTitles.forEach((title) => options.add(title));
+
+    return options;
   }
 
   Widget optionsViewBuilder(
@@ -254,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void onEventPressed(BuildContext context, Event event) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => EventScreen(id: event.id)),
+      MaterialPageRoute(builder: (context) => EventScreen(id: event.id ?? -1)),
     );
   }
 
@@ -267,6 +298,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void dispose() {
     _scrollController.dispose();
+
     super.dispose();
   }
 
@@ -295,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     bottom: 20,
                     left: 20,
                   ),
-                  child: AppAutocomplete<String>(
+                  child: AppAutocomplete(
                     textEditingController: _textEditingController,
                     focusNode: _focusNode,
                     borderRadius: 35,

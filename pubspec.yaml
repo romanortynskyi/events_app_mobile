@@ -57,6 +57,7 @@ dependencies:
   flutter_dotenv: ^5.1.0
   flutter_localizations:
     sdk: flutter
+  debounce_throttle: ^2.0.0
 
 dev_dependencies:
   flutter_test:

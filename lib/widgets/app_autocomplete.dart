@@ -1,31 +1,32 @@
 import 'dart:async';
+import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
-class AppAutocomplete<T extends Object> extends StatelessWidget {
-  final FutureOr<Iterable<T>> Function(TextEditingValue) optionsBuilder;
-  final void Function(T)? onSelected;
+class AppAutocomplete extends StatelessWidget {
+  final FutureOr<Iterable<String>> Function(TextEditingValue) optionsBuilder;
   final String hintText;
   final Widget Function(
     BuildContext context,
-    void Function(T) onAutoCompleteSelect,
-    Iterable<T> options,
+    void Function(String) onAutoCompleteSelect,
+    Iterable<String> options,
   ) optionsViewBuilder;
   final TextEditingController textEditingController;
   final FocusNode focusNode;
   final Widget? prefixIcon;
   final double? borderRadius;
+  final void Function(String) onSelected;
 
   const AppAutocomplete({
     super.key,
     required this.hintText,
     required this.optionsBuilder,
-    required this.onSelected,
     required this.optionsViewBuilder,
     required this.textEditingController,
     required this.focusNode,
+    required this.onSelected,
     this.prefixIcon,
     this.borderRadius,
   });

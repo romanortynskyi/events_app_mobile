@@ -19,7 +19,7 @@ class EventDetails extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            event.title,
+            event.title ?? '',
             style: TextStyle(
               color: LightThemeColors.text,
               fontWeight: FontWeight.bold,
@@ -28,12 +28,12 @@ class EventDetails extends StatelessWidget {
           const SizedBox(height: 10),
           EventDate(
             caption: 'Beginning',
-            date: event.startDate,
+            date: event.startDate ?? DateTime.now(),
             width: MediaQuery.of(context).size.width - 291,
           ),
           EventDate(
             caption: 'End',
-            date: event.endDate,
+            date: event.endDate ?? DateTime.now(),
             width: MediaQuery.of(context).size.width - 291,
           ),
         ],

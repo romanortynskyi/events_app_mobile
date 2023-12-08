@@ -162,7 +162,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     bottom: 20,
                     left: 20,
                   ),
-                  child: AppAutocomplete<String>(
+                  child: AppAutocomplete(
                     textEditingController: _textEditingController,
                     focusNode: _focusNode,
                     borderRadius: 35,
