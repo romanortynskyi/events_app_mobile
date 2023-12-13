@@ -1,4 +1,5 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/screens/add_event_screen.dart';
 import 'package:events_app_mobile/screens/home_screen.dart';
@@ -54,7 +55,7 @@ class _MainScreenState extends State<MainScreen> {
         items: icons,
         color: const Color(0xFFA491D3),
         backgroundColor: LightThemeColors.white,
-        height: 70,
+        height: GlobalConsts.bottomNavigationBarHeight,
         index: _index,
         onTap: (value) {
           setState(() {

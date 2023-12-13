@@ -282,6 +282,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _textEditingController.clear();
   }
 
+  void onAutocompleteSelected(BuildContext context, String text) {}
+
   void onEventPressed(BuildContext context, Event event) {
     Navigator.pushReplacement(
       context,
@@ -336,7 +338,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     optionsBuilder: optionsBuilder,
                     optionsViewBuilder: optionsViewBuilder,
                     onSelected: (String selection) {
-                      debugPrint('You just selected $selection');
+                      onAutocompleteSelected(context, selection);
                     },
                   ),
                 ),

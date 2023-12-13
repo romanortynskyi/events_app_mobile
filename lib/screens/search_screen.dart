@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
+import 'package:events_app_mobile/utils/widget_utils.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +22,9 @@ class SearchScreen extends StatefulWidget {
 class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  final GlobalKey topBarKey = GlobalKey();
+  double topBarHeight = 0;
 
   bool _isLoading = true;
 
@@ -142,51 +147,64 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      double newTopBarHeight = WidgetUtils.getSize(topBarKey).height;
+
+      setState(() {
+        topBarHeight = newTopBarHeight;
+      });
+    });
+
     return _isLoading
         ? const Center(
             child: CircularProgressIndicator(),
           )
-        : SingleChildScrollView(
-            child: Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  child: HomeHeader(
-                    imgSrc: 'https://source.unsplash.com/random/',
-                    geolocation: _geolocation,
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(
-                    right: 20,
-                    bottom: 20,
-                    left: 20,
-                  ),
-                  child: AppAutocomplete(
-                    textEditingController: _textEditingController,
-                    focusNode: _focusNode,
-                    borderRadius: 35,
-                    prefixIcon: const Icon(Icons.location_on_outlined),
-                    hintText: 'Search for locations...',
-                    optionsBuilder: optionsBuilder,
-                    optionsViewBuilder: optionsViewBuilder,
-                    onSelected: (String selection) {
-                      debugPrint('You just selected $selection');
-                    },
-                  ),
-                ),
-                SizedBox(
-                  height: MediaQuery.of(context).size.height - 298,
-                  child: GoogleMap(
-                    onMapCreated: _onMapCreated,
-                    initialCameraPosition: CameraPosition(
-                      target: _center,
-                      zoom: 11,
+        : Column(
+            children: [
+              Column(
+                key: topBarKey,
+                children: [
+                  Container(
+                    margin: const EdgeInsets.all(20),
+                    child: HomeHeader(
+                      imgSrc: 'https://source.unsplash.com/random/',
+                      geolocation: _geolocation,
                     ),
                   ),
+                  Container(
+                    margin: const EdgeInsets.only(
+                      right: 20,
+                      bottom: 20,
+                      left: 20,
+                    ),
+                    child: AppAutocomplete(
+                      textEditingController: _textEditingController,
+                      focusNode: _focusNode,
+                      borderRadius: 35,
+                      prefixIcon: const Icon(Icons.location_on_outlined),
+                      hintText: 'Search for locations...',
+                      optionsBuilder: optionsBuilder,
+                      optionsViewBuilder: optionsViewBuilder,
+                      onSelected: (String selection) {
+                        debugPrint('You just selected $selection');
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: MediaQuery.of(context).size.height -
+                    topBarHeight -
+                    GlobalConsts.bottomNavigationBarHeight * 2,
+                child: GoogleMap(
+                  onMapCreated: _onMapCreated,
+                  initialCameraPosition: CameraPosition(
+                    target: _center,
+                    zoom: 11,
+                  ),
                 ),
-              ],
-            ),
+              ),
+            ],
           );
   }
 }
