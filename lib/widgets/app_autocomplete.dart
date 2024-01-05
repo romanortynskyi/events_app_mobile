@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:debounce_throttle/debounce_throttle.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';

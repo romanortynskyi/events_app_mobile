@@ -1,5 +1,4 @@
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
