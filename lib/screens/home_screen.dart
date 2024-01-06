@@ -57,7 +57,33 @@ String autocompleteEvents =
     """
   query AUTOCOMPLETE_EVENTS(\$input: AutocompleteEventsInput!) {
     autocompleteEvents(input: \$input) {
-      title
+      items {
+        id
+        image {
+          src
+        }
+        createdAt
+        updatedAt
+        placeId
+        title
+        place {
+          url
+          name
+          country
+          locality
+          geometry {
+            location {
+              lat
+              lng
+            }
+          }
+        }
+        description
+        startDate
+        endDate
+        ticketPrice
+      }
+      totalPagesCount
     }
   }
 """;
@@ -240,7 +266,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     Map<String, dynamic> data = response.data ?? {};
 
-    Set eventTitles = (data['autocompleteEvents'])
+    Set eventTitles = (data['autocompleteEvents']['items'])
         .map((eventMap) => Event.fromMap(eventMap).title)
         .toSet();
 

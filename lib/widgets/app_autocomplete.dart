@@ -5,6 +5,10 @@ import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
 class AppAutocomplete extends StatelessWidget {
+  final Color? backgroundColor;
+  final Color? enabledBorderColor;
+  final Color? focusedBorderColor;
+  final Color? placeholderColor;
   final FutureOr<Iterable<String>> Function(TextEditingValue) optionsBuilder;
   final String hintText;
   final Widget Function(
@@ -16,6 +20,8 @@ class AppAutocomplete extends StatelessWidget {
   final FocusNode focusNode;
   final Widget? prefixIcon;
   final double? borderRadius;
+  final int? maxLines;
+  final TextInputAction? textInputAction;
   final void Function(String) onSelected;
 
   const AppAutocomplete({
@@ -28,6 +34,12 @@ class AppAutocomplete extends StatelessWidget {
     required this.onSelected,
     this.prefixIcon,
     this.borderRadius,
+    this.backgroundColor,
+    this.enabledBorderColor,
+    this.focusedBorderColor,
+    this.placeholderColor,
+    this.maxLines,
+    this.textInputAction,
   });
 
   @override
@@ -41,6 +53,11 @@ class AppAutocomplete extends StatelessWidget {
       fieldViewBuilder:
           (context, textEditingController, focusNode, onFieldSubmitted) {
         return AppTextField(
+          backgroundColor: backgroundColor,
+          textInputAction: textInputAction,
+          enabledBorderColor: enabledBorderColor,
+          focusedBorderColor: focusedBorderColor,
+          placeholderColor: placeholderColor,
           borderRadius: borderRadius,
           prefixIcon: prefixIcon,
           suffixIcon: textEditingController.value.text.isNotEmpty
@@ -54,6 +71,7 @@ class AppAutocomplete extends StatelessWidget {
           controller: textEditingController,
           hintText: hintText,
           obscureText: false,
+          maxLines: maxLines,
           onChanged: (value) {
             textEditingController.text = value;
           },

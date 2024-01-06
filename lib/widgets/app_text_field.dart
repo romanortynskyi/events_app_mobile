@@ -16,6 +16,11 @@ class AppTextField extends StatelessWidget {
   final TextEditingController? controller;
   final FocusNode? focusNode;
   final List<TextInputFormatter>? inputFormatters;
+  final Color? backgroundColor;
+  final Color? enabledBorderColor;
+  final Color? focusedBorderColor;
+  final Color? placeholderColor;
+  final TextInputAction? textInputAction;
   final void Function()? onTap;
 
   const AppTextField({
@@ -31,6 +36,11 @@ class AppTextField extends StatelessWidget {
     this.borderRadius,
     this.controller,
     this.focusNode,
+    this.backgroundColor,
+    this.enabledBorderColor,
+    this.focusedBorderColor,
+    this.placeholderColor,
+    this.textInputAction,
     this.onTap,
     this.inputFormatters,
   });
@@ -38,6 +48,7 @@ class AppTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      textInputAction: textInputAction,
       inputFormatters: inputFormatters,
       maxLines: maxLines,
       keyboardType: keyboardType,
@@ -49,16 +60,17 @@ class AppTextField extends StatelessWidget {
       obscureText: obscureText,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(color: LightThemeColors.hint),
+        hintStyle: TextStyle(color: placeholderColor ?? LightThemeColors.hint),
         enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.white),
+          borderSide: BorderSide(color: enabledBorderColor ?? Colors.white),
           borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 10)),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: LightThemeColors.darkGrey),
+          borderSide: BorderSide(
+              color: focusedBorderColor ?? LightThemeColors.darkGrey),
           borderRadius: BorderRadius.all(Radius.circular(borderRadius ?? 10)),
         ),
-        fillColor: LightThemeColors.grey,
+        fillColor: backgroundColor ?? LightThemeColors.grey,
         filled: true,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,

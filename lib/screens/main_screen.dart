@@ -53,7 +53,7 @@ class _MainScreenState extends State<MainScreen> {
       backgroundColor: LightThemeColors.white,
       bottomNavigationBar: CurvedNavigationBar(
         items: icons,
-        color: const Color(0xFFA491D3),
+        color: LightThemeColors.primary,
         backgroundColor: LightThemeColors.white,
         height: GlobalConsts.bottomNavigationBarHeight,
         index: _index,
