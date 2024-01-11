@@ -20,7 +20,7 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 
 String getEvents =
     """
-  query GET_EVENTS(\$skip: Float!, \$limit: Float!) {
+  query GET_EVENTS(\$skip: Int, \$limit: Int) {
     getEvents(skip: \$skip, limit: \$limit) {
       items {
         id

@@ -3,14 +3,53 @@ import 'dart:async';
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
+import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/utils/widget_utils.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:flutter/services.dart';
+import 'dart:ui' as ui;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:location/location.dart';
+
+String getEvents = '''
+  query GET_EVENTS(\$bounds: GetEventsBounds) {
+    getEvents(bounds: \$bounds) {
+      items {
+        id
+        image {
+          src
+        }
+        createdAt
+        updatedAt
+        placeId
+        geolocation {
+          lat
+          lng
+        }
+        title
+        place {
+          url
+          name
+          geometry {
+            location {
+              lat
+              lng
+            }
+          }
+        }
+        description
+        startDate
+        endDate
+        ticketPrice
+      }
+      totalPagesCount
+    }
+  }
+''';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -27,6 +66,20 @@ class _SearchScreenState extends State<SearchScreen> {
   double topBarHeight = 0;
 
   bool _isLoading = true;
+
+  Set<Marker> _markers = {};
+
+  Timer? _debounceTimer;
+
+  Future<Uint8List> getBytesFromAsset(String path, int width) async {
+    ByteData data = await rootBundle.load(path);
+    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
+        targetWidth: width);
+    ui.FrameInfo fi = await codec.getNextFrame();
+    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
+        .buffer
+        .asUint8List();
+  }
 
   Iterable<String> optionsBuilder(TextEditingValue textEditingValue) {
     if (textEditingValue.text == '') {
@@ -81,6 +134,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _onMapCreated(GoogleMapController controller) {
     _completer.complete(controller);
+    _getEvents();
   }
 
   @override
@@ -93,31 +147,42 @@ class _SearchScreenState extends State<SearchScreen> {
   Geolocation? _geolocation;
 
   void _getCurrentLocation() async {
-    LocationPermission permission;
-    Position? position;
+    Location location = Location();
 
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print('Denied');
-      } else {
-        position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+    LocationData locationData;
+
+    serviceEnabled = await location.serviceEnabled();
+
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+
+      if (!serviceEnabled) {
+        return;
       }
-    } else {
-      position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
     }
 
-    if (position != null && mounted) {
+    permissionGranted = await location.hasPermission();
+
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    locationData = await location.getLocation();
+
+    if (mounted) {
       // ignore: use_build_context_synchronously
       GraphQLClient client = GraphQLProvider.of(context).value;
       var response = await client.query(QueryOptions(
         document: gql(getGeolocationByCoords),
         variables: {
-          'latitude': position.latitude,
-          'longitude': position.longitude,
+          'latitude': locationData.latitude ?? 0,
+          'longitude': locationData.longitude ?? 0,
         },
       ));
 
@@ -125,8 +190,8 @@ class _SearchScreenState extends State<SearchScreen> {
       Geolocation geolocation =
           Geolocation.fromMap(data['getGeolocationByCoords']);
 
-      double latitude = position.latitude;
-      double longitude = position.longitude;
+      double latitude = locationData.latitude ?? 0;
+      double longitude = locationData.longitude ?? 0;
 
       if (mounted) {
         setState(() {
@@ -142,7 +207,84 @@ class _SearchScreenState extends State<SearchScreen> {
           zoom: 11,
         ),
       ));
+
+      Uint8List markerIcon =
+          await getBytesFromAsset('lib/images/user_marker.png', 50);
+
+      Marker userMarker = Marker(
+        markerId: const MarkerId(''),
+        position: LatLng(latitude, longitude),
+        icon: BitmapDescriptor.fromBytes(markerIcon),
+      );
+
+      setState(() {
+        _markers.add(userMarker);
+      });
     }
+  }
+
+  void _getEvents() {
+    if (_debounceTimer?.isActive ?? false) {
+      _debounceTimer?.cancel();
+    }
+
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () async {
+      GoogleMapController controller = await _completer.future;
+      LatLngBounds currentPosition = await controller.getVisibleRegion();
+
+      LatLng southwest = currentPosition.southwest;
+      LatLng northeast = currentPosition.northeast;
+
+      final QueryOptions options = QueryOptions(
+        document: gql(getEvents),
+        variables: {
+          'bounds': {
+            'xMin': southwest.longitude,
+            'yMin': southwest.latitude,
+            'xMax': northeast.longitude,
+            'yMax': northeast.latitude,
+          },
+        },
+      );
+
+      GraphQLClient client = GraphQLProvider.of(context).value;
+
+      final QueryResult result = await client.query(options);
+
+      if (result.hasException) {
+        print('Error: ${result.exception.toString()}');
+      } else {
+        List<Event> events = result.data?['getEvents']['items']
+            .map((eventMap) => Event.fromMap(eventMap))
+            .toList()
+            .cast<Event>();
+
+        events.forEach((event) {
+          double latitude = event.geolocation?.latLng?.latitude ?? 0;
+          double longitude = event.geolocation?.latLng?.longitude ?? 0;
+
+          LatLng position = LatLng(latitude, longitude);
+          Marker marker = Marker(
+            markerId: MarkerId(event.id.toString()),
+            position: position,
+          );
+
+          setState(() {
+            _markers.add(marker);
+          });
+        });
+      }
+    });
+  }
+
+  void _onCameraMove(CameraPosition cameraPosition) async {
+    _getEvents();
+  }
+
+  @override
+  void dispose() {
+    _debounceTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -198,10 +340,12 @@ class _SearchScreenState extends State<SearchScreen> {
                     GlobalConsts.bottomNavigationBarHeight * 2,
                 child: GoogleMap(
                   onMapCreated: _onMapCreated,
+                  onCameraMove: _onCameraMove,
                   initialCameraPosition: CameraPosition(
                     target: _center,
                     zoom: 11,
                   ),
+                  markers: _markers,
                 ),
               ),
             ],

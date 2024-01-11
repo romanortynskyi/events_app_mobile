@@ -58,6 +58,8 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   debounce_throttle: ^2.0.0
+  location: ^5.0.3
+  async: ^2.11.0
 
 dev_dependencies:
   flutter_test:

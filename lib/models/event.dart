@@ -12,6 +12,7 @@ class Event extends Model {
   late Asset? image;
   late int? distance;
   late String? placeId;
+  late Geolocation? geolocation;
 
   Event({
     int? id,
@@ -25,6 +26,7 @@ class Event extends Model {
     this.image,
     this.distance,
     this.placeId,
+    this.geolocation,
   }) : super(
           id: id,
           createdAt: createdAt,
@@ -47,6 +49,11 @@ class Event extends Model {
         map['startDate'] == null ? null : DateTime.parse(map['startDate']);
     endDate = map['endDate'] == null ? null : DateTime.parse(map['endDate']);
     distance = map['distance'];
+    geolocation = Geolocation(
+        latLng: LatLng(
+      map['geolocation']?['lat'] ?? 0,
+      map['geolocation']?['lng'] ?? 0,
+    ));
     location = Geolocation(
       country: map['place']?['country'],
       locality: map['place']?['locality'],
