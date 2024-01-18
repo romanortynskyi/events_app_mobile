@@ -2,48 +2,55 @@
 
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:location/location.dart';
 
 class GeolocationService {
   Future<Geolocation?> getCurrentGeolocation({
     required String graphqlDocument,
     required BuildContext context,
   }) async {
-    LocationPermission permission;
-    Position? position;
+    Location location = Location();
 
-    permission = await Geolocator.checkPermission();
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+    LocationData locationData;
 
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
+    serviceEnabled = await location.serviceEnabled();
 
-      if (permission == LocationPermission.denied) {
-        print('Denied');
-      } else {
-        position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+
+      if (!serviceEnabled) {
+        return null;
       }
-    } else {
-      position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
     }
+
+    permissionGranted = await location.hasPermission();
+
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+
+      if (permissionGranted != PermissionStatus.granted) {
+        return null;
+      }
+    }
+
+    locationData = await location.getLocation();
 
     GraphQLClient client = GraphQLProvider.of(context).value;
     var response = await client.query(QueryOptions(
       document: gql(graphqlDocument),
       variables: {
-        'latitude': position?.latitude,
-        'longitude': position?.longitude,
+        'latitude': locationData.latitude ?? 0,
+        'longitude': locationData.longitude ?? 0,
       },
     ));
 
-    if (response.data != null) {
-      Map<String, dynamic> data = response.data ?? {};
+    Map<String, dynamic> data = response.data ?? {};
+    Geolocation geolocation =
+        Geolocation.fromMap(data['getGeolocationByCoords']);
 
-      return Geolocation.fromMap(data['getGeolocationByCoords']);
-    }
-
-    return null;
+    return geolocation;
   }
 }

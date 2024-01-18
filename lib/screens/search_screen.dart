@@ -1,19 +1,35 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
+import 'package:events_app_mobile/screens/event_screen.dart';
+import 'package:events_app_mobile/services/geolocation_service.dart';
 import 'package:events_app_mobile/utils/widget_utils.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_compass/flutter_compass.dart';
 import 'dart:ui' as ui;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:location/location.dart';
+
+String getGeolocationByCoords = """
+  query GET_GEOLOCATION_BY_COORDS(\$latitude: Float!, \$longitude: Float!) {
+    getGeolocationByCoords(latitude: \$latitude, longitude: \$longitude) {
+      country
+      locality
+      placeId
+      latitude
+      longitude
+    }
+  }
+""";
 
 String getEvents = '''
   query GET_EVENTS(\$bounds: GetEventsBounds) {
@@ -67,7 +83,12 @@ class _SearchScreenState extends State<SearchScreen> {
 
   bool _isLoading = true;
 
-  Set<Marker> _markers = {};
+  final Map<MarkerId, Marker> _markers = {};
+
+  double _heading = 0;
+  Marker _userMarker = const Marker(
+    markerId: MarkerId(''),
+  );
 
   Timer? _debounceTimer;
 
@@ -142,85 +163,69 @@ class _SearchScreenState extends State<SearchScreen> {
     super.initState();
 
     _getCurrentLocation();
+
+    FlutterCompass.events!.listen((CompassEvent event) {
+      setState(() {
+        _heading = event.heading ?? 0;
+
+        Marker updatedMarker = _userMarker.copyWith(
+          rotationParam: _heading,
+        );
+
+        _markers[_userMarker.markerId] = updatedMarker;
+      });
+    });
   }
 
   Geolocation? _geolocation;
 
   void _getCurrentLocation() async {
-    Location location = Location();
+    Geolocation? geolocation = await GeolocationService().getCurrentGeolocation(
+      graphqlDocument: getGeolocationByCoords,
+      context: context,
+    );
 
-    bool serviceEnabled;
-    PermissionStatus permissionGranted;
-    LocationData locationData;
-
-    serviceEnabled = await location.serviceEnabled();
-
-    if (!serviceEnabled) {
-      serviceEnabled = await location.requestService();
-
-      if (!serviceEnabled) {
-        return;
-      }
-    }
-
-    permissionGranted = await location.hasPermission();
-
-    if (permissionGranted == PermissionStatus.denied) {
-      permissionGranted = await location.requestPermission();
-
-      if (permissionGranted != PermissionStatus.granted) {
-        return;
-      }
-    }
-
-    locationData = await location.getLocation();
+    double latitude = geolocation?.latLng?.latitude ?? 0;
+    double longitude = geolocation?.latLng?.longitude ?? 0;
 
     if (mounted) {
-      // ignore: use_build_context_synchronously
-      GraphQLClient client = GraphQLProvider.of(context).value;
-      var response = await client.query(QueryOptions(
-        document: gql(getGeolocationByCoords),
-        variables: {
-          'latitude': locationData.latitude ?? 0,
-          'longitude': locationData.longitude ?? 0,
-        },
-      ));
-
-      Map<String, dynamic> data = response.data ?? {};
-      Geolocation geolocation =
-          Geolocation.fromMap(data['getGeolocationByCoords']);
-
-      double latitude = locationData.latitude ?? 0;
-      double longitude = locationData.longitude ?? 0;
-
-      if (mounted) {
-        setState(() {
-          _geolocation = geolocation;
-          _isLoading = false;
-        });
-      }
-      final GoogleMapController mapController = await _completer.future;
-
-      await mapController.moveCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(latitude, longitude),
-          zoom: 11,
-        ),
-      ));
-
-      Uint8List markerIcon =
-          await getBytesFromAsset('lib/images/user_marker.png', 50);
-
-      Marker userMarker = Marker(
-        markerId: const MarkerId(''),
-        position: LatLng(latitude, longitude),
-        icon: BitmapDescriptor.fromBytes(markerIcon),
-      );
-
       setState(() {
-        _markers.add(userMarker);
+        _geolocation = geolocation;
+        _isLoading = false;
       });
     }
+
+    final GoogleMapController mapController = await _completer.future;
+
+    await mapController.moveCamera(CameraUpdate.newCameraPosition(
+      CameraPosition(
+        target: LatLng(latitude, longitude),
+        zoom: 11,
+      ),
+    ));
+
+    Uint8List markerIcon =
+        await getBytesFromAsset('lib/images/user_marker.png', 50);
+
+    _userMarker = Marker(
+      markerId: const MarkerId(''),
+      position: LatLng(latitude, longitude),
+      icon: BitmapDescriptor.fromBytes(markerIcon),
+      rotation: _heading,
+      anchor: const Offset(0.5, 0.5),
+      flat: true,
+    );
+
+    setState(() {
+      _markers[_userMarker.markerId] = _userMarker;
+    });
+  }
+
+  _showEventDetails(int id) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EventScreen(id: id)),
+    );
   }
 
   void _getEvents() {
@@ -263,14 +268,16 @@ class _SearchScreenState extends State<SearchScreen> {
           double latitude = event.geolocation?.latLng?.latitude ?? 0;
           double longitude = event.geolocation?.latLng?.longitude ?? 0;
 
+          MarkerId markerId = MarkerId(event.id.toString());
           LatLng position = LatLng(latitude, longitude);
           Marker marker = Marker(
-            markerId: MarkerId(event.id.toString()),
+            markerId: markerId,
             position: position,
+            onTap: () => {_showEventDetails(event.id ?? -1)},
           );
 
           setState(() {
-            _markers.add(marker);
+            _markers[markerId] = marker;
           });
         });
       }
@@ -345,7 +352,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     target: _center,
                     zoom: 11,
                   ),
-                  markers: _markers,
+                  markers: _markers.values.toSet(),
                 ),
               ),
             ],

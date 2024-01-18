@@ -22,6 +22,8 @@ class _MapScreenState extends State<MapScreen> {
   final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
+  Marker? userMarker;
+
   Iterable<String> optionsBuilder(TextEditingValue textEditingValue) {
     if (textEditingValue.text == '') {
       return const Iterable<String>.empty();
@@ -88,8 +90,6 @@ class _MapScreenState extends State<MapScreen> {
     _getCurrentLocation();
   }
 
-  Geolocation? _geolocation;
-
   void _getCurrentLocation() async {
     LocationPermission permission;
     Position? position;
@@ -109,7 +109,6 @@ class _MapScreenState extends State<MapScreen> {
     }
 
     if (position != null) {
-      // ignore: use_build_context_synchronously
       final GoogleMapController mapController = await _completer.future;
 
       await mapController.moveCamera(CameraUpdate.newCameraPosition(

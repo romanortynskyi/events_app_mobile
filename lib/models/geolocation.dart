@@ -11,14 +11,10 @@ class Geolocation {
       {this.latLng, this.country, this.locality, this.url, this.placeId});
 
   Geolocation.fromMap(Map<String, dynamic> map) {
-    double? latitude = map['latitude'];
-    double? longitude = map['longitude'];
-
-    if (latitude != null && longitude != null) {
-      final LatLng ll = LatLng(latitude, longitude);
-
-      latLng = ll;
-    }
+    double latitude = map['latitude'] ?? 0;
+    double longitude = map['longitude'] ?? 0;
+    final LatLng ll = LatLng(latitude, longitude);
+    latLng = ll;
 
     country = map['country'];
     locality = map['locality'];
