@@ -7,7 +7,6 @@ import 'package:events_app_mobile/bloc/auth/google_sign_in/google_sign_in_bloc.d
 import 'package:events_app_mobile/bloc/auth/facebook_sign_in/facebook_sign_in_bloc.dart'
     as facebook_sign_in_bloc;
 import 'package:events_app_mobile/consts/enums/auth_provider.dart';
-import 'package:events_app_mobile/consts/enums/error_message.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';

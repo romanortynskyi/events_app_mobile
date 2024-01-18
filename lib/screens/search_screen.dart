@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
-import 'dart:math' as math;
 
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';

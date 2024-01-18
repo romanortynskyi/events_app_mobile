@@ -4,7 +4,6 @@ import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/month.dart';
 import 'package:events_app_mobile/screens/event_screen.dart';
-import 'package:events_app_mobile/screens/home_screen.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/event_card.dart';
 import 'package:events_app_mobile/widgets/events_counter.dart';
