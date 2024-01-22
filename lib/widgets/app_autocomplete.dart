@@ -4,17 +4,17 @@ import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 
 // ignore: must_be_immutable
-class AppAutocomplete extends StatelessWidget {
+class AppAutocomplete<T extends Object> extends StatelessWidget {
   final Color? backgroundColor;
   final Color? enabledBorderColor;
   final Color? focusedBorderColor;
   final Color? placeholderColor;
-  final FutureOr<Iterable<String>> Function(TextEditingValue) optionsBuilder;
+  final FutureOr<Iterable<T>> Function(TextEditingValue) optionsBuilder;
   final String hintText;
   final Widget Function(
     BuildContext context,
-    void Function(String) onAutoCompleteSelect,
-    Iterable<String> options,
+    void Function(T) onAutoCompleteSelect,
+    Iterable<T> options,
   ) optionsViewBuilder;
   final TextEditingController textEditingController;
   final FocusNode focusNode;
@@ -22,7 +22,7 @@ class AppAutocomplete extends StatelessWidget {
   final double? borderRadius;
   final int? maxLines;
   final TextInputAction? textInputAction;
-  final void Function(String) onSelected;
+  final void Function(T) onSelected;
 
   const AppAutocomplete({
     super.key,
@@ -44,7 +44,7 @@ class AppAutocomplete extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RawAutocomplete(
+    return RawAutocomplete<T>(
       textEditingController: textEditingController,
       focusNode: focusNode,
       optionsBuilder: optionsBuilder,

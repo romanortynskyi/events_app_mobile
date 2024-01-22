@@ -1,20 +1,23 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
+import 'package:events_app_mobile/models/autocomplete_places_response.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/screens/event_screen.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
+import 'package:events_app_mobile/services/place_service.dart';
 import 'package:events_app_mobile/utils/widget_utils.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
-import 'dart:ui' as ui;
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
@@ -96,25 +99,36 @@ class _SearchScreenState extends State<SearchScreen> {
     ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
         targetWidth: width);
     ui.FrameInfo fi = await codec.getNextFrame();
+
     return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
         .buffer
         .asUint8List();
   }
 
-  Iterable<String> optionsBuilder(TextEditingValue textEditingValue) {
-    if (textEditingValue.text == '') {
-      return const Iterable<String>.empty();
+  Future<Iterable<AutocompletePlacesPrediction>> optionsBuilder(
+      TextEditingValue textEditingValue) async {
+    String text = textEditingValue.text;
+
+    if (text == '') {
+      return const Iterable<AutocompletePlacesPrediction>.empty();
     }
 
-    return ['hello', 'pryvito'].where((String option) {
-      return option.contains(textEditingValue.text.toLowerCase());
-    });
+    AutocompletePlacesResponse response =
+        await PlaceService().autocompletePlaces(
+      context: context,
+      text: text,
+      skip: 0,
+      limit: 10,
+    );
+
+    return response.items ??
+        const Iterable<AutocompletePlacesPrediction>.empty();
   }
 
   Widget optionsViewBuilder(
     BuildContext context,
     onAutoCompleteSelect,
-    Iterable<String> options,
+    Iterable<AutocompletePlacesPrediction> options,
   ) {
     return Container(
       margin: const EdgeInsets.only(left: 20),
@@ -134,10 +148,20 @@ class _SearchScreenState extends State<SearchScreen> {
                   },
                   itemBuilder: (BuildContext context, int index) {
                     if (options.isNotEmpty) {
+                      AutocompletePlacesPrediction prediction =
+                          options.elementAt(index);
+
                       return GestureDetector(
-                        onTap: () =>
-                            onAutoCompleteSelect(options.elementAt(index)),
-                        child: Text(options.elementAt(index)),
+                        onTap: () => onAutoCompleteSelect(prediction),
+                        child: Column(
+                          children: [
+                            Text(prediction.structuredFormatting?.mainText ??
+                                ''),
+                            Text(prediction
+                                    .structuredFormatting?.secondaryText ??
+                                '')
+                          ],
+                        ),
                       );
                     }
 
@@ -325,7 +349,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       bottom: 20,
                       left: 20,
                     ),
-                    child: AppAutocomplete(
+                    child: AppAutocomplete<AutocompletePlacesPrediction>(
                       textEditingController: _textEditingController,
                       focusNode: _focusNode,
                       borderRadius: 35,
@@ -333,8 +357,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       hintText: 'Search for locations...',
                       optionsBuilder: optionsBuilder,
                       optionsViewBuilder: optionsViewBuilder,
-                      onSelected: (String selection) {
-                        debugPrint('You just selected $selection');
+                      onSelected: (AutocompletePlacesPrediction selection) {
+                        debugPrint('You just selected ${selection.placeId}');
                       },
                     ),
                   ),
