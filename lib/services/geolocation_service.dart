@@ -37,20 +37,23 @@ class GeolocationService {
     }
 
     locationData = await location.getLocation();
+    if (context.mounted) {
+      GraphQLClient client = GraphQLProvider.of(context).value;
+      var response = await client.query(QueryOptions(
+        document: gql(graphqlDocument),
+        variables: {
+          'latitude': locationData.latitude ?? 0,
+          'longitude': locationData.longitude ?? 0,
+        },
+      ));
 
-    GraphQLClient client = GraphQLProvider.of(context).value;
-    var response = await client.query(QueryOptions(
-      document: gql(graphqlDocument),
-      variables: {
-        'latitude': locationData.latitude ?? 0,
-        'longitude': locationData.longitude ?? 0,
-      },
-    ));
+      Map<String, dynamic> data = response.data ?? {};
+      Geolocation geolocation =
+          Geolocation.fromMap(data['getGeolocationByCoords']);
 
-    Map<String, dynamic> data = response.data ?? {};
-    Geolocation geolocation =
-        Geolocation.fromMap(data['getGeolocationByCoords']);
+      return geolocation;
+    }
 
-    return geolocation;
+    return null;
   }
 }

@@ -1,7 +1,6 @@
 import 'package:events_app_mobile/models/asset.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/model.dart';
-import 'package:latlng/latlng.dart';
 
 class Event extends Model {
   late String? title;

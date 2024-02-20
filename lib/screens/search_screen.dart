@@ -79,6 +79,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   final GlobalKey topBarKey = GlobalKey();
   double topBarHeight = 0;
+  bool topBarHeightReceived = false;
 
   bool _isLoading = true;
 
@@ -185,60 +186,67 @@ class _SearchScreenState extends State<SearchScreen> {
     _getCurrentLocation();
 
     FlutterCompass.events!.listen((CompassEvent event) {
-      setState(() {
-        _heading = event.heading ?? 0;
+      if (mounted) {
+        setState(() {
+          _heading = event.heading ?? 0;
 
-        Marker updatedMarker = _userMarker.copyWith(
-          rotationParam: _heading,
-        );
+          Marker updatedMarker = _userMarker.copyWith(
+            rotationParam: _heading,
+          );
 
-        _markers[_userMarker.markerId] = updatedMarker;
-      });
+          _markers[_userMarker.markerId] = updatedMarker;
+        });
+      }
     });
   }
 
   Geolocation? _geolocation;
 
   void _getCurrentLocation() async {
-    Geolocation? geolocation = await GeolocationService().getCurrentGeolocation(
-      graphqlDocument: getGeolocationByCoords,
-      context: context,
-    );
-
-    double latitude = geolocation?.latitude ?? 0;
-    double longitude = geolocation?.longitude ?? 0;
-
     if (mounted) {
-      setState(() {
-        _geolocation = geolocation;
-        _isLoading = false;
-      });
+      Geolocation? geolocation =
+          await GeolocationService().getCurrentGeolocation(
+        graphqlDocument: getGeolocationByCoords,
+        context: context,
+      );
+
+      double latitude = geolocation?.latitude ?? 0;
+      double longitude = geolocation?.longitude ?? 0;
+
+      if (mounted) {
+        setState(() {
+          _geolocation = geolocation;
+          _isLoading = false;
+        });
+      }
+
+      final GoogleMapController mapController = await _completer.future;
+
+      await mapController.moveCamera(CameraUpdate.newCameraPosition(
+        CameraPosition(
+          target: LatLng(latitude, longitude),
+          zoom: 11,
+        ),
+      ));
+
+      Uint8List markerIcon =
+          await getBytesFromAsset('lib/images/user_marker.png', 50);
+
+      _userMarker = Marker(
+        markerId: const MarkerId(''),
+        position: LatLng(latitude, longitude),
+        icon: BitmapDescriptor.fromBytes(markerIcon),
+        rotation: _heading,
+        anchor: const Offset(0.5, 0.5),
+        flat: true,
+      );
+
+      if (mounted) {
+        setState(() {
+          _markers[_userMarker.markerId] = _userMarker;
+        });
+      }
     }
-
-    final GoogleMapController mapController = await _completer.future;
-
-    await mapController.moveCamera(CameraUpdate.newCameraPosition(
-      CameraPosition(
-        target: LatLng(latitude, longitude),
-        zoom: 11,
-      ),
-    ));
-
-    Uint8List markerIcon =
-        await getBytesFromAsset('lib/images/user_marker.png', 50);
-
-    _userMarker = Marker(
-      markerId: const MarkerId(''),
-      position: LatLng(latitude, longitude),
-      icon: BitmapDescriptor.fromBytes(markerIcon),
-      rotation: _heading,
-      anchor: const Offset(0.5, 0.5),
-      flat: true,
-    );
-
-    setState(() {
-      _markers[_userMarker.markerId] = _userMarker;
-    });
   }
 
   _showEventDetails(int id) {
@@ -272,34 +280,38 @@ class _SearchScreenState extends State<SearchScreen> {
         },
       );
 
-      GraphQLClient client = GraphQLProvider.of(context).value;
+      if (mounted) {
+        GraphQLClient client = GraphQLProvider.of(context).value;
 
-      final QueryResult result = await client.query(options);
+        final QueryResult result = await client.query(options);
 
-      if (result.hasException) {
-        print('Error: ${result.exception.toString()}');
-      } else {
-        List<Event> events = result.data?['getEvents']['items']
-            .map((eventMap) => Event.fromMap(eventMap))
-            .toList()
-            .cast<Event>();
+        if (result.hasException) {
+          print('Error: ${result.exception.toString()}');
+        } else {
+          List<Event> events = result.data?['getEvents']['items']
+              .map((eventMap) => Event.fromMap(eventMap))
+              .toList()
+              .cast<Event>();
 
-        events.forEach((event) {
-          double latitude = event.location?.latitude ?? 0;
-          double longitude = event.location?.longitude ?? 0;
+          events.forEach((event) {
+            double latitude = event.location?.latitude ?? 0;
+            double longitude = event.location?.longitude ?? 0;
 
-          MarkerId markerId = MarkerId(event.id.toString());
-          LatLng position = LatLng(latitude, longitude);
-          Marker marker = Marker(
-            markerId: markerId,
-            position: position,
-            onTap: () => {_showEventDetails(event.id ?? -1)},
-          );
+            MarkerId markerId = MarkerId(event.id.toString());
+            LatLng position = LatLng(latitude, longitude);
+            Marker marker = Marker(
+              markerId: markerId,
+              position: position,
+              onTap: () => {_showEventDetails(event.id ?? -1)},
+            );
 
-          setState(() {
-            _markers[markerId] = marker;
+            if (mounted) {
+              setState(() {
+                _markers[markerId] = marker;
+              });
+            }
           });
-        });
+        }
       }
     });
   }
@@ -319,9 +331,12 @@ class _SearchScreenState extends State<SearchScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       double newTopBarHeight = WidgetUtils.getSize(topBarKey).height;
 
-      setState(() {
-        topBarHeight = newTopBarHeight;
-      });
+      if (!topBarHeightReceived && newTopBarHeight > 0) {
+        setState(() {
+          topBarHeight = newTopBarHeight;
+          topBarHeightReceived = true;
+        });
+      }
     });
 
     return _isLoading

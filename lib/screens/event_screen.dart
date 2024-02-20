@@ -37,16 +37,11 @@ String getEventById = """
         src
       }
       place {
-        name
-        url
-        geometry{
-          location {
-            lat
-            lng
-          }
+        googleMapsUri
+        location {
+          latitude
+          longitude
         }
-        country
-        locality
       }
     }
   }

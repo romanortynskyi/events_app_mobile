@@ -18,8 +18,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-String getEvents =
-    """
+String getEvents = """
   query GET_EVENTS(\$skip: Int, \$limit: Int) {
     getEvents(skip: \$skip, limit: \$limit) {
       items {
@@ -32,15 +31,10 @@ String getEvents =
         placeId
         title
         place {
-          url
-          name
-          country
-          locality
-          geometry {
-            location {
-              lat
-              lng
-            }
+          googleMapsUri
+          location {
+            latitude
+            longitude
           }
         }
         description
@@ -53,8 +47,7 @@ String getEvents =
   }
 """;
 
-String autocompleteEvents =
-    """
+String autocompleteEvents = """
   query AUTOCOMPLETE_EVENTS(\$input: AutocompleteEventsInput!) {
     autocompleteEvents(input: \$input) {
       items {
