@@ -99,16 +99,16 @@ class _EventScreenState extends State<EventScreen> {
         _isLoadingEvent = false;
         _markers.add(Marker(
             markerId: MarkerId(event?.placeId ?? ''),
-            position: LatLng(event?.location?.latLng?.latitude ?? 0,
-                event?.location?.latLng?.longitude ?? 0)));
+            position: LatLng(event?.location?.latitude ?? 0,
+                event?.location?.longitude ?? 0)));
       });
 
       final GoogleMapController mapController = await _mapCompleter.future;
 
       CameraUpdate cameraUpdate = CameraUpdate.newCameraPosition(
         CameraPosition(
-          target: LatLng(event?.location?.latLng?.latitude ?? 0,
-              event?.location?.latLng?.longitude ?? 0),
+          target: LatLng(
+              event?.location?.latitude ?? 0, event?.location?.longitude ?? 0),
           zoom: 11,
         ),
       );

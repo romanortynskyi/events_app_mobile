@@ -45,18 +45,15 @@ String getEvents = '''
         updatedAt
         placeId
         geolocation {
-          lat
-          lng
+          latitude
+          longitude
         }
         title
         place {
-          url
-          name
-          geometry {
-            location {
-              lat
-              lng
-            }
+          googleMapsUri
+          location {
+            latitude
+            longitude
           }
         }
         description
@@ -152,7 +149,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           options.elementAt(index);
 
                       return GestureDetector(
-                        onTap: () => onAutoCompleteSelect(prediction),
+                        onTap: () => {onAutoCompleteSelect(prediction)},
                         child: Column(
                           children: [
                             Text(prediction.structuredFormatting?.mainText ??
@@ -208,8 +205,8 @@ class _SearchScreenState extends State<SearchScreen> {
       context: context,
     );
 
-    double latitude = geolocation?.latLng?.latitude ?? 0;
-    double longitude = geolocation?.latLng?.longitude ?? 0;
+    double latitude = geolocation?.latitude ?? 0;
+    double longitude = geolocation?.longitude ?? 0;
 
     if (mounted) {
       setState(() {
@@ -288,8 +285,8 @@ class _SearchScreenState extends State<SearchScreen> {
             .cast<Event>();
 
         events.forEach((event) {
-          double latitude = event.geolocation?.latLng?.latitude ?? 0;
-          double longitude = event.geolocation?.latLng?.longitude ?? 0;
+          double latitude = event.location?.latitude ?? 0;
+          double longitude = event.location?.longitude ?? 0;
 
           MarkerId markerId = MarkerId(event.id.toString());
           LatLng position = LatLng(latitude, longitude);
@@ -358,7 +355,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       optionsBuilder: optionsBuilder,
                       optionsViewBuilder: optionsViewBuilder,
                       onSelected: (AutocompletePlacesPrediction selection) {
-                        debugPrint('You just selected ${selection.placeId}');
+                        print('You just selected ${selection.placeId}');
                       },
                     ),
                   ),

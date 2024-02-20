@@ -58,8 +58,8 @@ class _AddEventScreenState extends State<AddEventScreen> {
       var response = await client.query(QueryOptions(
         document: gql(getGeolocationByCoords),
         variables: {
-          'latitude': location.latLng?.latitude ?? 0,
-          'longitude': location.latLng?.longitude ?? 0,
+          'latitude': location.latitude ?? 0,
+          'longitude': location.longitude ?? 0,
         },
       ));
 

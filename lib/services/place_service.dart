@@ -58,7 +58,6 @@ class PlaceService {
     } else {
       AutocompletePlacesResponse autocompletePlacesResponse =
           AutocompletePlacesResponse.fromMap(data['autocompletePlaces']);
-      print('lol');
 
       return autocompletePlacesResponse;
     }

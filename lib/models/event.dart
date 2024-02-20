@@ -50,20 +50,18 @@ class Event extends Model {
     endDate = map['endDate'] == null ? null : DateTime.parse(map['endDate']);
     distance = map['distance'];
     geolocation = Geolocation(
-        latLng: LatLng(
-      map['geolocation']?['lat'] ?? 0,
-      map['geolocation']?['lng'] ?? 0,
-    ));
+        latitude: map['geolocation']?['latitude'] ?? 0,
+        longitude: map['geolocation']?['longitude'] ?? 0);
     location = Geolocation(
       country: map['place']?['country'],
       locality: map['place']?['locality'],
       url: map['place']?['url'],
-      latLng: map['place']?['geometry']?['location'] == null
+      latitude: map['place']?['location'] == null
           ? null
-          : LatLng(
-              map['place']?['geometry']?['location']?['lat'],
-              map['place']?['geometry']?['location']?['lng'],
-            ),
+          : map['place']?['location']?['latitude'],
+      longitude: map['place']?['location'] == null
+          ? null
+          : map['place']?['location']?['longitude'],
     );
     image = Asset(
       src: map['image']?['src'] ?? '',
