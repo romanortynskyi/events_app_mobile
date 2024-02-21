@@ -290,8 +290,8 @@ class _SearchScreenState extends State<SearchScreen> {
               .cast<Event>();
 
           events.forEach((event) {
-            double latitude = event.geolocation?.latitude ?? 0;
-            double longitude = event.geolocation?.longitude ?? 0;
+            double latitude = event.place?.location?.latitude ?? 0;
+            double longitude = event.place?.location?.longitude ?? 0;
 
             MarkerId markerId = MarkerId(event.id.toString());
             LatLng position = LatLng(latitude, longitude);
