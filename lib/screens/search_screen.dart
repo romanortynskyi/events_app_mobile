@@ -44,10 +44,6 @@ String getEvents = '''
         createdAt
         updatedAt
         placeId
-        geolocation {
-          latitude
-          longitude
-        }
         title
         place {
           googleMapsUri
@@ -294,8 +290,8 @@ class _SearchScreenState extends State<SearchScreen> {
               .cast<Event>();
 
           events.forEach((event) {
-            double latitude = event.location?.latitude ?? 0;
-            double longitude = event.location?.longitude ?? 0;
+            double latitude = event.geolocation?.latitude ?? 0;
+            double longitude = event.geolocation?.longitude ?? 0;
 
             MarkerId markerId = MarkerId(event.id.toString());
             LatLng position = LatLng(latitude, longitude);

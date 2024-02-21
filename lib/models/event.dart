@@ -1,17 +1,18 @@
 import 'package:events_app_mobile/models/asset.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/model.dart';
+import 'package:events_app_mobile/models/place.dart';
 
 class Event extends Model {
   late String? title;
   late String? description;
   late DateTime? startDate;
   late DateTime? endDate;
-  late Geolocation? location;
   late Asset? image;
   late int? distance;
   late String? placeId;
   late Geolocation? geolocation;
+  late Place? place;
 
   Event({
     int? id,
@@ -21,11 +22,11 @@ class Event extends Model {
     this.description,
     this.startDate,
     this.endDate,
-    this.location,
     this.image,
     this.distance,
     this.placeId,
     this.geolocation,
+    this.place,
   }) : super(
           id: id,
           createdAt: createdAt,
@@ -51,20 +52,10 @@ class Event extends Model {
     geolocation = Geolocation(
         latitude: map['geolocation']?['latitude'] ?? 0,
         longitude: map['geolocation']?['longitude'] ?? 0);
-    location = Geolocation(
-      country: map['place']?['country'],
-      locality: map['place']?['locality'],
-      url: map['place']?['url'],
-      latitude: map['place']?['location'] == null
-          ? null
-          : map['place']?['location']?['latitude'],
-      longitude: map['place']?['location'] == null
-          ? null
-          : map['place']?['location']?['longitude'],
-    );
     image = Asset(
       src: map['image']?['src'] ?? '',
     );
     placeId = map['placeId'];
+    place = Place.fromMap(map['place']);
   }
 }

@@ -37,6 +37,7 @@ class GeolocationService {
     }
 
     locationData = await location.getLocation();
+
     if (context.mounted) {
       GraphQLClient client = GraphQLProvider.of(context).value;
       var response = await client.query(QueryOptions(
