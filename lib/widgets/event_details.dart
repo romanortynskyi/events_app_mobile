@@ -13,30 +13,31 @@ class EventDetails extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(top: 20, left: 15),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            event.title ?? '',
-            style: TextStyle(
-              color: LightThemeColors.text,
-              fontWeight: FontWeight.bold,
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(top: 20, right: 20, left: 15),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              event.title ?? '',
+              style: TextStyle(
+                color: LightThemeColors.text,
+                fontWeight: FontWeight.bold,
+              ),
+              softWrap: true,
             ),
-          ),
-          const SizedBox(height: 10),
-          EventDate(
-            caption: 'Beginning',
-            date: event.startDate ?? DateTime.now(),
-            width: MediaQuery.of(context).size.width - 291,
-          ),
-          EventDate(
-            caption: 'End',
-            date: event.endDate ?? DateTime.now(),
-            width: MediaQuery.of(context).size.width - 291,
-          ),
-        ],
+            const SizedBox(height: 10),
+            EventDate(
+              caption: 'Beginning',
+              date: event.startDate ?? DateTime.now(),
+            ),
+            EventDate(
+              caption: 'End',
+              date: event.endDate ?? DateTime.now(),
+            ),
+          ],
+        ),
       ),
     );
   }
