@@ -21,6 +21,8 @@ import 'package:flutter_compass/flutter_compass.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:collection/collection.dart';
+import 'package:image/image.dart' as images;
+import 'package:http/http.dart' as http;
 
 String getGeolocationByCoords = """
   query GET_GEOLOCATION_BY_COORDS(\$latitude: Float!, \$longitude: Float!) {
@@ -86,6 +88,7 @@ class _SearchScreenState extends State<SearchScreen> {
   Marker _userMarker = const Marker(
     markerId: MarkerId(''),
   );
+  Map<int, Uint8List> eventImages = {};
 
   Timer? _debounceTimer;
 
@@ -184,6 +187,50 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Geolocation? _geolocation;
 
+  Future<Uint8List?> _getEventImage(String src) async {
+    var response = await http.get(Uri.parse(src));
+
+    if (response.statusCode == 200) {
+      Uint8List bytes = response.bodyBytes;
+      var avatarImage = images.decodeImage(bytes);
+
+      if (avatarImage != null) {
+        Uint8List markerIconBytes = await AssetUtils.getBytesFromAsset(
+          'lib/images/event_marker.png',
+          300,
+          rootBundle,
+        );
+        var markerImage = images.decodeImage(markerIconBytes);
+
+        avatarImage = images.copyResize(
+          avatarImage,
+          width: markerImage!.width ~/ 1.1,
+          height: markerImage.height ~/ 1.4,
+        );
+
+        var radius = 90;
+        int originX = avatarImage.width ~/ 2;
+        int originY = avatarImage.height ~/ 2;
+
+        for (int y = -radius; y <= radius; y++) {
+          for (int x = -radius; x <= radius; x++) {
+            if (x * x + y * y <= radius * radius) {
+              markerImage.setPixel(
+                originX + x + 8,
+                originY + y + 10,
+                avatarImage.getPixelSafe(originX + x, originY + y),
+              );
+            }
+          }
+        }
+
+        return images.encodePng(markerImage);
+      }
+    }
+
+    return null;
+  }
+
   void _getCurrentLocation() async {
     if (mounted) {
       Geolocation? geolocation =
@@ -204,10 +251,10 @@ class _SearchScreenState extends State<SearchScreen> {
 
       final GoogleMapController mapController = await _completer.future;
 
-      await mapController.moveCamera(CameraUpdate.newCameraPosition(
+      await mapController.animateCamera(CameraUpdate.newCameraPosition(
         CameraPosition(
           target: LatLng(latitude, longitude),
-          zoom: 11,
+          zoom: 15,
         ),
       ));
 
@@ -299,22 +346,29 @@ class _SearchScreenState extends State<SearchScreen> {
 
           List<Event> events = firstEventsByPlace.values.toList();
 
-          events.forEach((event) {
+          events.forEach((event) async {
             double latitude = event.place?.location?.latitude ?? 0;
             double longitude = event.place?.location?.longitude ?? 0;
 
             MarkerId markerId = MarkerId(event.id.toString());
             LatLng position = LatLng(latitude, longitude);
-            Marker marker = Marker(
-              markerId: markerId,
-              position: position,
-              onTap: () => {_showEventDetails(event.id ?? -1)},
-            );
 
-            if (mounted) {
-              setState(() {
-                _markers[markerId] = marker;
-              });
+            Uint8List? imageBytes =
+                await _getEventImage(event.image?.src ?? '');
+
+            if (imageBytes != null) {
+              Marker marker = Marker(
+                markerId: markerId,
+                position: position,
+                onTap: () => {_showEventDetails(event.id ?? -1)},
+                icon: BitmapDescriptor.fromBytes(imageBytes),
+              );
+
+              if (mounted) {
+                setState(() {
+                  _markers[markerId] = marker;
+                });
+              }
             }
           });
         }

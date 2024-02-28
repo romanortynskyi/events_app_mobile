@@ -62,6 +62,7 @@ dependencies:
   async: ^2.11.0
   sensors: ^2.0.3
   flutter_compass: ^0.8.0
+  image: ^4.1.7
 
 dev_dependencies:
   flutter_test:
