@@ -5,10 +5,11 @@ import 'dart:ui' as ui;
 
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
-import 'package:events_app_mobile/models/autocomplete_places_response.dart';
+import 'package:events_app_mobile/models/autocomplete_places_result.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
+import 'package:events_app_mobile/models/paginated.dart';
+import 'package:events_app_mobile/models/place.dart';
 import 'package:events_app_mobile/screens/event_screen.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
 import 'package:events_app_mobile/services/place_service.dart';
@@ -16,6 +17,7 @@ import 'package:events_app_mobile/utils/widget_utils.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -43,9 +45,9 @@ String getEvents = '''
         }
         createdAt
         updatedAt
-        placeId
         title
         place {
+          originalId
           googleMapsUri
           location {
             latitude
@@ -99,15 +101,15 @@ class _SearchScreenState extends State<SearchScreen> {
         .asUint8List();
   }
 
-  Future<Iterable<AutocompletePlacesPrediction>> optionsBuilder(
+  Future<Iterable<AutocompletePlacesResult>> optionsBuilder(
       TextEditingValue textEditingValue) async {
     String text = textEditingValue.text;
 
     if (text == '') {
-      return const Iterable<AutocompletePlacesPrediction>.empty();
+      return const Iterable<AutocompletePlacesResult>.empty();
     }
 
-    AutocompletePlacesResponse response =
+    Paginated<AutocompletePlacesResult> response =
         await PlaceService().autocompletePlaces(
       context: context,
       text: text,
@@ -115,14 +117,13 @@ class _SearchScreenState extends State<SearchScreen> {
       limit: 10,
     );
 
-    return response.items ??
-        const Iterable<AutocompletePlacesPrediction>.empty();
+    return response.items;
   }
 
   Widget optionsViewBuilder(
     BuildContext context,
     onAutoCompleteSelect,
-    Iterable<AutocompletePlacesPrediction> options,
+    Iterable<AutocompletePlacesResult> options,
   ) {
     return Container(
       margin: const EdgeInsets.only(left: 20),
@@ -142,18 +143,15 @@ class _SearchScreenState extends State<SearchScreen> {
                   },
                   itemBuilder: (BuildContext context, int index) {
                     if (options.isNotEmpty) {
-                      AutocompletePlacesPrediction prediction =
+                      AutocompletePlacesResult result =
                           options.elementAt(index);
 
                       return GestureDetector(
-                        onTap: () => {onAutoCompleteSelect(prediction)},
-                        child: Column(
+                        onTap: () => {onAutoCompleteSelect(result)},
+                        child: const Column(
                           children: [
-                            Text(prediction.structuredFormatting?.mainText ??
-                                ''),
-                            Text(prediction
-                                    .structuredFormatting?.secondaryText ??
-                                '')
+                            Text('Rynok Square, 23'),
+                            Text('Lviv, Ukraine'),
                           ],
                         ),
                       );
@@ -357,7 +355,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       bottom: 20,
                       left: 20,
                     ),
-                    child: AppAutocomplete<AutocompletePlacesPrediction>(
+                    child: AppAutocomplete<AutocompletePlacesResult>(
                       textEditingController: _textEditingController,
                       focusNode: _focusNode,
                       borderRadius: 35,
@@ -365,8 +363,8 @@ class _SearchScreenState extends State<SearchScreen> {
                       hintText: 'Search for locations...',
                       optionsBuilder: optionsBuilder,
                       optionsViewBuilder: optionsViewBuilder,
-                      onSelected: (AutocompletePlacesPrediction selection) {
-                        print('You just selected ${selection.placeId}');
+                      onSelected: (AutocompletePlacesResult selection) {
+                        print('You just selected ${selection.originalId}');
                       },
                     ),
                   ),

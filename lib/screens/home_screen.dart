@@ -18,7 +18,8 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-String getEvents = """
+String getEvents =
+    """
   query GET_EVENTS(\$skip: Int, \$limit: Int) {
     getEvents(skip: \$skip, limit: \$limit) {
       items {
@@ -28,7 +29,6 @@ String getEvents = """
         }
         createdAt
         updatedAt
-        placeId
         title
         place {
           googleMapsUri
@@ -47,7 +47,8 @@ String getEvents = """
   }
 """;
 
-String autocompleteEvents = """
+String autocompleteEvents =
+    """
   query AUTOCOMPLETE_EVENTS(\$input: AutocompleteEventsInput!) {
     autocompleteEvents(input: \$input) {
       items {
@@ -57,18 +58,13 @@ String autocompleteEvents = """
         }
         createdAt
         updatedAt
-        placeId
         title
         place {
-          url
-          name
-          country
-          locality
-          geometry {
-            location {
-              lat
-              lng
-            }
+          originalId
+          googleMapsUri
+          location {
+            latitude
+            longitude
           }
         }
         description
@@ -191,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void didChangeDependencies() {
-    _getEvents(FetchPolicy.cacheFirst);
+    _getEvents(FetchPolicy.networkOnly);
 
     super.didChangeDependencies();
   }

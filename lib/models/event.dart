@@ -10,7 +10,6 @@ class Event extends Model {
   late DateTime? endDate;
   late Asset? image;
   late int? distance;
-  late String? placeId;
   late Geolocation? geolocation;
   late Place? place;
 
@@ -24,7 +23,6 @@ class Event extends Model {
     this.endDate,
     this.image,
     this.distance,
-    this.placeId,
     this.geolocation,
     this.place,
   }) : super(
@@ -55,7 +53,6 @@ class Event extends Model {
     image = Asset(
       src: map['image']?['src'] ?? '',
     );
-    placeId = map['placeId'];
     place = Place.fromMap(map['place']);
   }
 }

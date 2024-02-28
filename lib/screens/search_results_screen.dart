@@ -24,18 +24,13 @@ String searchEvents =
         }
         createdAt
         updatedAt
-        placeId
         title
         place {
-          url
-          name
-          country
-          locality
-          geometry {
-            location {
-              lat
-              lng
-            }
+          originalId
+          googleMapsUri
+          location {
+            latitude
+            longitude
           }
         }
         description
@@ -59,18 +54,13 @@ String autocompleteEvents =
         }
         createdAt
         updatedAt
-        placeId
         title
         place {
-          url
-          name
-          country
-          locality
-          geometry {
-            location {
-              lat
-              lng
-            }
+          originalId
+          googleMapsUri
+          location {
+            latitude
+            longitude
           }
         }
         description
@@ -167,14 +157,16 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       },
       fetchPolicy: fetchPolicy,
     ));
-    print(response);
+
     List<Month> months = _getMonths(response);
 
-    setState(() {
-      _months = months;
-      _skip += 10;
-      _isLoadingEvents = false;
-    });
+    if (mounted) {
+      setState(() {
+        _months = months;
+        _skip += 10;
+        _isLoadingEvents = false;
+      });
+    }
   }
 
   @override
@@ -205,7 +197,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   void onEventPressed(BuildContext context, Event event) {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => EventScreen(id: event.id ?? -1)),
     );

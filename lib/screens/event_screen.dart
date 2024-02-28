@@ -26,7 +26,6 @@ String getEventById = """
       id
       createdAt
       updatedAt
-      placeId
       distance
       title
       description
@@ -37,6 +36,7 @@ String getEventById = """
         src
       }
       place {
+        originalId
         googleMapsUri
         location {
           latitude
@@ -76,10 +76,11 @@ class _EventScreenState extends State<EventScreen> {
 
   Future<void> _getEventById() async {
     Geolocation? geolocation = await _getCurrentLocation();
-
-    setState(() {
-      _isLoadingGeolocation = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoadingGeolocation = false;
+      });
+    }
 
     if (geolocation != null) {
       Event? event = await EventService().getEventById(
@@ -89,14 +90,16 @@ class _EventScreenState extends State<EventScreen> {
         graphqlDocument: getEventById,
       );
 
-      setState(() {
-        _event = event;
-        _isLoadingEvent = false;
-        _markers.add(Marker(
-            markerId: MarkerId(event?.placeId ?? ''),
-            position: LatLng(event?.place?.location?.latitude ?? 0,
-                event?.place?.location?.longitude ?? 0)));
-      });
+      if (mounted) {
+        setState(() {
+          _event = event;
+          _isLoadingEvent = false;
+          _markers.add(Marker(
+              markerId: MarkerId(event?.place?.originalId ?? ''),
+              position: LatLng(event?.place?.location?.latitude ?? 0,
+                  event?.place?.location?.longitude ?? 0)));
+        });
+      }
 
       final GoogleMapController mapController = await _mapCompleter.future;
 

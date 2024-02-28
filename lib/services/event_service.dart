@@ -8,6 +8,7 @@ class EventService {
     required String originId,
     required BuildContext context,
     required String graphqlDocument,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
   }) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
     var response = await client.query(QueryOptions(
@@ -16,8 +17,9 @@ class EventService {
         'id': id,
         'originId': originId,
       },
+      fetchPolicy: fetchPolicy,
     ));
-    print('originId' + originId);
+
     Map<String, dynamic>? data = response.data;
 
     if (data == null) {

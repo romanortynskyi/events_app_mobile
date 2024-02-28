@@ -1,4 +1,5 @@
-import 'package:events_app_mobile/models/autocomplete_places_response.dart';
+import 'package:events_app_mobile/models/autocomplete_places_result.dart';
+import 'package:events_app_mobile/models/paginated.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
@@ -6,32 +7,16 @@ String autocompletePlacesQuery = '''
   query AUTOCOMPLETE_PLACES(\$input: AutocompletePlacesInput!) {
     autocompletePlaces(input: \$input) {
       items {
-        description
-        matchedSubstrings {
-          offset
-          length
+        place {
+          originalId
         }
-        placeId
-        structuredFormatting {
-          mainText
-          mainTextMatchedSubstrings {
-            length
-            offset
-          }
-          secondaryText
-        }
-        terms {
-          offset
-          value
-        }
-        types
       }
     }
   }
 ''';
 
 class PlaceService {
-  Future<AutocompletePlacesResponse> autocompletePlaces({
+  Future<Paginated<AutocompletePlacesResult>> autocompletePlaces({
     required BuildContext context,
     required String text,
     required int skip,
@@ -56,10 +41,16 @@ class PlaceService {
       print(response.exception?.graphqlErrors[0].message);
       throw Exception();
     } else {
-      AutocompletePlacesResponse autocompletePlacesResponse =
-          AutocompletePlacesResponse.fromMap(data['autocompletePlaces']);
+      List<AutocompletePlacesResult> places = data['autocompletePlaces']
+              ['items']
+          .map((item) => AutocompletePlacesResult.fromMap(item));
+      int totalPagesCount = data['autocompletePlaces']['totalPagesCount'];
 
-      return autocompletePlacesResponse;
+      Paginated<AutocompletePlacesResult> paginatedPlaces =
+          Paginated<AutocompletePlacesResult>(
+              items: places, totalPagesCount: totalPagesCount);
+
+      return paginatedPlaces;
     }
   }
 }
