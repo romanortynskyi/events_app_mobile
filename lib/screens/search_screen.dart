@@ -1,7 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:async';
-import 'dart:ui' as ui;
 
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
@@ -9,19 +8,19 @@ import 'package:events_app_mobile/models/autocomplete_places_result.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/paginated.dart';
-import 'package:events_app_mobile/models/place.dart';
 import 'package:events_app_mobile/screens/event_screen.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
 import 'package:events_app_mobile/services/place_service.dart';
+import 'package:events_app_mobile/utils/asset_utils.dart';
 import 'package:events_app_mobile/utils/widget_utils.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:collection/collection.dart';
 
 String getGeolocationByCoords = """
   query GET_GEOLOCATION_BY_COORDS(\$latitude: Float!, \$longitude: Float!) {
@@ -89,17 +88,6 @@ class _SearchScreenState extends State<SearchScreen> {
   );
 
   Timer? _debounceTimer;
-
-  Future<Uint8List> getBytesFromAsset(String path, int width) async {
-    ByteData data = await rootBundle.load(path);
-    ui.Codec codec = await ui.instantiateImageCodec(data.buffer.asUint8List(),
-        targetWidth: width);
-    ui.FrameInfo fi = await codec.getNextFrame();
-
-    return (await fi.image.toByteData(format: ui.ImageByteFormat.png))!
-        .buffer
-        .asUint8List();
-  }
 
   Future<Iterable<AutocompletePlacesResult>> optionsBuilder(
       TextEditingValue textEditingValue) async {
@@ -223,13 +211,16 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       ));
 
-      Uint8List markerIcon =
-          await getBytesFromAsset('lib/images/user_marker.png', 50);
+      Uint8List markerIconBytes = await AssetUtils.getBytesFromAsset(
+        'lib/images/user_marker.png',
+        50,
+        rootBundle,
+      );
 
       _userMarker = Marker(
         markerId: const MarkerId(''),
         position: LatLng(latitude, longitude),
-        icon: BitmapDescriptor.fromBytes(markerIcon),
+        icon: BitmapDescriptor.fromBytes(markerIconBytes),
         rotation: _heading,
         anchor: const Offset(0.5, 0.5),
         flat: true,
@@ -248,6 +239,15 @@ class _SearchScreenState extends State<SearchScreen> {
       context,
       MaterialPageRoute(builder: (context) => EventScreen(id: id)),
     );
+  }
+
+  Event? getEarliestEvent(List<Event> eventList) {
+    if (eventList.isEmpty) {
+      return null;
+    }
+
+    return eventList.reduce(
+        (a, b) => a.startDate!.isBefore(b.startDate ?? DateTime.now()) ? a : b);
   }
 
   void _getEvents() {
@@ -272,6 +272,7 @@ class _SearchScreenState extends State<SearchScreen> {
             'yMax': northeast.latitude,
           },
         },
+        fetchPolicy: FetchPolicy.networkOnly,
       );
 
       if (mounted) {
@@ -282,10 +283,21 @@ class _SearchScreenState extends State<SearchScreen> {
         if (result.hasException) {
           print('Error: ${result.exception.toString()}');
         } else {
-          List<Event> events = result.data?['getEvents']['items']
+          List<Event> eventsFromBe = result.data?['getEvents']['items']
               .map((eventMap) => Event.fromMap(eventMap))
               .toList()
               .cast<Event>();
+
+          Map<String, List<Event>> groupedEvents =
+              groupBy(eventsFromBe, (event) => event.place?.originalId ?? '');
+
+          Map<String, Event> firstEventsByPlace = {};
+
+          for (var entry in groupedEvents.entries) {
+            firstEventsByPlace[entry.key] = getEarliestEvent(entry.value)!;
+          }
+
+          List<Event> events = firstEventsByPlace.values.toList();
 
           events.forEach((event) {
             double latitude = event.place?.location?.latitude ?? 0;

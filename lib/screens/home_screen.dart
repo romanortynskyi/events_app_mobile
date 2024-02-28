@@ -18,8 +18,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-String getEvents =
-    """
+String getEvents = """
   query GET_EVENTS(\$skip: Int, \$limit: Int) {
     getEvents(skip: \$skip, limit: \$limit) {
       items {
@@ -47,8 +46,7 @@ String getEvents =
   }
 """;
 
-String autocompleteEvents =
-    """
+String autocompleteEvents = """
   query AUTOCOMPLETE_EVENTS(\$input: AutocompleteEventsInput!) {
     autocompleteEvents(input: \$input) {
       items {
@@ -312,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void onEventPressed(BuildContext context, Event event) {
-    Navigator.pushReplacement(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => EventScreen(id: event.id ?? -1)),
     );

@@ -8,6 +8,7 @@ import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/services/event_service.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
+import 'package:events_app_mobile/utils/distance_format_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
@@ -107,7 +108,7 @@ class _EventScreenState extends State<EventScreen> {
         CameraPosition(
           target: LatLng(event?.place?.location?.latitude ?? 0,
               event?.place?.location?.longitude ?? 0),
-          zoom: 11,
+          zoom: 15,
         ),
       );
 
@@ -124,8 +125,9 @@ class _EventScreenState extends State<EventScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print('event: ');
-    print(_event);
+    String formattedDistance =
+        DistanceFormatUtils.format(_event?.distance?.toDouble() ?? 0);
+
     return Scaffold(
       body: _isLoadingEvent || _isLoadingGeolocation
           ? Center(
@@ -202,7 +204,7 @@ class _EventScreenState extends State<EventScreen> {
                               bottom: 10,
                             ),
                             child: Text(
-                              '${_event?.distance} m away',
+                              '$formattedDistance away',
                               style: TextStyle(
                                 color: LightThemeColors.text,
                                 fontWeight: FontWeight.bold,
