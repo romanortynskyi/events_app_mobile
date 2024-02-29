@@ -1,12 +1,16 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
+import 'package:events_app_mobile/controllers/home_screen_controller.dart';
+import 'package:events_app_mobile/graphql/home_screen/home_screen_queries.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/month.dart';
 import 'package:events_app_mobile/screens/event_screen.dart';
 import 'package:events_app_mobile/screens/search_results_screen.dart';
+import 'package:events_app_mobile/services/event_service.dart';
+import 'package:events_app_mobile/services/geolocation_service.dart';
+import 'package:events_app_mobile/services/location_service.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/event_card.dart';
 import 'package:events_app_mobile/widgets/events_counter.dart';
@@ -14,66 +18,7 @@ import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:events_app_mobile/widgets/month_tile.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:intl/intl.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-
-String getEvents = """
-  query GET_EVENTS(\$skip: Int, \$limit: Int) {
-    getEvents(skip: \$skip, limit: \$limit) {
-      items {
-        id
-        image {
-          src
-        }
-        createdAt
-        updatedAt
-        title
-        place {
-          googleMapsUri
-          location {
-            latitude
-            longitude
-          }
-        }
-        description
-        startDate
-        endDate
-        ticketPrice
-      }
-      totalPagesCount
-    }
-  }
-""";
-
-String autocompleteEvents = """
-  query AUTOCOMPLETE_EVENTS(\$input: AutocompleteEventsInput!) {
-    autocompleteEvents(input: \$input) {
-      items {
-        id
-        image {
-          src
-        }
-        createdAt
-        updatedAt
-        title
-        place {
-          originalId
-          googleMapsUri
-          location {
-            latitude
-            longitude
-          }
-        }
-        description
-        startDate
-        endDate
-        ticketPrice
-      }
-      totalPagesCount
-    }
-  }
-""";
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -91,86 +36,32 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isLoadingEvents = true;
   bool _isLoadingLocation = true;
 
+  late EventService _eventService;
+  late LocationService _locationService;
+  late GeolocationService _geolocationService;
+  late HomeScreenController _homeScreenController;
+
   final TextEditingController _textEditingController = TextEditingController();
-
-  List<Month> _getMonths(response) {
-    List<Event> events = response.data?['getEvents']['items']
-        .map((item) => Event.fromMap(item))
-        .toList()
-        .cast<Event>();
-
-    if (events.isEmpty) {
-      return _months;
-    }
-
-    Set<String> uniqueMonthNames = events
-        .map((event) =>
-            DateFormat('MMM yyyy').format(event.startDate ?? DateTime.now()))
-        .toSet();
-
-    List<Month> months = uniqueMonthNames.map((monthName) {
-      List<Event> eventsByMonth = events
-          .where((event) =>
-              DateFormat('MMM yyyy')
-                  .format(event.startDate ?? DateTime.now()) ==
-              monthName)
-          .toList();
-
-      return Month(
-        name: monthName,
-        events: eventsByMonth,
-      );
-    }).toList();
-
-    if (_months.isNotEmpty) {
-      Month lastMonthFromState = _months.last;
-      Month firstMonthFromResponse =
-          months.where((month) => month.name == lastMonthFromState.name).first;
-      Month updatedLastMonth = Month(
-        name: lastMonthFromState.name,
-        events: [
-          ...lastMonthFromState.events,
-          ...firstMonthFromResponse.events,
-        ],
-      );
-
-      List<Month> updatedMonths = [
-        ..._months.where((month) => month.name != updatedLastMonth.name),
-        updatedLastMonth,
-        ...months.sublist(1),
-      ];
-
-      return updatedMonths;
-    }
-
-    return months;
-  }
-
-  Future<void> _getEvents(FetchPolicy fetchPolicy) async {
-    GraphQLClient client = GraphQLProvider.of(context).value;
-    var response = await client.query(QueryOptions(
-      document: gql(getEvents),
-      variables: {
-        'skip': _skip,
-        'limit': 10,
-      },
-      fetchPolicy: fetchPolicy,
-    ));
-
-    List<Month> months = _getMonths(response);
-
-    setState(() {
-      _months = months;
-      _skip += 10;
-      _isLoadingEvents = false;
-    });
-  }
 
   @override
   void initState() {
     super.initState();
 
-    _getCurrentLocation();
+    _eventService = EventService();
+    _locationService = LocationService();
+    _geolocationService = GeolocationService();
+
+    _homeScreenController = HomeScreenController(
+      context: context,
+      eventService: _eventService,
+      locationService: _locationService,
+      geolocationService: _geolocationService,
+    );
+
+    _homeScreenController.getCurrentGeolocation(
+      HomeScreenQueries.getGeolocationByCoords,
+      _onCurrentGeolocationLoaded,
+    );
 
     _scrollController = ScrollController();
 
@@ -178,124 +69,49 @@ class _HomeScreenState extends State<HomeScreen> {
       var nextPageTrigger = 0.8 * _scrollController.position.maxScrollExtent;
       if (_scrollController.position.pixels >= nextPageTrigger &&
           !_isLoadingEvents) {
-        _getEvents(FetchPolicy.networkOnly);
+        await _homeScreenController.getEvents(
+          document: HomeScreenQueries.getEvents,
+          skip: _skip,
+          limit: 10,
+          fetchPolicy: FetchPolicy.networkOnly,
+          callback: _onEventsLoaded,
+        );
       }
     });
   }
 
+  void _didChangeDependencies() async {
+    await _homeScreenController.getEvents(
+      document: HomeScreenQueries.getEvents,
+      skip: _skip,
+      limit: 10,
+      fetchPolicy: FetchPolicy.networkOnly,
+      callback: _onEventsLoaded,
+    );
+  }
+
   @override
   void didChangeDependencies() {
-    _getEvents(FetchPolicy.networkOnly);
+    _didChangeDependencies();
 
     super.didChangeDependencies();
   }
 
-  Future<void> _getCurrentLocation() async {
-    LocationPermission permission;
-    Position? position;
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print('Denied');
-      } else {
-        position = await Geolocator.getCurrentPosition(
-            desiredAccuracy: LocationAccuracy.high);
-      }
-    } else {
-      position = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
-    }
-
-    if (position != null && mounted) {
-      GraphQLClient client = GraphQLProvider.of(context).value;
-      var response = await client.query(QueryOptions(
-        document: gql(getGeolocationByCoords),
-        variables: {
-          'latitude': position.latitude,
-          'longitude': position.longitude,
-        },
-      ));
-
-      Map<String, dynamic> data = response.data ?? {};
-
-      if (mounted) {
-        setState(() {
-          _geolocation = Geolocation.fromMap(data['getGeolocationByCoords']);
-          _isLoadingLocation = false;
-        });
-      }
-    }
+  void _onEventsLoaded(List<Event> events) {
+    setState(() {
+      _months = _homeScreenController.getMonths(events, _months);
+      _skip += 10;
+      _isLoadingEvents = false;
+    });
   }
 
-  Future<Iterable<String>> optionsBuilder(
-      TextEditingValue textEditingValue) async {
-    String text = textEditingValue.text;
-
-    if (text == '') {
-      return const Iterable<String>.empty();
+  Future<void> _onCurrentGeolocationLoaded(Geolocation geolocation) async {
+    if (mounted) {
+      setState(() {
+        _geolocation = geolocation;
+        _isLoadingLocation = false;
+      });
     }
-
-    List<String> options = [];
-
-    GraphQLClient client = GraphQLProvider.of(context).value;
-    var response = await client.query(QueryOptions(
-      document: gql(autocompleteEvents),
-      variables: {
-        'input': {
-          'query': text,
-          'skip': 0,
-          'limit': 10,
-        },
-      },
-    ));
-
-    Map<String, dynamic> data = response.data ?? {};
-
-    Set eventTitles = (data['autocompleteEvents']['items'])
-        .map((eventMap) => Event.fromMap(eventMap).title)
-        .toSet();
-
-    eventTitles.forEach((title) => options.add(title));
-
-    return options;
-  }
-
-  Widget optionsViewBuilder(
-    BuildContext context,
-    onAutoCompleteSelect,
-    Iterable<String> options,
-  ) {
-    return Align(
-        alignment: Alignment.topLeft,
-        child: Material(
-          color: LightThemeColors.grey,
-          elevation: 4.0,
-          child: SizedBox(
-              width: MediaQuery.of(context).size.width - 40,
-              child: ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                itemCount: options.length,
-                separatorBuilder: (context, i) {
-                  return const Divider();
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  if (options.isNotEmpty) {
-                    return GestureDetector(
-                      onTap: () =>
-                          onAutoCompleteSelect(options.elementAt(index)),
-                      child: Text(options.elementAt(index)),
-                    );
-                  }
-
-                  return null;
-                },
-              )),
-        ));
   }
 
   void onClearSearch() {
@@ -317,9 +133,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> onRefresh(BuildContext context) async {
-    _getCurrentLocation();
+    _homeScreenController.getCurrentGeolocation(
+      HomeScreenQueries.getGeolocationByCoords,
+      _onCurrentGeolocationLoaded,
+    );
 
-    return _getEvents(FetchPolicy.networkOnly);
+    await _homeScreenController.getEvents(
+      document: HomeScreenQueries.getEvents,
+      skip: _skip,
+      limit: 10,
+      fetchPolicy: FetchPolicy.networkOnly,
+      callback: _onEventsLoaded,
+    );
   }
 
   @override
@@ -360,8 +185,26 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: 35,
                     prefixIcon: const Icon(Icons.search),
                     hintText: 'Search for events...',
-                    optionsBuilder: optionsBuilder,
-                    optionsViewBuilder: optionsViewBuilder,
+                    optionsBuilder: (TextEditingValue textEditingValue) =>
+                        _homeScreenController.autocompleteEventsOptionsBuilder(
+                      textEditingValue: textEditingValue,
+                      document: HomeScreenQueries.autocompleteEvents,
+                      query: _textEditingController.text,
+                      skip: 0,
+                      limit: 10,
+                    ),
+                    optionsViewBuilder: (
+                      BuildContext context,
+                      onAutoCompleteSelect,
+                      Iterable<String> options,
+                    ) =>
+                        _homeScreenController
+                            .autocompleteEventsOptionsViewBuilder(
+                      context: context,
+                      onAutoCompleteSelect: onAutoCompleteSelect,
+                      options: options,
+                      scrollController: _scrollController,
+                    ),
                     onSelected: (String selection) {
                       onAutocompleteSelected(context, selection);
                     },

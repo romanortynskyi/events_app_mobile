@@ -53,24 +53,9 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
       if (!mounted) return;
 
-      GraphQLClient client = GraphQLProvider.of(context).value;
-
-      var response = await client.query(QueryOptions(
-        document: gql(getGeolocationByCoords),
-        variables: {
-          'latitude': location.latitude ?? 0,
-          'longitude': location.longitude ?? 0,
-        },
-      ));
-
-      Map<String, dynamic> data = response.data ?? {};
-      String placeId = data['getGeolocationByCoords']['placeId'];
-
       setState(() {
-        _placeId = placeId;
+        _placeId = location.placeId;
       });
-
-      print(placeId);
     }
   }
 
@@ -205,7 +190,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
       GraphQLClient client = GraphQLProvider.of(context).value;
 
-      await client.mutate(MutationOptions(
+      var response = await client.mutate(MutationOptions(
         document: gql(addEvent),
         variables: {
           'input': {

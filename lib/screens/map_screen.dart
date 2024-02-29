@@ -3,7 +3,6 @@
 import 'dart:async';
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:flutter/material.dart';
@@ -121,20 +120,20 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void onLocationTap(LatLng latLng) async {
-    GraphQLClient client = GraphQLProvider.of(context).value;
-    var response = await client.query(QueryOptions(
-      document: gql(getGeolocationByCoords),
-      variables: {
-        'latitude': latLng.latitude,
-        'longitude': latLng.longitude,
-      },
-    ));
+    // GraphQLClient client = GraphQLProvider.of(context).value;
+    // var response = await client.query(QueryOptions(
+    //   document: gql(getGeolocationByCoords),
+    //   variables: {
+    //     'latitude': latLng.latitude,
+    //     'longitude': latLng.longitude,
+    //   },
+    // ));
 
-    Map<String, dynamic> data = response.data ?? {};
-    Geolocation geolocation =
-        Geolocation.fromMap(data['getGeolocationByCoords']);
+    // Map<String, dynamic> data = response.data ?? {};
+    // Geolocation geolocation =
+    //     Geolocation.fromMap(data['getGeolocationByCoords']);
 
-    Navigator.pop(context, geolocation);
+    // Navigator.pop(context, geolocation);
   }
 
   @override

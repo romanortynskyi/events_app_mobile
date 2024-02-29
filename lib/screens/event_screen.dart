@@ -2,7 +2,6 @@
 
 import 'dart:async';
 
-import 'package:events_app_mobile/graphql/queries/get_geolocation_by_coords.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
@@ -63,13 +62,13 @@ class _EventScreenState extends State<EventScreen> {
 
   Future<Geolocation?> _getCurrentLocation() async {
     if (mounted) {
-      Geolocation? geolocation =
-          await GeolocationService().getCurrentGeolocation(
-        context: context,
-        graphqlDocument: getGeolocationByCoords,
-      );
+      // Geolocation? geolocation =
+      //     await GeolocationService().getCurrentGeolocation(
+      //   context: context,
+      //   graphqlDocument: getGeolocationByCoords,
+      // );
 
-      return geolocation;
+      // return geolocation;
     }
 
     return null;

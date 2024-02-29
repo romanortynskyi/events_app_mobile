@@ -108,7 +108,7 @@ class _SearchScreenState extends State<SearchScreen> {
       limit: 10,
     );
 
-    return response.items;
+    return [];
   }
 
   Widget optionsViewBuilder(
@@ -161,7 +161,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _onMapCreated(GoogleMapController controller) {
     _completer.complete(controller);
-    _getEvents();
+    // _getEvents();
   }
 
   @override
@@ -233,51 +233,51 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void _getCurrentLocation() async {
     if (mounted) {
-      Geolocation? geolocation =
-          await GeolocationService().getCurrentGeolocation(
-        graphqlDocument: getGeolocationByCoords,
-        context: context,
-      );
+      //   Geolocation? geolocation =
+      //       await GeolocationService().getCurrentGeolocation(
+      //     graphqlDocument: getGeolocationByCoords,
+      //     context: context,
+      //   );
 
-      double latitude = geolocation?.latitude ?? 0;
-      double longitude = geolocation?.longitude ?? 0;
+      //   double latitude = geolocation?.latitude ?? 0;
+      //   double longitude = geolocation?.longitude ?? 0;
 
-      if (mounted) {
-        setState(() {
-          _geolocation = geolocation;
-          _isLoading = false;
-        });
-      }
+      //   if (mounted) {
+      //     setState(() {
+      //       _geolocation = geolocation;
+      //       _isLoading = false;
+      //     });
+      //   }
 
-      final GoogleMapController mapController = await _completer.future;
+      //   final GoogleMapController mapController = await _completer.future;
 
-      await mapController.animateCamera(CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(latitude, longitude),
-          zoom: 15,
-        ),
-      ));
+      //   await mapController.animateCamera(CameraUpdate.newCameraPosition(
+      //     CameraPosition(
+      //       target: LatLng(latitude, longitude),
+      //       zoom: 15,
+      //     ),
+      //   ));
 
-      Uint8List markerIconBytes = await AssetUtils.getBytesFromAsset(
-        'lib/images/user_marker.png',
-        50,
-        rootBundle,
-      );
+      //   Uint8List markerIconBytes = await AssetUtils.getBytesFromAsset(
+      //     'lib/images/user_marker.png',
+      //     50,
+      //     rootBundle,
+      //   );
 
-      _userMarker = Marker(
-        markerId: const MarkerId(''),
-        position: LatLng(latitude, longitude),
-        icon: BitmapDescriptor.fromBytes(markerIconBytes),
-        rotation: _heading,
-        anchor: const Offset(0.5, 0.5),
-        flat: true,
-      );
+      //   _userMarker = Marker(
+      //     markerId: const MarkerId(''),
+      //     position: LatLng(latitude, longitude),
+      //     icon: BitmapDescriptor.fromBytes(markerIconBytes),
+      //     rotation: _heading,
+      //     anchor: const Offset(0.5, 0.5),
+      //     flat: true,
+      //   );
 
-      if (mounted) {
-        setState(() {
-          _markers[_userMarker.markerId] = _userMarker;
-        });
-      }
+      //   if (mounted) {
+      //     setState(() {
+      //       _markers[_userMarker.markerId] = _userMarker;
+      //     });
+      //   }
     }
   }
 
