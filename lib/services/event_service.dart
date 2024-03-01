@@ -6,14 +6,14 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 class EventService {
   Future<Paginated<Event>> getEvents({
     required BuildContext context,
-    required String document,
+    required String graphqlDocument,
     required int skip,
     required int limit,
     FetchPolicy? fetchPolicy,
   }) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
     var response = await client.query(QueryOptions(
-      document: gql(document),
+      document: gql(graphqlDocument),
       variables: {
         'skip': skip,
         'limit': limit,
@@ -39,7 +39,7 @@ class EventService {
     required String originId,
     required BuildContext context,
     required String graphqlDocument,
-    FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
+    FetchPolicy? fetchPolicy = FetchPolicy.cacheFirst,
   }) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
     var response = await client.query(QueryOptions(
@@ -67,7 +67,7 @@ class EventService {
 
   Future<Paginated<Event>> autocompleteEvents({
     required BuildContext context,
-    required String document,
+    required String graphqlDocument,
     required String query,
     required int skip,
     required int limit,
@@ -75,7 +75,7 @@ class EventService {
   }) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
     var response = await client.query(QueryOptions(
-      document: gql(document),
+      document: gql(graphqlDocument),
       variables: {
         'input': {
           'query': query,

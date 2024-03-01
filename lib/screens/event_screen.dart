@@ -3,10 +3,13 @@
 import 'dart:async';
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/controllers/event_screen_controller.dart';
+import 'package:events_app_mobile/graphql/home_screen/event_screen_queries.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/services/event_service.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
+import 'package:events_app_mobile/services/location_service.dart';
 import 'package:events_app_mobile/utils/distance_format_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -20,33 +23,6 @@ class EventScreen extends StatefulWidget {
   State<StatefulWidget> createState() => _EventScreenState();
 }
 
-String getEventById = """
-  query GET_EVENT_BY_ID(\$id: Float!, \$originId: String!) {
-    getEventById(id: \$id, originId: \$originId) {
-      id
-      createdAt
-      updatedAt
-      distance
-      title
-      description
-      startDate
-      endDate
-      ticketPrice
-      image {
-        src
-      }
-      place {
-        originalId
-        googleMapsUri
-        location {
-          latitude
-          longitude
-        }
-      }
-    }
-  }
-""";
-
 class _EventScreenState extends State<EventScreen> {
   late Event? _event = null;
   final Completer _mapCompleter = Completer();
@@ -56,62 +32,66 @@ class _EventScreenState extends State<EventScreen> {
 
   bool _isLoadingGeolocation = true;
 
+  late LocationService _locationService;
+  late GeolocationService _geolocationService;
+  late EventService _eventService;
+  late EventScreenController _eventScreenController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _locationService = LocationService();
+    _geolocationService = GeolocationService();
+    _eventService = EventService();
+    _eventScreenController = EventScreenController(
+      context: context,
+      locationService: _locationService,
+      geolocationService: _geolocationService,
+      eventService: _eventService,
+    );
+  }
+
   void _onMapCreated(GoogleMapController controller) {
     _mapCompleter.complete(controller);
   }
 
-  Future<Geolocation?> _getCurrentLocation() async {
-    if (mounted) {
-      // Geolocation? geolocation =
-      //     await GeolocationService().getCurrentGeolocation(
-      //   context: context,
-      //   graphqlDocument: getGeolocationByCoords,
-      // );
-
-      // return geolocation;
-    }
-
-    return null;
-  }
-
-  Future<void> _getEventById() async {
-    Geolocation? geolocation = await _getCurrentLocation();
+  void _onGeolocationLoaded(Geolocation geolocation) {
     if (mounted) {
       setState(() {
         _isLoadingGeolocation = false;
       });
     }
+  }
+
+  void _onEventLoaded(Event event) {
+    if (mounted) {
+      setState(() {
+        _event = event;
+        _isLoadingEvent = false;
+        _markers.add(Marker(
+            markerId: MarkerId(event.place?.originalId ?? ''),
+            position: LatLng(event.place?.location?.latitude ?? 0,
+                event.place?.location?.longitude ?? 0)));
+      });
+    }
+  }
+
+  Future<void> _didChangeDependencies() async {
+    Geolocation? geolocation =
+        await _eventScreenController.getCurrentGeolocation(
+      graphqlDocument: EventScreenQueries.getGeolocationByCoords,
+    );
 
     if (geolocation != null) {
-      Event? event = await EventService().getEventById(
+      _onGeolocationLoaded(geolocation);
+
+      _eventScreenController.getEventById(
         id: widget.id,
         originId: geolocation.placeId ?? '',
-        context: context,
-        graphqlDocument: getEventById,
+        mapCompleter: _mapCompleter,
+        callback: _onEventLoaded,
       );
-
-      if (mounted) {
-        setState(() {
-          _event = event;
-          _isLoadingEvent = false;
-          _markers.add(Marker(
-              markerId: MarkerId(event?.place?.originalId ?? ''),
-              position: LatLng(event?.place?.location?.latitude ?? 0,
-                  event?.place?.location?.longitude ?? 0)));
-        });
-      }
-
-      final GoogleMapController mapController = await _mapCompleter.future;
-
-      CameraUpdate cameraUpdate = CameraUpdate.newCameraPosition(
-        CameraPosition(
-          target: LatLng(event?.place?.location?.latitude ?? 0,
-              event?.place?.location?.longitude ?? 0),
-          zoom: 15,
-        ),
-      );
-
-      await mapController.moveCamera(cameraUpdate);
     }
   }
 
@@ -119,7 +99,7 @@ class _EventScreenState extends State<EventScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _getEventById();
+    _didChangeDependencies();
   }
 
   @override

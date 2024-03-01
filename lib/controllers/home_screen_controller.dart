@@ -29,14 +29,14 @@ class HomeScreenController {
   });
 
   Future<List<Event>> _getEventsFromBe({
-    required String document,
+    required String graphqlDocument,
     required int skip,
     required int limit,
     FetchPolicy? fetchPolicy,
   }) async {
     Paginated<Event>? response = await eventService.getEvents(
       context: context,
-      document: document,
+      graphqlDocument: graphqlDocument,
       skip: skip,
       limit: limit,
       fetchPolicy: fetchPolicy,
@@ -46,7 +46,7 @@ class HomeScreenController {
   }
 
   Future<List<Event>> _autocompleteEventsFromBe({
-    required String document,
+    required String graphqlDocument,
     required String query,
     required int skip,
     required int limit,
@@ -54,7 +54,7 @@ class HomeScreenController {
   }) async {
     Paginated<Event>? response = await eventService.autocompleteEvents(
       context: context,
-      document: document,
+      graphqlDocument: graphqlDocument,
       query: query,
       skip: skip,
       limit: limit,
@@ -65,14 +65,14 @@ class HomeScreenController {
   }
 
   Future<void> getEvents({
-    required String document,
+    required String graphqlDocument,
     required int skip,
     required int limit,
     FetchPolicy? fetchPolicy,
     Function? callback,
   }) async {
     List<Event> events = await _getEventsFromBe(
-      document: document,
+      graphqlDocument: graphqlDocument,
       skip: skip,
       limit: limit,
       fetchPolicy: fetchPolicy,
@@ -129,12 +129,13 @@ class HomeScreenController {
     return months;
   }
 
-  Future<void> getCurrentGeolocation(String document, Function callback) async {
+  Future<void> getCurrentGeolocation(
+      String graphqlDocument, Function callback) async {
     LocationData? locationData = await locationService.getCurrentLocation();
 
     if (locationData != null) {
       Geolocation? geolocation = await geolocationService.getCurrentGeolocation(
-        graphqlDocument: document,
+        graphqlDocument: graphqlDocument,
         context: context,
         locationData: locationData,
       );
@@ -147,7 +148,7 @@ class HomeScreenController {
 
   Future<Iterable<String>> autocompleteEventsOptionsBuilder({
     required TextEditingValue textEditingValue,
-    required String document,
+    required String graphqlDocument,
     required String query,
     required int skip,
     required int limit,
@@ -161,7 +162,7 @@ class HomeScreenController {
     List<String> options = [];
 
     List<Event> events = await _autocompleteEventsFromBe(
-      document: document,
+      graphqlDocument: graphqlDocument,
       query: query,
       skip: skip,
       limit: limit,

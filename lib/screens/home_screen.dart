@@ -70,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (_scrollController.position.pixels >= nextPageTrigger &&
           !_isLoadingEvents) {
         await _homeScreenController.getEvents(
-          document: HomeScreenQueries.getEvents,
+          graphqlDocument: HomeScreenQueries.getEvents,
           skip: _skip,
           limit: 10,
           fetchPolicy: FetchPolicy.networkOnly,
@@ -82,7 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _didChangeDependencies() async {
     await _homeScreenController.getEvents(
-      document: HomeScreenQueries.getEvents,
+      graphqlDocument: HomeScreenQueries.getEvents,
       skip: _skip,
       limit: 10,
       fetchPolicy: FetchPolicy.networkOnly,
@@ -139,7 +139,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     await _homeScreenController.getEvents(
-      document: HomeScreenQueries.getEvents,
+      graphqlDocument: HomeScreenQueries.getEvents,
       skip: _skip,
       limit: 10,
       fetchPolicy: FetchPolicy.networkOnly,
@@ -188,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     optionsBuilder: (TextEditingValue textEditingValue) =>
                         _homeScreenController.autocompleteEventsOptionsBuilder(
                       textEditingValue: textEditingValue,
-                      document: HomeScreenQueries.autocompleteEvents,
+                      graphqlDocument: HomeScreenQueries.autocompleteEvents,
                       query: _textEditingController.text,
                       skip: 0,
                       limit: 10,
