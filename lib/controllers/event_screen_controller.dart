@@ -39,6 +39,8 @@ class EventScreenController {
 
       return geolocation;
     }
+
+    return null;
   }
 
   Future<Event?> _getEventByIdFromBe({

@@ -19,14 +19,6 @@ import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
 
-String getGeolocationByCoords = """
-  query GET_GEOLOCATION_BY_COORDS(\$latitude: Float!, \$longitude: Float!) {
-    getGeolocationByCoords(latitude: \$latitude, longitude: \$longitude) {
-      placeId
-    }
-  }
-""";
-
 class AddEventScreen extends StatefulWidget {
   const AddEventScreen({super.key});
 
