@@ -1,4 +1,5 @@
 import 'package:events_app_mobile/models/event.dart';
+import 'package:events_app_mobile/models/get_events_bounds.dart';
 import 'package:events_app_mobile/models/paginated.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -7,17 +8,34 @@ class EventService {
   Future<Paginated<Event>> getEvents({
     required BuildContext context,
     required String graphqlDocument,
-    required int skip,
-    required int limit,
+    int? skip,
+    int? limit,
+    GetEventsBounds? bounds,
     FetchPolicy? fetchPolicy,
   }) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
-    var response = await client.query(QueryOptions(
-      document: gql(graphqlDocument),
-      variables: {
+
+    Map<String, dynamic> variables = {};
+
+    if (skip != null && limit != null) {
+      variables.addAll({
         'skip': skip,
         'limit': limit,
-      },
+      });
+    } else if (bounds != null) {
+      variables.addAll({
+        'bounds': {
+          'xMin': bounds.xMin,
+          'yMin': bounds.yMin,
+          'xMax': bounds.xMax,
+          'yMax': bounds.yMax,
+        },
+      });
+    }
+
+    var response = await client.query(QueryOptions(
+      document: gql(graphqlDocument),
+      variables: variables,
       fetchPolicy: fetchPolicy ?? FetchPolicy.networkOnly,
     ));
 

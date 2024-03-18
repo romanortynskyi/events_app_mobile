@@ -98,11 +98,13 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onEventsLoaded(List<Event> events) {
-    setState(() {
-      _months = _homeScreenController.getMonths(events, _months);
-      _skip += 10;
-      _isLoadingEvents = false;
-    });
+    if (mounted) {
+      setState(() {
+        _months = _homeScreenController.getMonths(events, _months);
+        _skip += 10;
+        _isLoadingEvents = false;
+      });
+    }
   }
 
   Future<void> _onCurrentGeolocationLoaded(Geolocation geolocation) async {
