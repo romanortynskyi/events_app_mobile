@@ -179,6 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
         borderRadius: 35,
         prefixIcon: const Icon(Icons.search),
         hintText: 'Search for events...',
+        maxLines: 1,
         optionsBuilder: (TextEditingValue textEditingValue) =>
             _homeScreenController.autocompleteEventsOptionsBuilder(
           textEditingValue: textEditingValue,
