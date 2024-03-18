@@ -16,6 +16,7 @@ import 'package:events_app_mobile/widgets/event_card.dart';
 import 'package:events_app_mobile/widgets/events_counter.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:events_app_mobile/widgets/month_tile.dart';
+import 'package:events_app_mobile/widgets/no_events_found.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -218,14 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           autocomplete,
-          Center(
-            child: Text(
-              'No events found',
-              style: TextStyle(
-                color: LightThemeColors.text,
-              ),
-            ),
-          )
+          const NoEventsFound(),
         ],
       );
     } else {
