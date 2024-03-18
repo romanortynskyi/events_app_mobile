@@ -154,6 +154,9 @@ class _MapScreenState extends State<MapScreen> {
                 onSelected: (String selection) {
                   debugPrint('You just selected $selection');
                 },
+                onSubmitted: (String selection) {
+                  debugPrint('You just selected $selection');
+                },
               ),
               const SizedBox(height: 20),
               SizedBox(

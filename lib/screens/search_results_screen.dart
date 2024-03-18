@@ -318,6 +318,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           onSelected: (String selection) {
             onAutocompleteSelected(context, selection);
           },
+          onSubmitted: (String selection) {
+            onAutocompleteSelected(context, selection);
+          },
           maxLines: 1,
         ),
       ),

@@ -152,6 +152,7 @@ class HomeScreenController {
     required String query,
     required int skip,
     required int limit,
+    FetchPolicy? fetchPolicy,
   }) async {
     String text = textEditingValue.text;
 
@@ -166,6 +167,7 @@ class HomeScreenController {
       query: query,
       skip: skip,
       limit: limit,
+      fetchPolicy: fetchPolicy,
     );
 
     Set eventTitles = events.map((event) => event.title).toSet();

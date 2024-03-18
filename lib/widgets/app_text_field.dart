@@ -22,6 +22,7 @@ class AppTextField extends StatelessWidget {
   final Color? placeholderColor;
   final TextInputAction? textInputAction;
   final void Function()? onTap;
+  final void Function(String)? onSubmitted;
 
   const AppTextField({
     super.key,
@@ -42,6 +43,7 @@ class AppTextField extends StatelessWidget {
     this.placeholderColor,
     this.textInputAction,
     this.onTap,
+    this.onSubmitted,
     this.inputFormatters,
   });
 
@@ -55,6 +57,7 @@ class AppTextField extends StatelessWidget {
       focusNode: focusNode,
       controller: controller,
       onChanged: onChanged,
+      onFieldSubmitted: onSubmitted,
       onTap: onTap,
       validator: validator,
       obscureText: obscureText,

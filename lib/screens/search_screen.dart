@@ -209,6 +209,9 @@ class _SearchScreenState extends State<SearchScreen> {
                       onSelected: (AutocompletePlacesResult selection) {
                         print('You just selected ${selection.originalId}');
                       },
+                      onSubmitted: (String value) {
+                        print('You just selected $value');
+                      },
                     ),
                   ),
                 ],

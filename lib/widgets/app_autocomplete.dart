@@ -23,6 +23,7 @@ class AppAutocomplete<T extends Object> extends StatelessWidget {
   final int? maxLines;
   final TextInputAction? textInputAction;
   final void Function(T) onSelected;
+  final void Function(String) onSubmitted;
 
   const AppAutocomplete({
     super.key,
@@ -32,6 +33,7 @@ class AppAutocomplete<T extends Object> extends StatelessWidget {
     required this.textEditingController,
     required this.focusNode,
     required this.onSelected,
+    required this.onSubmitted,
     this.prefixIcon,
     this.borderRadius,
     this.backgroundColor,
@@ -75,6 +77,7 @@ class AppAutocomplete<T extends Object> extends StatelessWidget {
           onChanged: (value) {
             textEditingController.text = value;
           },
+          onSubmitted: onSubmitted,
           validator: (value) {
             return null;
           },

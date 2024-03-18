@@ -158,99 +158,129 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return _isLoadingEvents || _isLoadingLocation
-        ? Center(
-            child: CircularProgressIndicator(
-              color: LightThemeColors.primary,
+    if (_isLoadingEvents || _isLoadingLocation) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: LightThemeColors.primary,
+        ),
+      );
+    }
+
+    Widget autocomplete = Container(
+      margin: const EdgeInsets.only(
+        right: 20,
+        bottom: 20,
+        left: 20,
+      ),
+      child: AppAutocomplete(
+        textEditingController: _textEditingController,
+        focusNode: _focusNode,
+        borderRadius: 35,
+        prefixIcon: const Icon(Icons.search),
+        hintText: 'Search for events...',
+        optionsBuilder: (TextEditingValue textEditingValue) =>
+            _homeScreenController.autocompleteEventsOptionsBuilder(
+          textEditingValue: textEditingValue,
+          graphqlDocument: HomeScreenQueries.autocompleteEvents,
+          query: _textEditingController.text,
+          skip: 0,
+          limit: 10,
+          fetchPolicy: FetchPolicy.networkOnly,
+        ),
+        optionsViewBuilder: (
+          BuildContext context,
+          onAutoCompleteSelect,
+          Iterable<String> options,
+        ) =>
+            _homeScreenController.autocompleteEventsOptionsViewBuilder(
+          context: context,
+          onAutoCompleteSelect: onAutoCompleteSelect,
+          options: options,
+          scrollController: _scrollController,
+        ),
+        onSelected: (String selection) {
+          onAutocompleteSelected(context, selection);
+        },
+        onSubmitted: (String value) {
+          onAutocompleteSelected(context, value);
+        },
+      ),
+    );
+
+    if (_months.isEmpty) {
+      return Column(
+        children: [
+          Container(
+            margin: const EdgeInsets.all(20),
+            child: HomeHeader(
+              imgSrc: 'https://source.unsplash.com/random/',
+              geolocation: _geolocation,
+            ),
+          ),
+          autocomplete,
+          Center(
+            child: Text(
+              'No events found',
+              style: TextStyle(
+                color: LightThemeColors.text,
+              ),
             ),
           )
-        : RefreshIndicator(
-            onRefresh: () => onRefresh(context),
-            child: Column(
-              children: [
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  child: HomeHeader(
-                    imgSrc: 'https://source.unsplash.com/random/',
-                    geolocation: _geolocation,
-                  ),
+        ],
+      );
+    } else {
+      return RefreshIndicator(
+          onRefresh: () => onRefresh(context),
+          child: Column(
+            children: [
+              Container(
+                margin: const EdgeInsets.all(20),
+                child: HomeHeader(
+                  imgSrc: 'https://source.unsplash.com/random/',
+                  geolocation: _geolocation,
                 ),
-                Container(
-                  margin: const EdgeInsets.only(
-                    right: 20,
-                    bottom: 20,
-                    left: 20,
-                  ),
-                  child: AppAutocomplete(
-                    textEditingController: _textEditingController,
-                    focusNode: _focusNode,
-                    borderRadius: 35,
-                    prefixIcon: const Icon(Icons.search),
-                    hintText: 'Search for events...',
-                    optionsBuilder: (TextEditingValue textEditingValue) =>
-                        _homeScreenController.autocompleteEventsOptionsBuilder(
-                      textEditingValue: textEditingValue,
-                      graphqlDocument: HomeScreenQueries.autocompleteEvents,
-                      query: _textEditingController.text,
-                      skip: 0,
-                      limit: 10,
-                    ),
-                    optionsViewBuilder: (
-                      BuildContext context,
-                      onAutoCompleteSelect,
-                      Iterable<String> options,
-                    ) =>
-                        _homeScreenController
-                            .autocompleteEventsOptionsViewBuilder(
-                      context: context,
-                      onAutoCompleteSelect: onAutoCompleteSelect,
-                      options: options,
-                      scrollController: _scrollController,
-                    ),
-                    onSelected: (String selection) {
-                      onAutocompleteSelected(context, selection);
-                    },
-                  ),
-                ),
-                Expanded(
-                  child: ListView.builder(
-                    controller: _scrollController,
-                    shrinkWrap: true,
-                    itemCount: _months.length,
-                    itemBuilder: (context, index) {
-                      final month = _months[index];
+              ),
+              autocomplete,
+              Expanded(
+                child: ListView.builder(
+                  controller: _scrollController,
+                  shrinkWrap: true,
+                  itemCount: _months.length,
+                  itemBuilder: (context, index) {
+                    final month = _months[index];
 
-                      return Column(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 20),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                MonthTile(text: month.name),
-                                EventsCounter(count: month.events.length),
-                              ],
-                            ),
+                    return Column(
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 20),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              MonthTile(text: month.name),
+                              EventsCounter(count: month.events.length),
+                            ],
                           ),
-                          ListView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: month.events.length,
-                            itemBuilder: (context, eventIndex) {
-                              Event event = month.events[eventIndex];
+                        ),
+                        ListView.builder(
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemCount: month.events.length,
+                          itemBuilder: (context, eventIndex) {
+                            Event event = month.events[eventIndex];
 
-                              return TouchableOpacity(
-                                onTap: () => onEventPressed(context, event),
-                                child: EventCard(event: event),
-                              );
-                            },
-                          ).build(context),
-                        ],
-                      );
-                    },
-                  ).build(context),
-                ),
-              ],
-            ));
+                            return TouchableOpacity(
+                              onTap: () => onEventPressed(context, event),
+                              child: EventCard(event: event),
+                            );
+                          },
+                        ).build(context),
+                      ],
+                    );
+                  },
+                ).build(context),
+              ),
+            ],
+          ));
+    }
   }
 }
