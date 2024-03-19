@@ -1,77 +1,20 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/controllers/search_results_screen_controller.dart';
+import 'package:events_app_mobile/graphql/search_results_screen/search_results_screen_queries.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/month.dart';
 import 'package:events_app_mobile/screens/event_screen.dart';
+import 'package:events_app_mobile/services/event_service.dart';
+import 'package:events_app_mobile/utils/month_utils.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/event_card.dart';
 import 'package:events_app_mobile/widgets/events_counter.dart';
 import 'package:events_app_mobile/widgets/month_tile.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-
-String searchEvents =
-    """
-  query SEARCH_EVENTS(\$input: SearchEventsInput!) {
-    searchEvents(input: \$input) {
-      items {
-        id
-        image {
-          src
-        }
-        createdAt
-        updatedAt
-        title
-        place {
-          originalId
-          googleMapsUri
-          location {
-            latitude
-            longitude
-          }
-        }
-        description
-        startDate
-        endDate
-        ticketPrice
-      }
-      totalPagesCount
-    }
-  }
-""";
-
-String autocompleteEvents =
-    """
-  query AUTOCOMPLETE_EVENTS(\$input: AutocompleteEventsInput!) {
-    autocompleteEvents(input: \$input) {
-      items {
-        id
-        image {
-          src
-        }
-        createdAt
-        updatedAt
-        title
-        place {
-          originalId
-          googleMapsUri
-          location {
-            latitude
-            longitude
-          }
-        }
-        description
-        startDate
-        endDate
-        ticketPrice
-      }
-      totalPagesCount
-    }
-  }
-""";
 
 class SearchResultsScreen extends StatefulWidget {
   final String query;
@@ -91,74 +34,27 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
   TextEditingController? _textEditingController;
 
-  List<Month> _getMonths(response) {
-    List<Event> events = response.data?['searchEvents']['items']
-        .map((item) => Event.fromMap(item))
-        .toList()
-        .cast<Event>();
+  late EventService _eventService;
+  late SearchResultsScreenController _searchResultsScreenController;
 
-    if (events.isEmpty) {
-      return _months;
-    }
-
-    Set<String> uniqueMonthNames = events
-        .map((event) =>
-            DateFormat('MMM yyyy').format(event.startDate ?? DateTime.now()))
-        .toSet();
-
-    List<Month> months = uniqueMonthNames.map((monthName) {
-      List<Event> eventsByMonth = events
-          .where((event) =>
-              DateFormat('MMM yyyy')
-                  .format(event.startDate ?? DateTime.now()) ==
-              monthName)
-          .toList();
-
-      return Month(
-        name: monthName,
-        events: eventsByMonth,
-      );
-    }).toList();
-
-    if (_months.isNotEmpty) {
-      Month lastMonthFromState = _months.last;
-      Month firstMonthFromResponse =
-          months.where((month) => month.name == lastMonthFromState.name).first;
-      Month updatedLastMonth = Month(
-        name: lastMonthFromState.name,
-        events: [
-          ...lastMonthFromState.events,
-          ...firstMonthFromResponse.events,
-        ],
-      );
-
-      List<Month> updatedMonths = [
-        ..._months.where((month) => month.name != updatedLastMonth.name),
-        updatedLastMonth,
-        ...months.sublist(1),
-      ];
-
-      return updatedMonths;
-    }
-
-    return months;
+  List<Month> _getMonths(List<Event> events) {
+    return MonthUtils.getMonths(
+      events: events,
+      prevMonths: _months,
+    ).toList();
   }
 
   Future<void> _searchEvents(FetchPolicy fetchPolicy) async {
-    GraphQLClient client = GraphQLProvider.of(context).value;
-    var response = await client.query(QueryOptions(
-      document: gql(searchEvents),
-      variables: {
-        'input': {
-          'query': widget.query,
-          'skip': _skip,
-          'limit': 10,
-        },
-      },
-      fetchPolicy: fetchPolicy,
-    ));
+    List<Event> events = await _searchResultsScreenController.searchEvents(
+      context: context,
+      graphqlDocument: SearchResultsScreenQueries.searchEvents,
+      query: widget.query,
+      skip: _skip,
+      limit: 10,
+      fetchPolicy: FetchPolicy.networkOnly,
+    );
 
-    List<Month> months = _getMonths(response);
+    List<Month> months = _getMonths(events);
 
     if (mounted) {
       setState(() {
@@ -175,6 +71,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
     _scrollController = ScrollController();
     _textEditingController = TextEditingController(text: widget.query);
+
+    _eventService = EventService();
+
+    _searchResultsScreenController =
+        SearchResultsScreenController(eventService: _eventService);
 
     _scrollController.addListener(() async {
       var nextPageTrigger = 0.8 * _scrollController.position.maxScrollExtent;
@@ -214,37 +115,15 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     super.dispose();
   }
 
-  Future<Iterable<String>> optionsBuilder(
-      TextEditingValue textEditingValue) async {
-    String text = textEditingValue.text;
-
-    if (text == '') {
-      return const Iterable<String>.empty();
-    }
-
-    List<String> options = [];
-
-    GraphQLClient client = GraphQLProvider.of(context).value;
-    var response = await client.query(QueryOptions(
-      document: gql(autocompleteEvents),
-      variables: {
-        'input': {
-          'query': text,
-          'skip': 0,
-          'limit': 10,
-        },
-      },
-    ));
-
-    Map<String, dynamic> data = response.data ?? {};
-
-    Set eventTitles = (data['autocompleteEvents']['items'])
-        .map((eventMap) => Event.fromMap(eventMap).title)
-        .toSet();
-
-    eventTitles.forEach((title) => options.add(title));
-
-    return options;
+  Future<Iterable<String>> optionsBuilder(TextEditingValue textEditingValue) {
+    return _searchResultsScreenController.autocompleteEventsOptionsBuilder(
+      context: context,
+      graphqlDocument: SearchResultsScreenQueries.autocompleteEvents,
+      query: textEditingValue.text,
+      skip: 0,
+      limit: 10,
+      fetchPolicy: FetchPolicy.networkOnly,
+    );
   }
 
   Widget optionsViewBuilder(
@@ -252,35 +131,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     onAutoCompleteSelect,
     Iterable<String> options,
   ) {
-    return Align(
-        alignment: Alignment.topLeft,
-        child: Material(
-          color: LightThemeColors.grey,
-          elevation: 4.0,
-          child: SizedBox(
-              width: MediaQuery.of(context).size.width - 40,
-              child: ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: _scrollController,
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                itemCount: options.length,
-                separatorBuilder: (context, i) {
-                  return const Divider();
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  if (options.isNotEmpty) {
-                    return GestureDetector(
-                      onTap: () =>
-                          onAutoCompleteSelect(options.elementAt(index)),
-                      child: Text(options.elementAt(index)),
-                    );
-                  }
-
-                  return null;
-                },
-              )),
-        ));
+    return _searchResultsScreenController.autocompleteEventsOptionsViewBuilder(
+      context: context,
+      onAutoCompleteSelect: onAutoCompleteSelect,
+      options: options,
+      scrollController: _scrollController,
+    );
   }
 
   void onAutocompleteSelected(BuildContext context, String text) {

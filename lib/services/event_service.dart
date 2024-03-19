@@ -117,4 +117,39 @@ class EventService {
 
     return Paginated<Event>(items: events, totalPagesCount: totalPagesCount);
   }
+
+  Future<Paginated<Event>> searchEvents({
+    required BuildContext context,
+    required String graphqlDocument,
+    required String query,
+    required int skip,
+    required int limit,
+    FetchPolicy? fetchPolicy = FetchPolicy.cacheFirst,
+  }) async {
+    GraphQLClient client = GraphQLProvider.of(context).value;
+    var response = await client.query(QueryOptions(
+      document: gql(graphqlDocument),
+      variables: {
+        'input': {
+          'query': query,
+          'skip': skip,
+          'limit': limit,
+        },
+      },
+      fetchPolicy: fetchPolicy,
+    ));
+
+    List<Event> events = response.data!['searchEvents']['items']
+        .map((item) => Event.fromMap(item))
+        .toList()
+        .cast<Event>();
+    int totalPagesCount = response.data!['searchEvents']['totalPagesCount'];
+
+    Paginated<Event> paginatedEvents = Paginated(
+      items: events,
+      totalPagesCount: totalPagesCount,
+    );
+
+    return paginatedEvents;
+  }
 }
