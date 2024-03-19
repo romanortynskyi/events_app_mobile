@@ -51,7 +51,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       query: widget.query,
       skip: _skip,
       limit: 10,
-      fetchPolicy: FetchPolicy.networkOnly,
+      fetchPolicy: fetchPolicy,
     );
 
     List<Month> months = _getMonths(events);
@@ -140,10 +140,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   void onAutocompleteSelected(BuildContext context, String text) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SearchResultsScreen(query: text)),
-    );
+    _searchResultsScreenController.onAutocompleteSelected(context, text);
   }
 
   @override

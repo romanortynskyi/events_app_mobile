@@ -1,6 +1,7 @@
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/paginated.dart';
+import 'package:events_app_mobile/screens/search_results_screen.dart';
 import 'package:events_app_mobile/services/event_service.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -97,5 +98,12 @@ class SearchResultsScreenController {
                 },
               )),
         ));
+  }
+
+  void onAutocompleteSelected(BuildContext context, String text) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => SearchResultsScreen(query: text)),
+    );
   }
 }
