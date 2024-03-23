@@ -226,33 +226,33 @@ class _AddEventScreenState extends State<AddEventScreen> {
         double progressBarValue = (state.step + 1 / steps.length) * 100;
 
         return Scaffold(
-          backgroundColor: LightThemeColors.background,
-          appBar: AppBar(
-            title: const Text('Vertical Image'),
-            centerTitle: true,
-            leading: state.step > 0
-                ? IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                    ),
-                    onPressed: _onBackPressed,
-                  )
-                : null,
-          ),
-          body: Column(
-            children: [
-              AppProgressBar(
-                duration: 300,
-                color: LightThemeColors.primary,
-                height: 5,
-                radius: 0,
-                padding: 0,
-                value: progressBarValue,
+            backgroundColor: LightThemeColors.background,
+            appBar: AppBar(
+              title: const Text('Vertical Image'),
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(5),
+                child: AppProgressBar(
+                  duration: 300,
+                  color: LightThemeColors.primary,
+                  height: 5,
+                  radius: 0,
+                  padding: 0,
+                  value: progressBarValue,
+                ),
               ),
-              step,
-            ],
-          ),
-        );
+              centerTitle: true,
+              leading: state.step > 0
+                  ? IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back,
+                      ),
+                      onPressed: _onBackPressed,
+                    )
+                  : null,
+            ),
+            body: SingleChildScrollView(
+              child: step,
+            ));
       },
     );
   }

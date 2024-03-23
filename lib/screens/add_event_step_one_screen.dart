@@ -69,6 +69,7 @@ class _AddEventStepOneScreenState extends State<AddEventStepOneScreen> {
       return Container(
         margin: const EdgeInsets.all(20),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             GestureDetector(
               onTap: image == null ? _onChooseImagePressed : () {},

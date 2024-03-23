@@ -38,7 +38,7 @@ class _AddEventStepTwoScreenState extends State<AddEventStepTwoScreen> {
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       double newTapToChooseImageTextWidth =
-          WidgetUtils.getSize(tapToChooseImageTextKey).height;
+          WidgetUtils.getSize(tapToChooseImageTextKey).width;
 
       if (!tapToChooseImageTextWidthReceived &&
           newTapToChooseImageTextWidth > 0) {
@@ -61,13 +61,15 @@ class _AddEventStepTwoScreenState extends State<AddEventStepTwoScreen> {
                 _image == null
                     ? Image.asset('lib/images/image-placeholder-horizontal.png')
                     : Image.file(_image ?? File('')),
-                Positioned.fill(
+                Positioned(
                   left: tapToChooseImageTextWidth / 2 - 10,
                   top: 180,
-                  child: Text(
-                    _image == null ? 'Tap to choose an image' : '',
-                    key: tapToChooseImageTextKey,
-                  ),
+                  child: _image == null
+                      ? Text(
+                          'Tap to choose an image',
+                          key: tapToChooseImageTextKey,
+                        )
+                      : const SizedBox(),
                 ),
                 Positioned(
                   top: 0,

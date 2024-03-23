@@ -4,14 +4,14 @@ import 'package:equatable/equatable.dart';
 import 'package:events_app_mobile/abstract/copyable.dart';
 
 class EventInput implements Copyable, Equatable {
-  String? placeId;
-  String? title;
-  String? description;
-  DateTime? startDate;
-  DateTime? endDate;
-  double? ticketPrice;
-  File? verticalImage;
-  List<int>? categories;
+  final String? placeId;
+  final String? title;
+  final String? description;
+  final DateTime? startDate;
+  final DateTime? endDate;
+  final double? ticketPrice;
+  final File? verticalImage;
+  final List<int>? categories;
 
   EventInput({
     this.placeId,
