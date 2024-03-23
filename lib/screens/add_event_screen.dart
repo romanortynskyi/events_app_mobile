@@ -2,15 +2,20 @@
 
 import 'dart:io';
 
+import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/mutations/add_event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
+import 'package:events_app_mobile/screens/add_event_step_one_screen.dart';
+import 'package:events_app_mobile/screens/add_event_step_two_screen.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/screens/map_screen.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
+import 'package:events_app_mobile/widgets/app_progress_bar.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart';
 import 'package:intl/intl.dart';
@@ -35,6 +40,11 @@ class _AddEventScreenState extends State<AddEventScreen> {
   DateTime? _endDateTime;
   File? _imageFile;
   String? _placeId;
+
+  List<Widget> steps = [
+    const AddEventStepOneScreen(),
+    const AddEventStepTwoScreen(),
+  ];
 
   void onSelectLocationPressed() async {
     if (_formKey.currentState!.validate()) {
@@ -204,104 +214,46 @@ class _AddEventScreenState extends State<AddEventScreen> {
     }
   }
 
+  void _onBackPressed() {
+    context.read<AddEventBloc>().add(const AddEventDecrementStepRequested());
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20),
-        child: Form(
-          key: _formKey,
-          autovalidateMode: AutovalidateMode.onUserInteraction,
-          child: Column(
+    return BlocBuilder<AddEventBloc, AddEventState>(
+      builder: (BuildContext context, AddEventState state) {
+        Widget step = steps[state.step];
+        double progressBarValue = (state.step + 1 / steps.length) * 100;
+
+        return Scaffold(
+          backgroundColor: LightThemeColors.background,
+          appBar: AppBar(
+            title: const Text('Vertical Image'),
+            centerTitle: true,
+            leading: state.step > 0
+                ? IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back,
+                    ),
+                    onPressed: _onBackPressed,
+                  )
+                : null,
+          ),
+          body: Column(
             children: [
-              const SizedBox(height: 20),
-              Text(
-                'Add Event',
-                style: TextStyle(
-                  color: LightThemeColors.text,
-                  fontSize: 30,
-                ),
+              AppProgressBar(
+                duration: 300,
+                color: LightThemeColors.primary,
+                height: 5,
+                radius: 0,
+                padding: 0,
+                value: progressBarValue,
               ),
-              const SizedBox(height: 20),
-              AppTextField(
-                validator: titleValidator,
-                hintText: 'Title',
-                obscureText: false,
-                onChanged: onTitleChanged,
-              ),
-              const SizedBox(height: 10),
-              AppTextField(
-                validator: descriptionValidator,
-                hintText: 'Description',
-                obscureText: false,
-                onChanged: onDescriptionChanged,
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-              ),
-              const SizedBox(height: 10),
-              _startDateTime == null
-                  ? AppButton(
-                      onPressed: onShowStartDatePicker,
-                      text: 'Select Start Date',
-                    )
-                  : Row(
-                      children: [
-                        Text(
-                          DateFormat('EEE, MMM DD yyyy hh:mm')
-                              .format(_startDateTime ?? DateTime.now()),
-                        ),
-                        IconButton(
-                            onPressed: onShowStartDatePicker,
-                            icon: const Icon(Icons.edit))
-                      ],
-                    ),
-              const SizedBox(height: 10),
-              _endDateTime == null
-                  ? AppButton(
-                      onPressed: onShowEndDatePicker,
-                      text: 'Select End Date',
-                    )
-                  : Row(
-                      children: [
-                        Text(
-                          DateFormat('EEE, MMM DD yyyy hh:mm')
-                              .format(_endDateTime ?? DateTime.now()),
-                        ),
-                        IconButton(
-                            onPressed: onShowEndDatePicker,
-                            icon: const Icon(Icons.edit))
-                      ],
-                    ),
-              const SizedBox(height: 10),
-              AppTextField(
-                keyboardType: TextInputType.number,
-                inputFormatters: <TextInputFormatter>[
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-                validator: ticketPriceValidator,
-                hintText: 'Ticket Price',
-                obscureText: false,
-                onChanged: onTicketPriceChanged,
-              ),
-              const SizedBox(height: 10),
-              AppButton(onPressed: onSelectImagePressed, text: 'Select Image'),
-              const SizedBox(height: 10),
-              _imageFile?.path == null
-                  ? Container()
-                  : Text(_imageFile?.path ?? ''),
-              AppButton(
-                onPressed: onSelectLocationPressed,
-                text: 'Select Location',
-              ),
-              const SizedBox(height: 10),
-              AppButton(
-                onPressed: onSubmitPressed,
-                text: 'Submit',
-              ),
+              step,
             ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

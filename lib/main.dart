@@ -1,3 +1,4 @@
+import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart';
 import 'package:events_app_mobile/bloc/auth/email_sign_in/email_sign_in_bloc.dart';
 import 'package:events_app_mobile/bloc/auth/facebook_sign_in/facebook_sign_in_bloc.dart';
 import 'package:events_app_mobile/bloc/auth/google_sign_in/google_sign_in_bloc.dart';
@@ -70,6 +71,11 @@ class MyApp extends StatelessWidget {
               return FacebookSignInBloc(
                 authRepository: AuthRepository(),
               );
+            },
+          ),
+          BlocProvider<AddEventBloc>(
+            create: (context) {
+              return AddEventBloc();
             },
           ),
         ],
