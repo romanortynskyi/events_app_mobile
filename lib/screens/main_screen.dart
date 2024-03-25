@@ -47,6 +47,12 @@ class _MainScreenState extends State<MainScreen> {
     ProfileScreen(),
   ];
 
+  void _onBottomNavigationBarItemTap(int index) {
+    setState(() {
+      _index = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,11 +63,7 @@ class _MainScreenState extends State<MainScreen> {
         backgroundColor: LightThemeColors.white,
         height: GlobalConsts.bottomNavigationBarHeight,
         index: _index,
-        onTap: (value) {
-          setState(() {
-            _index = value;
-          });
-        },
+        onTap: _onBottomNavigationBarItemTap,
       ),
       body: SafeArea(
         child: items[_index],

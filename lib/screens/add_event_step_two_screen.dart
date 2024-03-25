@@ -37,6 +37,12 @@ class _AddEventStepTwoScreenState extends State<AddEventStepTwoScreen> {
     }
   }
 
+  void _onContinue() {
+    context
+        .read<add_event_bloc.AddEventBloc>()
+        .add(const add_event_bloc.AddEventIncrementStepRequested());
+  }
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -106,7 +112,8 @@ class _AddEventStepTwoScreenState extends State<AddEventStepTwoScreen> {
               ),
               const SizedBox(height: 20),
               AppButton(
-                onPressed: () {},
+                isDisabled: image == null,
+                onPressed: image == null ? null : _onContinue,
                 text: 'Continue',
               ),
             ],

@@ -7,6 +7,7 @@ import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/mutations/add_event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/screens/add_event_step_one_screen.dart';
+import 'package:events_app_mobile/screens/add_event_step_three_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_two_screen.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/screens/map_screen.dart';
@@ -42,11 +43,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
   List<String> titles = [
     'Vertical Image',
     'Horizontal Image',
+    'Add Event Details',
   ];
 
   List<Widget> steps = [
     const AddEventStepOneScreen(),
     const AddEventStepTwoScreen(),
+    const AddEventStepThreeScreen(),
   ];
 
   void onSelectLocationPressed() async {
@@ -164,18 +167,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
     }
   }
 
-  void onSelectImagePressed() async {
-    XFile? image = await ImagePicker().pickImage(source: ImageSource.gallery);
-
-    if (image != null) {
-      File file = File(image.path);
-
-      setState(() {
-        _imageFile = file;
-      });
-    }
-  }
-
   void onSubmitPressed() async {
     if (_imageFile != null) {
       var byteData = _imageFile?.readAsBytesSync();
@@ -226,7 +217,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
     return BlocBuilder<AddEventBloc, AddEventState>(
       builder: (BuildContext context, AddEventState state) {
         Widget step = steps[state.step];
-        double progressBarValue = (state.step + 1 / steps.length) * 100;
+        double progressBarValue = ((state.step + 1) / steps.length) * 100;
         String title = titles[state.step];
 
         return Scaffold(
