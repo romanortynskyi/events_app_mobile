@@ -1,31 +1,31 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:events_app_mobile/exceptions/wrong_email_or_password_exception.dart';
 import 'package:events_app_mobile/models/user.dart';
-import 'package:events_app_mobile/repositories/auth_repository.dart';
+import 'package:events_app_mobile/services/auth_service.dart';
 import 'package:flutter/widgets.dart';
 
 part 'email_sign_in_event.dart';
 part 'email_sign_in_state.dart';
 
 class EmailSignInBloc extends Bloc<EmailSignInEvent, EmailSignInState> {
-  EmailSignInBloc({required this.authRepository})
-      : super(UnAuthenticated(user: null)) {
+  EmailSignInBloc({required this.authService})
+      : super(const UnAuthenticated(user: null)) {
     on<EmailSignInRequested>(_onEmailSignInPressed);
     on<EmailSignUpRequested>(_onEmailSignUpPressed);
     on<EmailSignInErrorRequested>(_onEmailSignInError);
     on<EmailSignOutRequested>(_onEmailSignOutPressed);
     on<EmailGetMeRequested>(_onGetMe);
   }
-  final AuthRepository authRepository;
+  final AuthService authService;
 
   Future<void> _onEmailSignInPressed(
     EmailSignInRequested event,
     Emitter<EmailSignInState> emit,
   ) async {
-    emit(Loading());
+    emit(const Loading());
+
     try {
-      final user = await authRepository.signIn(
+      final user = await authService.signIn(
         context: event.context,
         email: event.email,
         password: event.password,
@@ -43,9 +43,10 @@ class EmailSignInBloc extends Bloc<EmailSignInEvent, EmailSignInState> {
     EmailSignUpRequested event,
     Emitter<EmailSignInState> emit,
   ) async {
-    emit(Loading());
+    emit(const Loading());
+
     try {
-      final user = await authRepository.signUp(
+      final user = await authService.signUp(
         context: event.context,
         email: event.email,
         password: event.password,
@@ -72,15 +73,16 @@ class EmailSignInBloc extends Bloc<EmailSignInEvent, EmailSignInState> {
     EmailSignOutRequested event,
     Emitter<EmailSignInState> emit,
   ) async {
-    await authRepository.signOut();
-    emit(UnAuthenticated(user: null));
+    await authService.signOut();
+
+    emit(const UnAuthenticated(user: null));
   }
 
   void _onGetMe(
     EmailGetMeRequested event,
     Emitter<EmailSignInState> emit,
   ) async {
-    User? user = await authRepository.getMe(event.context);
+    User? user = await authService.getMe(event.context);
 
     if (user != null) {
       Authenticated(user: user);

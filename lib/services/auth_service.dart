@@ -3,10 +3,11 @@
 import 'package:events_app_mobile/consts/enums/auth_provider.dart';
 import 'package:events_app_mobile/consts/enums/error_message.dart';
 import 'package:events_app_mobile/exceptions/wrong_email_or_password_exception.dart';
-import 'package:events_app_mobile/graphql/mutations/login.dart';
-import 'package:events_app_mobile/graphql/mutations/sign_up.dart' as sign_up;
-import 'package:events_app_mobile/graphql/mutations/login_with_google.dart';
-import 'package:events_app_mobile/graphql/mutations/login_with_facebook.dart';
+import 'package:events_app_mobile/graphql/global/mutations/login.dart';
+import 'package:events_app_mobile/graphql/global/mutations/sign_up.dart'
+    as sign_up;
+import 'package:events_app_mobile/graphql/global/mutations/login_with_google.dart';
+import 'package:events_app_mobile/graphql/global/mutations/login_with_facebook.dart';
 import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:events_app_mobile/graphql/queries/get_me.dart' as get_me;
@@ -15,7 +16,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-class AuthRepository {
+class AuthService {
   Future<User?> signInWithGoogle(BuildContext context) async {
     GoogleSignIn googleSignIn = GoogleSignIn();
     GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();

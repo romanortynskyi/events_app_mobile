@@ -4,18 +4,18 @@ abstract class FacebookSignInState extends Equatable {
   @override
   List<Object?> get props => [];
 
-  User? user;
-  FacebookSignInState(this.user);
+  final User? user;
+  const FacebookSignInState(this.user);
 }
 
 class UnAuthenticated extends FacebookSignInState {
-  UnAuthenticated(super.user);
+  const UnAuthenticated(super.user);
 }
 
 class Authenticated extends FacebookSignInState {
-  Authenticated(super.user);
+  const Authenticated(super.user);
 }
 
 class Loading extends FacebookSignInState {
-  Loading(super.user);
+  const Loading(super.user);
 }

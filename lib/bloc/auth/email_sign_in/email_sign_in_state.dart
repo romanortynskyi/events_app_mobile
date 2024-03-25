@@ -4,23 +4,23 @@ abstract class EmailSignInState extends Equatable {
   @override
   List<Object?> get props => [];
 
-  User? user;
-  String? errorMessage;
-  EmailSignInState({this.user, this.errorMessage});
+  final User? user;
+  final String? errorMessage;
+  const EmailSignInState({this.user, this.errorMessage});
 }
 
 class UnAuthenticated extends EmailSignInState {
-  UnAuthenticated({super.user, super.errorMessage});
+  const UnAuthenticated({super.user, super.errorMessage});
 }
 
 class Authenticated extends EmailSignInState {
-  Authenticated({super.user, super.errorMessage});
+  const Authenticated({super.user, super.errorMessage});
 }
 
 class Loading extends EmailSignInState {
-  Loading({super.user, super.errorMessage});
+  const Loading({super.user, super.errorMessage});
 }
 
 class Error extends EmailSignInState {
-  Error({super.user, super.errorMessage});
+  const Error({super.user, super.errorMessage});
 }

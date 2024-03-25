@@ -4,18 +4,18 @@ abstract class GoogleSignInState extends Equatable {
   @override
   List<Object?> get props => [];
 
-  User? user;
-  GoogleSignInState(this.user);
+  final User? user;
+  const GoogleSignInState(this.user);
 }
 
 class UnAuthenticated extends GoogleSignInState {
-  UnAuthenticated(super.user);
+  const UnAuthenticated(super.user);
 }
 
 class Authenticated extends GoogleSignInState {
-  Authenticated(super.user);
+  const Authenticated(super.user);
 }
 
 class Loading extends GoogleSignInState {
-  Loading(super.user);
+  const Loading(super.user);
 }
