@@ -27,10 +27,6 @@ class SearchScreen extends StatefulWidget {
 }
 
 class _SearchScreenState extends State<SearchScreen> {
-  late EventService _eventService;
-  late LocationService _locationService;
-  late GeolocationService _geolocationService;
-  late PlaceService _placeService;
   late SearchScreenController _searchScreenController;
 
   final TextEditingController _textEditingController = TextEditingController();
@@ -125,17 +121,17 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
 
-    _eventService = EventService();
-    _locationService = LocationService();
-    _geolocationService = GeolocationService();
-    _placeService = PlaceService();
+    EventService eventService = EventService();
+    LocationService locationService = LocationService();
+    GeolocationService geolocationService = GeolocationService();
+    PlaceService placeService = PlaceService();
 
     _searchScreenController = SearchScreenController(
       context: context,
-      eventService: _eventService,
-      locationService: _locationService,
-      geolocationService: _geolocationService,
-      placeService: _placeService,
+      eventService: eventService,
+      locationService: locationService,
+      geolocationService: geolocationService,
+      placeService: placeService,
       rootBundle: rootBundle,
     );
 
