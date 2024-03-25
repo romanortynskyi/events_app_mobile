@@ -32,23 +32,21 @@ class _EventScreenState extends State<EventScreen> {
 
   bool _isLoadingGeolocation = true;
 
-  late LocationService _locationService;
-  late GeolocationService _geolocationService;
-  late EventService _eventService;
   late EventScreenController _eventScreenController;
 
   @override
   void initState() {
     super.initState();
 
-    _locationService = LocationService();
-    _geolocationService = GeolocationService();
-    _eventService = EventService();
+    LocationService locationService = LocationService();
+    GeolocationService geolocationService = GeolocationService();
+    EventService eventService = EventService();
+
     _eventScreenController = EventScreenController(
       context: context,
-      locationService: _locationService,
-      geolocationService: _geolocationService,
-      eventService: _eventService,
+      locationService: locationService,
+      geolocationService: geolocationService,
+      eventService: eventService,
     );
   }
 
