@@ -1,11 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
-import 'package:events_app_mobile/bloc/auth/email_sign_in/email_sign_in_bloc.dart'
-    as email_sign_in_bloc;
-import 'package:events_app_mobile/bloc/auth/google_sign_in/google_sign_in_bloc.dart'
-    as google_sign_in_bloc;
-import 'package:events_app_mobile/bloc/auth/facebook_sign_in/facebook_sign_in_bloc.dart'
-    as facebook_sign_in_bloc;
+import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
@@ -42,9 +37,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void onSignupPressed() {
     if (_formKey.currentState!.validate()) {
-      context
-          .read<email_sign_in_bloc.EmailSignInBloc>()
-          .add(email_sign_in_bloc.EmailSignUpRequested(
+      context.read<auth_bloc.AuthBloc>().add(auth_bloc.EmailSignUpRequested(
             context: context,
             email: _email,
             password: _password,
@@ -100,73 +93,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   void onLoginWithGoogle() async {
     context
-        .read<google_sign_in_bloc.GoogleSignInBloc>()
-        .add(google_sign_in_bloc.GoogleSignInRequested(context));
+        .read<auth_bloc.AuthBloc>()
+        .add(auth_bloc.GoogleSignInRequested(context));
   }
 
   void onLoginWithFacebook() async {
     context
-        .read<facebook_sign_in_bloc.FacebookSignInBloc>()
-        .add(facebook_sign_in_bloc.FacebookSignInRequested(context));
+        .read<auth_bloc.AuthBloc>()
+        .add(auth_bloc.FacebookSignInRequested(context));
   }
 
   @override
   Widget build(BuildContext context) {
-    var googleSignInState = context.select(
-        (google_sign_in_bloc.GoogleSignInBloc googleSignInBloc) =>
-            googleSignInBloc.state);
-    var facebookSignInState = context.select(
-        (facebook_sign_in_bloc.FacebookSignInBloc facebookSignInBloc) =>
-            facebookSignInBloc.state);
-    var emailSignInState = context.select(
-        (email_sign_in_bloc.EmailSignInBloc emailSignInBloc) =>
-            emailSignInBloc.state);
+    return BlocConsumer<auth_bloc.AuthBloc, auth_bloc.AuthState>(
+        listener: (context, state) {
+      if (state is auth_bloc.Authenticated) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MainScreen()),
+        );
+      }
 
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<email_sign_in_bloc.EmailSignInBloc,
-            email_sign_in_bloc.EmailSignInState>(
-          listener: (context, state) {
-            if (state is email_sign_in_bloc.Authenticated) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const MainScreen()),
-              );
-            }
+      if (state is auth_bloc.Error) {
+        onLoginError(context, state.errorMessage ?? '');
+      }
+    }, builder: (BuildContext context, auth_bloc.AuthState state) {
+      bool isLoading = state is auth_bloc.Loading;
 
-            if (state is email_sign_in_bloc.Error) {
-              onLoginError(context, state.errorMessage ?? '');
-            }
-          },
-        ),
-        BlocListener<google_sign_in_bloc.GoogleSignInBloc,
-            google_sign_in_bloc.GoogleSignInState>(
-          listener: (context, state) {
-            if (state is google_sign_in_bloc.Authenticated) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const MainScreen()),
-              );
-            }
-          },
-        ),
-        BlocListener<facebook_sign_in_bloc.FacebookSignInBloc,
-            facebook_sign_in_bloc.FacebookSignInState>(
-          listener: (context, state) {
-            if (state is facebook_sign_in_bloc.Authenticated) {
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const MainScreen()),
-              );
-            }
-          },
-        ),
-      ],
-      child: Scaffold(
+      return Scaffold(
         backgroundColor: LightThemeColors.background,
-        body: emailSignInState is email_sign_in_bloc.Loading ||
-                googleSignInState is google_sign_in_bloc.Loading ||
-                facebookSignInState is facebook_sign_in_bloc.Loading
+        body: isLoading
             ? const Center(child: CircularProgressIndicator())
             : SafeArea(
                 child: SingleChildScrollView(
@@ -254,7 +210,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                 ),
               ),
-      ),
-    );
+      );
+    });
   }
 }

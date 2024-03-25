@@ -1,8 +1,6 @@
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart';
-import 'package:events_app_mobile/bloc/auth/email_sign_in/email_sign_in_bloc.dart';
-import 'package:events_app_mobile/bloc/auth/facebook_sign_in/facebook_sign_in_bloc.dart';
-import 'package:events_app_mobile/bloc/auth/google_sign_in/google_sign_in_bloc.dart';
-import 'package:events_app_mobile/repositories/auth_repository.dart';
+import 'package:events_app_mobile/bloc/auth/auth_bloc.dart';
+import 'package:events_app_mobile/services/auth_service.dart';
 import 'package:events_app_mobile/screens/login_screen.dart';
 import 'package:events_app_mobile/utils/env_utils.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
@@ -43,8 +41,9 @@ main() async {
 
 class MyApp extends StatelessWidget {
   final ValueNotifier<GraphQLClient> client;
+  final AuthService authService = AuthService();
 
-  const MyApp(this.client, {super.key});
+  MyApp(this.client, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -52,24 +51,10 @@ class MyApp extends StatelessWidget {
       client: client,
       child: MultiBlocProvider(
         providers: [
-          BlocProvider<EmailSignInBloc>(
+          BlocProvider<AuthBloc>(
             create: (context) {
-              return EmailSignInBloc(
-                authRepository: AuthRepository(),
-              );
-            },
-          ),
-          BlocProvider<GoogleSignInBloc>(
-            create: (context) {
-              return GoogleSignInBloc(
-                authRepository: AuthRepository(),
-              );
-            },
-          ),
-          BlocProvider<FacebookSignInBloc>(
-            create: (context) {
-              return FacebookSignInBloc(
-                authRepository: AuthRepository(),
+              return AuthBloc(
+                authService: authService,
               );
             },
           ),

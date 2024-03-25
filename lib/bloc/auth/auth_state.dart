@@ -1,26 +1,26 @@
-part of 'email_sign_in_bloc.dart';
+part of 'auth_bloc.dart';
 
-abstract class EmailSignInState extends Equatable {
+abstract class AuthState extends Equatable {
   @override
   List<Object?> get props => [];
 
   final User? user;
   final String? errorMessage;
-  const EmailSignInState({this.user, this.errorMessage});
+  const AuthState({this.user, this.errorMessage});
 }
 
-class UnAuthenticated extends EmailSignInState {
+class UnAuthenticated extends AuthState {
   const UnAuthenticated({super.user, super.errorMessage});
 }
 
-class Authenticated extends EmailSignInState {
+class Authenticated extends AuthState {
   const Authenticated({super.user, super.errorMessage});
 }
 
-class Loading extends EmailSignInState {
+class Loading extends AuthState {
   const Loading({super.user, super.errorMessage});
 }
 
-class Error extends EmailSignInState {
+class Error extends AuthState {
   const Error({super.user, super.errorMessage});
 }
