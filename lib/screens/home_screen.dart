@@ -6,7 +6,6 @@ import 'package:events_app_mobile/graphql/home_screen/home_screen_queries.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/month.dart';
-import 'package:events_app_mobile/screens/event_screen.dart';
 import 'package:events_app_mobile/screens/search_results_screen.dart';
 import 'package:events_app_mobile/services/event_service.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
@@ -117,25 +116,22 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void onClearSearch() {
+  void _onClearSearch() {
     _textEditingController.clear();
   }
 
-  void onAutocompleteSelected(BuildContext context, String text) {
+  void _onAutocompleteSelected(BuildContext context, String text) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => SearchResultsScreen(query: text)),
     );
   }
 
-  void onEventPressed(BuildContext context, Event event) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => EventScreen(id: event.id ?? -1)),
-    );
+  void _onEventPressed(BuildContext context, Event event) {
+    _homeScreenController.onEventPressed(context, event);
   }
 
-  Future<void> onRefresh(BuildContext context) async {
+  Future<void> _onRefresh(BuildContext context) async {
     _homeScreenController.getCurrentGeolocation(
       HomeScreenQueries.getGeolocationByCoords,
       _onCurrentGeolocationLoaded,
@@ -201,10 +197,10 @@ class _HomeScreenState extends State<HomeScreen> {
           scrollController: _scrollController,
         ),
         onSelected: (String selection) {
-          onAutocompleteSelected(context, selection);
+          _onAutocompleteSelected(context, selection);
         },
         onSubmitted: (String value) {
-          onAutocompleteSelected(context, value);
+          _onAutocompleteSelected(context, value);
         },
       ),
     );
@@ -225,7 +221,7 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     } else {
       return RefreshIndicator(
-          onRefresh: () => onRefresh(context),
+          onRefresh: () => _onRefresh(context),
           child: Column(
             children: [
               Container(
@@ -264,7 +260,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             Event event = month.events[eventIndex];
 
                             return TouchableOpacity(
-                              onTap: () => onEventPressed(context, event),
+                              onTap: () => _onEventPressed(context, event),
                               child: EventCard(event: event),
                             );
                           },

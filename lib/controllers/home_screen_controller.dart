@@ -7,6 +7,7 @@ import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/month.dart';
 import 'package:events_app_mobile/models/paginated.dart';
+import 'package:events_app_mobile/screens/event_screen.dart';
 import 'package:events_app_mobile/services/event_service.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
 import 'package:events_app_mobile/services/location_service.dart';
@@ -212,5 +213,12 @@ class HomeScreenController {
                 },
               )),
         ));
+  }
+
+  void onEventPressed(BuildContext context, Event event) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EventScreen(id: event.id ?? -1)),
+    );
   }
 }
