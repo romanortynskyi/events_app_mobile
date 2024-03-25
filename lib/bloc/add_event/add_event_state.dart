@@ -30,6 +30,14 @@ class SetVerticalImage extends AddEventState {
   });
 }
 
+class SetHorizontalImage extends AddEventState {
+  const SetHorizontalImage({
+    required super.step,
+    required super.eventInput,
+    super.errorMessage,
+  });
+}
+
 class SetStep extends AddEventState {
   const SetStep({
     required super.step,

@@ -10,9 +10,7 @@ import 'package:events_app_mobile/screens/add_event_step_one_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_two_screen.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/screens/map_screen.dart';
-import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/app_progress_bar.dart';
-import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -40,6 +38,11 @@ class _AddEventScreenState extends State<AddEventScreen> {
   DateTime? _endDateTime;
   File? _imageFile;
   String? _placeId;
+
+  List<String> titles = [
+    'Vertical Image',
+    'Horizontal Image',
+  ];
 
   List<Widget> steps = [
     const AddEventStepOneScreen(),
@@ -224,11 +227,12 @@ class _AddEventScreenState extends State<AddEventScreen> {
       builder: (BuildContext context, AddEventState state) {
         Widget step = steps[state.step];
         double progressBarValue = (state.step + 1 / steps.length) * 100;
+        String title = titles[state.step];
 
         return Scaffold(
             backgroundColor: LightThemeColors.background,
             appBar: AppBar(
-              title: const Text('Vertical Image'),
+              title: Text(title),
               bottom: PreferredSize(
                 preferredSize: const Size.fromHeight(5),
                 child: AppProgressBar(

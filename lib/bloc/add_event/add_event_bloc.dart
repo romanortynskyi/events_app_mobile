@@ -12,6 +12,7 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
     on<AddEventSetVerticalImageRequested>(_onSetVerticalImage);
     on<AddEventIncrementStepRequested>(_onIncrementStep);
     on<AddEventDecrementStepRequested>(_onDecrementStep);
+    on<AddEventSetHorizontalImageRequested>(_onSetHorizontalImage);
   }
 
   void _onIncrementStep(
@@ -35,5 +36,14 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
     EventInput newEventInput =
         state.eventInput.copyWith(verticalImage: event.imageFile);
     emit(SetVerticalImage(eventInput: newEventInput, step: state.step));
+  }
+
+  void _onSetHorizontalImage(
+    AddEventSetHorizontalImageRequested event,
+    Emitter<AddEventState> emit,
+  ) async {
+    EventInput newEventInput =
+        state.eventInput.copyWith(horizontalImage: event.imageFile);
+    emit(SetHorizontalImage(eventInput: newEventInput, step: state.step));
   }
 }

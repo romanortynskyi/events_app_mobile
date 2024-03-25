@@ -11,6 +11,7 @@ class EventInput implements Copyable, Equatable {
   final DateTime? endDate;
   final double? ticketPrice;
   final File? verticalImage;
+  final File? horizontalImage;
   final List<int>? categories;
 
   EventInput({
@@ -21,6 +22,7 @@ class EventInput implements Copyable, Equatable {
     this.endDate,
     this.ticketPrice,
     this.verticalImage,
+    this.horizontalImage,
     this.categories,
   });
 
@@ -33,6 +35,7 @@ class EventInput implements Copyable, Equatable {
         endDate: endDate,
         ticketPrice: ticketPrice,
         verticalImage: verticalImage,
+        horizontalImage: horizontalImage,
         categories: categories,
       );
 
@@ -45,14 +48,18 @@ class EventInput implements Copyable, Equatable {
     DateTime? endDate,
     double? ticketPrice,
     File? verticalImage,
+    File? horizontalImage,
     List<int>? categories,
   }) {
-    File? newVerticalImage;
+    File? newVerticalImage = this.verticalImage;
+    File? newHorizontalImage = this.horizontalImage;
 
-    if (this.verticalImage == null) {
+    if (verticalImage != null) {
       newVerticalImage = verticalImage;
-    } else if (verticalImage!.path != this.verticalImage!.path) {
-      newVerticalImage = verticalImage;
+    }
+
+    if (horizontalImage != null) {
+      newHorizontalImage = horizontalImage;
     }
 
     return EventInput(
@@ -63,6 +70,7 @@ class EventInput implements Copyable, Equatable {
       endDate: endDate ?? this.endDate,
       ticketPrice: ticketPrice ?? this.ticketPrice,
       verticalImage: newVerticalImage,
+      horizontalImage: newHorizontalImage,
       categories: categories ?? this.categories,
     );
   }

@@ -25,6 +25,14 @@ class AddEventSetVerticalImageRequested extends AddEventEvent {
   });
 }
 
+class AddEventSetHorizontalImageRequested extends AddEventEvent {
+  final File imageFile;
+
+  const AddEventSetHorizontalImageRequested({
+    required this.imageFile,
+  });
+}
+
 class AddEventSetInitialEventInputRequested extends AddEventEvent {
   final EventInput eventInput;
 
