@@ -93,18 +93,18 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     super.didChangeDependencies();
   }
 
-  void onClearSearch() {
+  void _onClearSearch() {
     _textEditingController?.clear();
   }
 
-  void onEventPressed(BuildContext context, Event event) {
+  void _onEventPressed(BuildContext context, Event event) {
     Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => EventScreen(id: event.id ?? -1)),
     );
   }
 
-  Future<void> onRefresh(BuildContext context) async {
+  Future<void> _onRefresh(BuildContext context) async {
     return _searchEvents(FetchPolicy.networkOnly);
   }
 
@@ -115,7 +115,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     super.dispose();
   }
 
-  Future<Iterable<String>> optionsBuilder(TextEditingValue textEditingValue) {
+  Future<Iterable<String>> _optionsBuilder(TextEditingValue textEditingValue) {
     return _searchResultsScreenController.autocompleteEventsOptionsBuilder(
       context: context,
       graphqlDocument: SearchResultsScreenQueries.autocompleteEvents,
@@ -126,7 +126,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
-  Widget optionsViewBuilder(
+  Widget _optionsViewBuilder(
     BuildContext context,
     onAutoCompleteSelect,
     Iterable<String> options,
@@ -139,7 +139,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
-  void onAutocompleteSelected(BuildContext context, String text) {
+  void _onAutocompleteSelected(BuildContext context, String text) {
     _searchResultsScreenController.onAutocompleteSelected(context, text);
   }
 
@@ -166,13 +166,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           focusedBorderColor: Colors.transparent,
           placeholderColor: Colors.white,
           hintText: 'Search for events...',
-          optionsBuilder: optionsBuilder,
-          optionsViewBuilder: optionsViewBuilder,
+          optionsBuilder: _optionsBuilder,
+          optionsViewBuilder: _optionsViewBuilder,
           onSelected: (String selection) {
-            onAutocompleteSelected(context, selection);
+            _onAutocompleteSelected(context, selection);
           },
           onSubmitted: (String selection) {
-            onAutocompleteSelected(context, selection);
+            _onAutocompleteSelected(context, selection);
           },
           maxLines: 1,
         ),
@@ -184,7 +184,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               ),
             )
           : RefreshIndicator(
-              onRefresh: () => onRefresh(context),
+              onRefresh: () => _onRefresh(context),
               child: Expanded(
                 child: ListView.builder(
                   controller: _scrollController,
@@ -210,7 +210,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                             Event event = month.events[eventIndex];
 
                             return TouchableOpacity(
-                              onTap: () => onEventPressed(context, event),
+                              onTap: () => _onEventPressed(context, event),
                               child: EventCard(event: event),
                             );
                           },
