@@ -11,22 +11,20 @@ part 'auth_state.dart';
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthBloc({required this.authService})
       : super(const UnAuthenticated(user: null)) {
-    on<EmailSignInRequested>(_onEmailSignInPressed);
-    on<EmailSignUpRequested>(_onEmailSignUpPressed);
+    on<EmailSignInRequested>(_onEmailSignInRequested);
+    on<EmailSignUpRequested>(_onEmailSignUpRequested);
     on<EmailSignInErrorRequested>(_onEmailSignInError);
-    on<EmailGetMeRequested>(_onEmailGetMe);
 
-    on<FacebookSignInRequested>(_onFacebookSignInPressed);
-    on<FacebookGetMeRequested>(_onFacebookGetMe);
+    on<FacebookSignInRequested>(_onFacebookSignInRequested);
 
     on<GoogleSignInRequested>(_onGoogleSignInPressed);
-    on<GoogleGetMeRequested>(_onGoogleGetMe);
 
-    on<SignOutRequested>(_onSignOutPressed);
+    on<GetMeRequested>(_onGetMeRequested);
+    on<SignOutRequested>(_onSignOutRequested);
   }
   final AuthService authService;
 
-  Future<void> _onEmailSignInPressed(
+  Future<void> _onEmailSignInRequested(
     EmailSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
@@ -47,7 +45,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onEmailSignUpPressed(
+  void _onEmailSignUpRequested(
     EmailSignUpRequested event,
     Emitter<AuthState> emit,
   ) async {
@@ -77,7 +75,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(Error(errorMessage: event.errorMessage));
   }
 
-  void _onSignOutPressed(
+  void _onSignOutRequested(
     SignOutRequested event,
     Emitter<AuthState> emit,
   ) async {
@@ -86,8 +84,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const UnAuthenticated(user: null));
   }
 
-  void _onEmailGetMe(
-    EmailGetMeRequested event,
+  void _onGetMeRequested(
+    GetMeRequested event,
     Emitter<AuthState> emit,
   ) async {
     User? user =
@@ -98,7 +96,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  Future<void> _onFacebookSignInPressed(
+  Future<void> _onFacebookSignInRequested(
     FacebookSignInRequested event,
     Emitter<AuthState> emit,
   ) async {
@@ -111,18 +109,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onFacebookGetMe(
-    FacebookGetMeRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    User? user =
-        await authService.getMe(event.context, FetchPolicy.networkOnly);
-
-    if (user != null) {
-      Authenticated(user: user);
-    }
-  }
-
   Future<void> _onGoogleSignInPressed(
     GoogleSignInRequested event,
     Emitter<AuthState> emit,
@@ -130,20 +116,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const Loading());
 
     final user = await authService.signInWithGoogle(event.context);
-
-    if (user != null) {
-      emit(Authenticated(user: user));
-    }
-  }
-
-  void _onGoogleGetMe(
-    GoogleGetMeRequested event,
-    Emitter<AuthState> emit,
-  ) async {
-    emit(const Loading());
-
-    final user =
-        await authService.getMe(event.context, FetchPolicy.networkOnly);
 
     if (user != null) {
       emit(Authenticated(user: user));

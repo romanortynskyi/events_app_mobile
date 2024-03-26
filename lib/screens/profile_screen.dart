@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/user.dart';
@@ -5,6 +7,7 @@ import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -14,6 +17,17 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final ImagePicker _imagePicker = ImagePicker();
+
+  void _onChooseImagePressed() async {
+    XFile? pickedFile =
+        await _imagePicker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      File file = File(pickedFile.path);
+    }
+  }
+
   void _onSignOut() {
     context.read<auth_bloc.AuthBloc>().add(auth_bloc.SignOutRequested());
   }
@@ -68,71 +82,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               );
 
-        return Column(children: [
-          Stack(
-            children: [
-              Image.asset('lib/images/profile-background.png'),
-              Positioned(
-                bottom: 20,
-                left: imageLeft,
-                child: Stack(
-                  children: [
-                    Container(
-                        width: imageWidth,
-                        height: imageHeight,
-                        decoration: BoxDecoration(
-                          color: LightThemeColors.primary,
-                          borderRadius: BorderRadius.circular(200),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: const Offset(0, 0),
-                            ),
-                          ],
-                        ),
-                        child: Center(
-                          child: Text(
-                            initials,
-                            style: TextStyle(
-                              fontSize: 50,
-                              color: LightThemeColors.white,
-                            ),
+        return Column(
+          children: [
+            Stack(
+              children: [
+                Image.asset('lib/images/profile-background.png'),
+                Positioned(
+                  bottom: 20,
+                  left: imageLeft,
+                  child: Stack(
+                    children: [
+                      Container(
+                          width: imageWidth,
+                          height: imageHeight,
+                          decoration: BoxDecoration(
+                            color: LightThemeColors.primary,
+                            borderRadius: BorderRadius.circular(200),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 5,
+                                blurRadius: 7,
+                                offset: const Offset(0, 0),
+                              ),
+                            ],
                           ),
-                        )),
-                    deleteImageButton,
-                    Positioned(
-                      right: 10,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(200),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 2,
-                              blurRadius: 2,
-                              offset: const Offset(
-                                  0, 0), // changes position of shadow
+                          child: Center(
+                            child: Text(
+                              initials,
+                              style: TextStyle(
+                                fontSize: 50,
+                                color: LightThemeColors.white,
+                              ),
                             ),
-                          ],
-                        ),
-                        child: IconButton.filled(
-                          onPressed: () {},
-                          icon: const Icon(Icons.edit),
+                          )),
+                      deleteImageButton,
+                      Positioned(
+                        right: 10,
+                        child: Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(200),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.5),
+                                spreadRadius: 2,
+                                blurRadius: 2,
+                                offset: const Offset(
+                                    0, 0), // changes position of shadow
+                              ),
+                            ],
+                          ),
+                          child: IconButton.filled(
+                            onPressed: _onChooseImagePressed,
+                            icon: const Icon(Icons.edit),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+              ],
+            ),
+            Container(
+              margin: const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+              child: AppButton(
+                text: 'Sign Out',
+                onPressed: _onSignOut,
               ),
-            ],
-          ),
-          AppButton(text: 'Sign Out', onPressed: _onSignOut),
-        ]);
+            ),
+          ],
+        );
       },
     );
   }
