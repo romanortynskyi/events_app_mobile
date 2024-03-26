@@ -36,9 +36,6 @@ class EmailSignUpRequested extends AuthEvent {
     required this.password,
   });
 }
-
-class EmailSignOutRequested extends AuthEvent {}
-
 class EmailGetMeRequested extends AuthEvent {
   final BuildContext context;
 
@@ -57,8 +54,6 @@ class FacebookSignInRequested extends AuthEvent {
   const FacebookSignInRequested(this.context);
 }
 
-class FacebookSignOutRequested extends AuthEvent {}
-
 class FacebookGetMeRequested extends AuthEvent {
   final BuildContext context;
 
@@ -71,11 +66,10 @@ class GoogleSignInRequested extends AuthEvent {
   const GoogleSignInRequested(this.context);
 }
 
-class GoogleSignOutRequested extends AuthEvent {}
-
 class GoogleGetMeRequested extends AuthEvent {
   final BuildContext context;
 
   const GoogleGetMeRequested(this.context);
 }
 
+class SignOutRequested extends AuthEvent {}

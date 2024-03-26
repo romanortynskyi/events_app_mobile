@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, constant_pattern_never_matches_value_type
 
 import 'package:events_app_mobile/consts/enums/auth_provider.dart';
 import 'package:events_app_mobile/consts/enums/error_message.dart';
@@ -46,8 +46,9 @@ class AuthService {
 
   Future<void> signOutWithGoogle() async {
     GoogleSignIn().disconnect();
+
     await SecureStorageUtils.setItem('token', null);
-    await SecureStorageUtils.setItem('provider', AuthProvider.facebook.value);
+    await SecureStorageUtils.setItem('provider', null);
   }
 
   Future<User?> signInWithFacebook(BuildContext context) async {
@@ -148,13 +149,40 @@ class AuthService {
     return user;
   }
 
-  Future<void> signOut() async {}
+  Future<void> signOut() async {
+    String providerStr = await SecureStorageUtils.getItem('provider');
 
-  Future<User?> getMe(BuildContext context) async {
-    final QueryResult getMeResult =
-        await GraphQLProvider.of(context).value.query(
-              QueryOptions(document: gql(get_me.getMe)),
-            );
+    AuthProvider provider = AuthProvider.values
+        .firstWhere((e) => e.toString() == 'AuthProvider.$providerStr');
+
+    switch (provider) {
+      case AuthProvider.email:
+        await SecureStorageUtils.setItem('token', null);
+        await SecureStorageUtils.setItem('provider', null);
+
+        break;
+
+      case AuthProvider.google:
+        await signOutWithGoogle();
+
+        break;
+
+      default:
+        await signOutWithFacebook();
+
+        break;
+    }
+  }
+
+  Future<User?> getMe(BuildContext context, FetchPolicy fetchPolicy) async {
+    GraphQLClient client = GraphQLProvider.of(context).value;
+
+    final QueryResult getMeResult = await client.query(
+      QueryOptions(
+        document: gql(get_me.getMe),
+        fetchPolicy: fetchPolicy,
+      ),
+    );
 
     var data = getMeResult.data ?? {};
     final user = User.fromMap(data['getMe'] ?? {});

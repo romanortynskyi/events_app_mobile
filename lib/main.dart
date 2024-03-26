@@ -1,7 +1,7 @@
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart';
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart';
+import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/services/auth_service.dart';
-import 'package:events_app_mobile/screens/login_screen.dart';
 import 'package:events_app_mobile/utils/env_utils.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -77,7 +77,7 @@ class MyApp extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: true,
           ),
-          home: const LoginScreen(),
+          home: const MainScreen(),
         ),
       ),
     );

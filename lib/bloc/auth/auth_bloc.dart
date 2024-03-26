@@ -3,6 +3,7 @@ import 'package:equatable/equatable.dart';
 import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/services/auth_service.dart';
 import 'package:flutter/widgets.dart';
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -13,16 +14,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<EmailSignInRequested>(_onEmailSignInPressed);
     on<EmailSignUpRequested>(_onEmailSignUpPressed);
     on<EmailSignInErrorRequested>(_onEmailSignInError);
-    on<EmailSignOutRequested>(_onEmailSignOutPressed);
     on<EmailGetMeRequested>(_onEmailGetMe);
 
     on<FacebookSignInRequested>(_onFacebookSignInPressed);
-    on<FacebookSignOutRequested>(_onFacebookSignOutPressed);
     on<FacebookGetMeRequested>(_onFacebookGetMe);
 
     on<GoogleSignInRequested>(_onGoogleSignInPressed);
-    on<GoogleSignOutRequested>(_onGoogleSignOutPressed);
     on<GoogleGetMeRequested>(_onGoogleGetMe);
+
+    on<SignOutRequested>(_onSignOutPressed);
   }
   final AuthService authService;
 
@@ -77,8 +77,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(Error(errorMessage: event.errorMessage));
   }
 
-  void _onEmailSignOutPressed(
-    EmailSignOutRequested event,
+  void _onSignOutPressed(
+    SignOutRequested event,
     Emitter<AuthState> emit,
   ) async {
     await authService.signOut();
@@ -90,7 +90,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     EmailGetMeRequested event,
     Emitter<AuthState> emit,
   ) async {
-    User? user = await authService.getMe(event.context);
+    User? user =
+        await authService.getMe(event.context, FetchPolicy.networkOnly);
 
     if (user != null) {
       Authenticated(user: user);
@@ -110,20 +111,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onFacebookSignOutPressed(
-    FacebookSignOutRequested event,
-    Emitter<AuthState> emit,
-  ) {
-    authService.signOutWithFacebook();
-
-    emit(const UnAuthenticated(user: null));
-  }
-
   void _onFacebookGetMe(
     FacebookGetMeRequested event,
     Emitter<AuthState> emit,
   ) async {
-    User? user = await authService.getMe(event.context);
+    User? user =
+        await authService.getMe(event.context, FetchPolicy.networkOnly);
 
     if (user != null) {
       Authenticated(user: user);
@@ -143,22 +136,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
 
-  void _onGoogleSignOutPressed(
-    GoogleSignOutRequested event,
-    Emitter<AuthState> emit,
-  ) {
-    authService.signOutWithGoogle();
-
-    emit(const UnAuthenticated(user: null));
-  }
-
   void _onGoogleGetMe(
     GoogleGetMeRequested event,
     Emitter<AuthState> emit,
   ) async {
     emit(const Loading());
 
-    final user = await authService.getMe(event.context);
+    final user =
+        await authService.getMe(event.context, FetchPolicy.networkOnly);
 
     if (user != null) {
       emit(Authenticated(user: user));

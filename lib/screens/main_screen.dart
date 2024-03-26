@@ -1,11 +1,15 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/screens/add_event_screen.dart';
 import 'package:events_app_mobile/screens/home_screen.dart';
+import 'package:events_app_mobile/screens/login_screen.dart';
 import 'package:events_app_mobile/screens/search_screen.dart';
 import 'package:events_app_mobile/screens/profile_screen.dart';
+import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -47,26 +51,41 @@ class _MainScreenState extends State<MainScreen> {
     ProfileScreen(),
   ];
 
-  void _onBottomNavigationBarItemTap(int index) {
-    setState(() {
-      _index = index;
-    });
+  bool _letIndexChange(int index) {
+    User? user = context.read<auth_bloc.AuthBloc>().state.user;
+
+    if (index == items.length - 1 && user == null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
+
+      return false;
+    } else {
+      setState(() {
+        _index = index;
+      });
+    }
+
+    return true;
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: LightThemeColors.white,
-      bottomNavigationBar: CurvedNavigationBar(
-        items: icons,
-        color: LightThemeColors.primary,
+    return BlocBuilder<auth_bloc.AuthBloc, auth_bloc.AuthState>(
+      builder: (BuildContext context, auth_bloc.AuthState state) => Scaffold(
         backgroundColor: LightThemeColors.white,
-        height: GlobalConsts.bottomNavigationBarHeight,
-        index: _index,
-        onTap: _onBottomNavigationBarItemTap,
-      ),
-      body: SafeArea(
-        child: items[_index],
+        bottomNavigationBar: CurvedNavigationBar(
+          items: icons,
+          color: LightThemeColors.primary,
+          backgroundColor: LightThemeColors.white,
+          height: GlobalConsts.bottomNavigationBarHeight,
+          index: _index,
+          letIndexChange: _letIndexChange,
+        ),
+        body: SafeArea(
+          child: items[_index],
+        ),
       ),
     );
   }

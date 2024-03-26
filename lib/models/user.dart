@@ -1,3 +1,4 @@
+import 'package:events_app_mobile/models/asset.dart';
 import 'package:events_app_mobile/models/model.dart';
 
 class User extends Model {
@@ -5,6 +6,7 @@ class User extends Model {
   late String lastName;
   String? email;
   String? token;
+  Asset? image;
 
   User({
     required int id,
@@ -12,6 +14,7 @@ class User extends Model {
     required this.lastName,
     this.email,
     this.token,
+    this.image,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) : super(
@@ -30,5 +33,6 @@ class User extends Model {
     lastName = map['lastName'];
     email = map['email'];
     token = map['token'];
+    image = map['image'] == null ? null : Asset.fromMap(map['image']);
   }
 }
