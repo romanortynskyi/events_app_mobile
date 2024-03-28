@@ -29,9 +29,19 @@ main() async {
     return 'Bearer $token';
   });
 
+  final WebSocketLink webSocketLink = WebSocketLink(
+    EnvUtils.getEnv('WS_URL'),
+  );
+
+  final link = Link.split(
+    (request) => request.isSubscription,
+    webSocketLink,
+    httpLink,
+  );
+
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(
-      link: authLink.concat(httpLink),
+      link: authLink.concat(link),
       cache: GraphQLCache(store: HiveStore()),
     ),
   );

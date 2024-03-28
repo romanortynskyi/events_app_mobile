@@ -1,21 +1,21 @@
-import 'package:events_app_mobile/models/model.dart';
+import 'package:events_app_mobile/abstract/model.dart';
 
-class Asset extends Model {
-  late String src;
+class Asset extends Model<Asset> {
+  late String? src;
   late String? filename;
 
   Asset({
-    required this.src,
+    this.src,
     this.filename,
   });
 
-  Asset.fromMap(Map<String, dynamic> map)
-      : super(
-          id: map['id'],
-          createdAt: map['createdAt'],
-          updatedAt: map['updatedAt'],
-        ) {
+  @override
+  fromMap(Map<String, dynamic> map) {
+    super.fromMap(map);
+
     src = map['src'];
     filename = map['filename'];
+
+    return this;
   }
 }

@@ -44,7 +44,7 @@ class EventService {
     }
 
     List<Event> events = response.data!['getEvents']['items']
-        .map((map) => Event.fromMap(map))
+        .map((map) => Event().fromMap(map))
         .toList()
         .cast<Event>();
     int totalPagesCount = response.data!['getEvents']['totalPagesCount'];
@@ -75,7 +75,7 @@ class EventService {
       print('exception: ');
       print(response.exception?.graphqlErrors[0].message);
     } else {
-      Event event = Event.fromMap(data['getEventById']);
+      Event event = Event().fromMap(data['getEventById']);
 
       return event;
     }
@@ -109,7 +109,7 @@ class EventService {
     }
 
     List<Event> events = response.data!['autocompleteEvents']['items']
-        .map((map) => Event.fromMap(map))
+        .map((map) => Event().fromMap(map))
         .toList()
         .cast<Event>();
     int totalPagesCount =
@@ -140,7 +140,7 @@ class EventService {
     ));
 
     List<Event> events = response.data!['searchEvents']['items']
-        .map((item) => Event.fromMap(item))
+        .map((item) => Event().fromMap(item))
         .toList()
         .cast<Event>();
     int totalPagesCount = response.data!['searchEvents']['totalPagesCount'];

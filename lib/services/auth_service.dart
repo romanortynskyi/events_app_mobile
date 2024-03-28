@@ -1,5 +1,7 @@
 // ignore_for_file: use_build_context_synchronously, constant_pattern_never_matches_value_type
 
+import 'dart:io';
+
 import 'package:events_app_mobile/consts/enums/auth_provider.dart';
 import 'package:events_app_mobile/consts/enums/error_message.dart';
 import 'package:events_app_mobile/exceptions/wrong_email_or_password_exception.dart';
@@ -8,13 +10,25 @@ import 'package:events_app_mobile/graphql/global/mutations/sign_up.dart'
     as sign_up;
 import 'package:events_app_mobile/graphql/global/mutations/login_with_google.dart';
 import 'package:events_app_mobile/graphql/global/mutations/login_with_facebook.dart';
+import 'package:events_app_mobile/graphql/profile_screen/subscriptions/upload_user_image_progress.dart';
+import 'package:events_app_mobile/managers/web_socket_manager.dart';
+import 'package:events_app_mobile/models/asset.dart';
+import 'package:events_app_mobile/models/progress.dart';
 import 'package:events_app_mobile/models/user.dart';
+import 'package:events_app_mobile/models/web_socket_message.dart';
+import 'package:events_app_mobile/utils/env_utils.dart';
+import 'package:events_app_mobile/utils/multipart_file_utils.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:events_app_mobile/graphql/queries/get_me.dart' as get_me;
+import 'package:events_app_mobile/graphql/profile_screen/mutations/update_user_image.dart'
+    as update_user_image;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:graphql_flutter/graphql_flutter.dart' as graphql_flutter;
+import 'package:http/http.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/io.dart';
 
 class AuthService {
   Future<User?> signInWithGoogle(BuildContext context) async {
@@ -25,15 +39,17 @@ class AuthService {
     final idToken = googleAuth?.idToken;
 
     try {
-      final QueryResult signInResult =
-          await GraphQLProvider.of(context).value.query(
-                QueryOptions(document: gql(loginWithGoogle), variables: {
-                  'idToken': idToken,
-                }),
+      final graphql_flutter.QueryResult signInResult =
+          await graphql_flutter.GraphQLProvider.of(context).value.query(
+                graphql_flutter.QueryOptions(
+                    document: graphql_flutter.gql(loginWithGoogle),
+                    variables: {
+                      'idToken': idToken,
+                    }),
               );
 
       var data = signInResult.data ?? {};
-      final user = User.fromMap(data['loginWithGoogle'] ?? {});
+      final user = User.create().fromMap(data['loginWithGoogle'] ?? {});
 
       await SecureStorageUtils.setItem('token', user.token);
       await SecureStorageUtils.setItem('provider', AuthProvider.google.value);
@@ -58,15 +74,17 @@ class AuthService {
       if (loginResult.status == LoginStatus.success) {
         AccessToken? accessToken = loginResult.accessToken;
 
-        final QueryResult signInResult =
-            await GraphQLProvider.of(context).value.query(
-                  QueryOptions(document: gql(loginWithFacebook), variables: {
-                    'accessToken': accessToken?.token,
-                  }),
+        final graphql_flutter.QueryResult signInResult =
+            await graphql_flutter.GraphQLProvider.of(context).value.query(
+                  graphql_flutter.QueryOptions(
+                      document: graphql_flutter.gql(loginWithFacebook),
+                      variables: {
+                        'accessToken': accessToken?.token,
+                      }),
                 );
 
         var data = signInResult.data ?? {};
-        final user = User.fromMap(data['loginWithFacebook'] ?? {});
+        final user = User.create().fromMap(data['loginWithFacebook'] ?? {});
 
         await SecureStorageUtils.setItem('token', user.token);
 
@@ -90,14 +108,16 @@ class AuthService {
       {required BuildContext context,
       required String email,
       required String password}) async {
-    final QueryResult loginResult =
-        await GraphQLProvider.of(context).value.mutate(
-              MutationOptions(document: gql(login), variables: {
-                'input': {
-                  'email': email,
-                  'password': password,
-                },
-              }),
+    final graphql_flutter.QueryResult loginResult =
+        await graphql_flutter.GraphQLProvider.of(context).value.mutate(
+              graphql_flutter.MutationOptions(
+                  document: graphql_flutter.gql(login),
+                  variables: {
+                    'input': {
+                      'email': email,
+                      'password': password,
+                    },
+                  }),
             );
 
     String? message = loginResult.exception?.graphqlErrors[0].message;
@@ -107,7 +127,7 @@ class AuthService {
     }
 
     var data = loginResult.data ?? {};
-    final user = User.fromMap(data['login'] ?? {});
+    final user = User.create().fromMap(data['login'] ?? {});
 
     await SecureStorageUtils.setItem('token', user.token);
     await SecureStorageUtils.setItem('provider', AuthProvider.email.value);
@@ -122,16 +142,18 @@ class AuthService {
     required String firstName,
     required String lastName,
   }) async {
-    final QueryResult signUpResult =
-        await GraphQLProvider.of(context).value.mutate(
-              MutationOptions(document: gql(sign_up.signUp), variables: {
-                'input': {
-                  'email': email,
-                  'password': password,
-                  'firstName': firstName,
-                  'lastName': lastName,
-                },
-              }),
+    final graphql_flutter.QueryResult signUpResult =
+        await graphql_flutter.GraphQLProvider.of(context).value.mutate(
+              graphql_flutter.MutationOptions(
+                  document: graphql_flutter.gql(sign_up.signUp),
+                  variables: {
+                    'input': {
+                      'email': email,
+                      'password': password,
+                      'firstName': firstName,
+                      'lastName': lastName,
+                    },
+                  }),
             );
 
     String? message = signUpResult.exception?.graphqlErrors[0].message;
@@ -141,7 +163,7 @@ class AuthService {
     }
 
     var data = signUpResult.data ?? {};
-    final user = User.fromMap(data['signUp'] ?? {});
+    final user = User.create().fromMap(data['signUp'] ?? {});
 
     await SecureStorageUtils.setItem('token', user.token);
     await SecureStorageUtils.setItem('provider', AuthProvider.email.value);
@@ -174,19 +196,53 @@ class AuthService {
     }
   }
 
-  Future<User?> getMe(BuildContext context, FetchPolicy fetchPolicy) async {
-    GraphQLClient client = GraphQLProvider.of(context).value;
+  Future<User?> getMe(
+      BuildContext context, graphql_flutter.FetchPolicy fetchPolicy) async {
+    graphql_flutter.GraphQLClient client =
+        graphql_flutter.GraphQLProvider.of(context).value;
 
-    final QueryResult getMeResult = await client.query(
-      QueryOptions(
-        document: gql(get_me.getMe),
+    final graphql_flutter.QueryResult getMeResult = await client.query(
+      graphql_flutter.QueryOptions(
+        document: graphql_flutter.gql(get_me.getMe),
         fetchPolicy: fetchPolicy,
       ),
     );
 
     var data = getMeResult.data ?? {};
-    final user = User.fromMap(data['getMe'] ?? {});
+    final user = User.create().fromMap(data['getMe'] ?? {});
 
     return user;
+  }
+
+  Future<Asset> updateUserImage({
+    required BuildContext context,
+    required File file,
+    graphql_flutter.FetchPolicy fetchPolicy =
+        graphql_flutter.FetchPolicy.networkOnly,
+  }) async {
+    graphql_flutter.GraphQLClient client =
+        graphql_flutter.GraphQLProvider.of(context).value;
+
+    MultipartFile multipartFile =
+        MultipartFileUtils.getMultipartFile(file, 'image');
+
+    final graphql_flutter.QueryResult updateUserImageResult =
+        await client.query(
+      graphql_flutter.QueryOptions(
+        document: graphql_flutter.gql(update_user_image.updateUserImage),
+        variables: {
+          'input': {
+            'image': multipartFile,
+          },
+        },
+        fetchPolicy: fetchPolicy,
+      ),
+    );
+
+    var data = updateUserImageResult.data ?? {};
+
+    final asset = Asset().fromMap(data['updateUserImage'] ?? {});
+
+    return asset;
   }
 }

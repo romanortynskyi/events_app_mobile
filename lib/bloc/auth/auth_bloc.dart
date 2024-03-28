@@ -1,5 +1,11 @@
+// ignore_for_file: use_build_context_synchronously
+
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:events_app_mobile/models/asset.dart';
+import 'package:events_app_mobile/models/progress.dart';
 import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/services/auth_service.dart';
 import 'package:flutter/widgets.dart';
@@ -21,6 +27,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<GetMeRequested>(_onGetMeRequested);
     on<SignOutRequested>(_onSignOutRequested);
+
+    on<UpdateUserImageRequested>(_onUpdateUserImageRequested);
   }
   final AuthService authService;
 
@@ -120,5 +128,21 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (user != null) {
       emit(Authenticated(user: user));
     }
+  }
+
+  Future<void> _onUpdateUserImageRequested(
+    UpdateUserImageRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(UploadingUserImage(user: state.user, uploadImageProgress: 0));
+
+    final Asset image = await authService.updateUserImage(
+      context: event.context,
+      file: event.file,
+    );
+
+    User updatedUser = state.user!.copyWith(image: image);
+
+    emit(Authenticated(user: updatedUser));
   }
 }

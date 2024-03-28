@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
@@ -25,6 +28,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (pickedFile != null) {
       File file = File(pickedFile.path);
+
+      context
+          .read<auth_bloc.AuthBloc>()
+          .add(auth_bloc.UpdateUserImageRequested(context, file));
     }
   }
 
@@ -51,8 +58,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
         User? user = state.user;
 
-        String? firstNameFirstLetter = user?.firstName.characters.first;
-        String? lastNameFirstLetter = user?.lastName.characters.first;
+        String? firstNameFirstLetter = user?.firstName?.characters.first;
+        String? lastNameFirstLetter = user?.lastName?.characters.first;
         String initials = '$firstNameFirstLetter$lastNameFirstLetter';
 
         Widget deleteImageButton = user?.image == null
@@ -70,8 +77,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.grey.withOpacity(0.5),
                         spreadRadius: 2,
                         blurRadius: 2,
-                        offset:
-                            const Offset(0, 0), // changes position of shadow
+                        offset: const Offset(0, 0),
                       ),
                     ],
                   ),
@@ -81,6 +87,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
               );
+
+        bool isUserImageUpdating = state is auth_bloc.UploadingUserImage;
+
+        double progress =
+            ((state.uploadImageProgress ?? 0) / 100).floor().toDouble();
+
+        Widget circleContent = isUserImageUpdating
+            ? Center(
+                child: SizedBox(
+                  height: imageHeight,
+                  width: imageWidth,
+                  child: CircularProgressIndicator(
+                    value: progress,
+                    backgroundColor: LightThemeColors.white,
+                    strokeCap: StrokeCap.round,
+                  ),
+                ),
+              )
+            : Center(
+                child: Text(
+                  initials,
+                  style: TextStyle(
+                    fontSize: 50,
+                    color: LightThemeColors.white,
+                  ),
+                ),
+              );
+
+        Color circleColor = isUserImageUpdating
+            ? LightThemeColors.white
+            : LightThemeColors.primary;
 
         return Column(
           children: [
@@ -93,29 +130,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Stack(
                     children: [
                       Container(
-                          width: imageWidth,
-                          height: imageHeight,
-                          decoration: BoxDecoration(
-                            color: LightThemeColors.primary,
-                            borderRadius: BorderRadius.circular(200),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.5),
-                                spreadRadius: 5,
-                                blurRadius: 7,
-                                offset: const Offset(0, 0),
-                              ),
-                            ],
-                          ),
-                          child: Center(
-                            child: Text(
-                              initials,
-                              style: TextStyle(
-                                fontSize: 50,
-                                color: LightThemeColors.white,
-                              ),
+                        width: imageWidth,
+                        height: imageHeight,
+                        decoration: BoxDecoration(
+                          color: circleColor,
+                          borderRadius: BorderRadius.circular(200),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.grey.withOpacity(0.5),
+                              spreadRadius: 5,
+                              blurRadius: 7,
+                              offset: const Offset(0, 0),
                             ),
-                          )),
+                          ],
+                        ),
+                        child: circleContent,
+                      ),
                       deleteImageButton,
                       Positioned(
                         right: 10,

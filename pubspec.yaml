@@ -63,6 +63,12 @@ dependencies:
   sensors: ^2.0.3
   flutter_compass: ^0.8.0
   image: ^4.1.7
+  percent_indicator: ^4.2.3
+  web_socket_channel: ^2.2.0
+  ferry: ^0.14.2+1
+  graphql: ^5.2.0-beta.1
+  ferry_flutter: ^0.8.1
+  ferry_generator: ^0.8.1
 
 dev_dependencies:
   flutter_test:

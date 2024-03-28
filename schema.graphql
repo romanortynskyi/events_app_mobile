@@ -1,0 +1,9 @@
+type Subscription {
+  uploadUserImageProgress(userId: Int!): Progress!
+}
+
+type Progress {
+  total: Int!
+  loaded: Int!
+  userId: Int!
+}

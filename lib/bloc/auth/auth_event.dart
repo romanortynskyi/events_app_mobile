@@ -62,3 +62,10 @@ class GetMeRequested extends AuthEvent {
 }
 
 class SignOutRequested extends AuthEvent {}
+
+class UpdateUserImageRequested extends AuthEvent {
+  final BuildContext context;
+  final File file;
+
+  const UpdateUserImageRequested(this.context, this.file);
+}

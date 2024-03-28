@@ -1,10 +1,8 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
-import 'package:events_app_mobile/consts/enums/auth_provider.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
-import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:events_app_mobile/widgets/or_continue_with.dart';
@@ -35,31 +33,7 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> onInit() async {
-    String? providerStr = await SecureStorageUtils.getItem('provider');
-
-    if (providerStr != null) {
-      AuthProvider authProvider = AuthProvider.values.byName(providerStr);
-
-      switch (authProvider) {
-        case AuthProvider.google:
-          context
-              .read<auth_bloc.AuthBloc>()
-              .add(auth_bloc.GoogleGetMeRequested(context));
-          break;
-
-        case AuthProvider.facebook:
-          context
-              .read<auth_bloc.AuthBloc>()
-              .add(auth_bloc.FacebookGetMeRequested(context));
-          break;
-
-        default:
-          context
-              .read<auth_bloc.AuthBloc>()
-              .add(auth_bloc.EmailGetMeRequested(context));
-          break;
-      }
-    }
+    context.read<auth_bloc.AuthBloc>().add(auth_bloc.GetMeRequested(context));
   }
 
   void onPasswordHiddenPressed() {

@@ -6,7 +6,8 @@ abstract class AuthState extends Equatable {
 
   final User? user;
   final String? errorMessage;
-  const AuthState({this.user, this.errorMessage});
+  final int? uploadImageProgress;
+  const AuthState({this.user, this.errorMessage, this.uploadImageProgress});
 }
 
 class UnAuthenticated extends AuthState {
@@ -19,6 +20,10 @@ class Authenticated extends AuthState {
 
 class Loading extends AuthState {
   const Loading({super.user, super.errorMessage});
+}
+
+class UploadingUserImage extends AuthState {
+  const UploadingUserImage({super.user, super.uploadImageProgress});
 }
 
 class Error extends AuthState {

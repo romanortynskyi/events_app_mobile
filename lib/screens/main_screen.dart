@@ -1,7 +1,9 @@
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/managers/web_socket_manager.dart';
 import 'package:events_app_mobile/models/user.dart';
+import 'package:events_app_mobile/models/web_socket_message.dart';
 import 'package:events_app_mobile/screens/add_event_screen.dart';
 import 'package:events_app_mobile/screens/home_screen.dart';
 import 'package:events_app_mobile/screens/login_screen.dart';
@@ -68,6 +70,21 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     return true;
+  }
+
+  void onInit() async {
+    WebSocketManager? wsManager = await WebSocketManager.getInstance(
+      onMessage: (WebSocketMessage message) {
+        print(message);
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    onInit();
   }
 
   @override

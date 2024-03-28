@@ -1,9 +1,9 @@
 import 'package:events_app_mobile/models/asset.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
-import 'package:events_app_mobile/models/model.dart';
+import 'package:events_app_mobile/abstract/model.dart';
 import 'package:events_app_mobile/models/place.dart';
 
-class Event extends Model {
+class Event extends Model<Event> {
   late String? title;
   late String? description;
   late DateTime? startDate;
@@ -31,16 +31,10 @@ class Event extends Model {
           updatedAt: updatedAt,
         );
 
-  Event.fromMap(Map<String, dynamic> map)
-      : super(
-          id: map['id'],
-          createdAt: map['createdAt'] == null
-              ? null
-              : DateTime.parse(map['createdAt']),
-          updatedAt: map['updatedAt'] == null
-              ? null
-              : DateTime.parse(map['updatedAt']),
-        ) {
+  @override
+  Event fromMap(Map<String, dynamic> map) {
+    super.fromMap(map);
+
     title = map['title'];
     description = map['description'];
     startDate =
@@ -54,5 +48,7 @@ class Event extends Model {
       src: map['image']?['src'] ?? '',
     );
     place = Place.fromMap(map['place']);
+
+    return this;
   }
 }
