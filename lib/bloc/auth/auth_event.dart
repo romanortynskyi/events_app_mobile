@@ -69,3 +69,9 @@ class UpdateUserImageRequested extends AuthEvent {
 
   const UpdateUserImageRequested(this.context, this.file);
 }
+
+class UpdateUserImageProgressRequested extends AuthEvent {
+  final UploadUserImageProgress progress;
+
+  const UpdateUserImageProgressRequested(this.progress);
+}

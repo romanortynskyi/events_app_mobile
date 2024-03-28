@@ -49,8 +49,8 @@ class WebSocketManager {
         Map<String, dynamic> map = jsonDecode(message);
         String typeStr = map['type'];
 
-        WebSocketMessageType type = WebSocketMessageType.values
-            .firstWhere((e) => e.toString() == 'WebSocketMessageType.$typeStr');
+        WebSocketMessageType type =
+            WebSocketMessageType.values.firstWhere((e) => e.value == typeStr);
 
         switch (type) {
           case WebSocketMessageType.uploadUserImageProgress:

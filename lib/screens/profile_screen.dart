@@ -81,9 +81,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ],
                   ),
-                  child: IconButton.filled(
-                    onPressed: () {},
-                    icon: const Icon(Icons.edit),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: LightThemeColors.red,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: IconButton(
+                      onPressed: () {},
+                      icon: Icon(
+                        Icons.delete,
+                        color: LightThemeColors.white,
+                      ),
+                    ),
                   ),
                 ),
               );
