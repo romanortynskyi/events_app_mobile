@@ -5,6 +5,9 @@ String getMe = """
       firstName
       lastName
       email
+      image {
+        src
+      }
     }
   }
 """;

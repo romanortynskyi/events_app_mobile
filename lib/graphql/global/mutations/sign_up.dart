@@ -6,6 +6,9 @@ String signUp = """
       lastName
       email
       token
+      image {
+        src
+      }
     }
   }
 """;

@@ -20,11 +20,32 @@ class WebSocketManager {
 
   static WebSocketManager? _instance;
 
+  Future<void> reconnect() async {
+    String? token = await SecureStorageUtils.getItem('token');
+    String bearerToken = '';
+
+    if (token != null) {
+      bearerToken = 'Bearer $token';
+    }
+
+    _instance = WebSocketManager._privateConstructor(
+      url: EnvUtils.getEnv('WS_URL'),
+      headers: {
+        'Authorization': bearerToken,
+      },
+      onMessage: onMessage,
+    );
+  }
+
   static Future<WebSocketManager?> getInstance({
     required Function(WebSocketMessage) onMessage,
   }) async {
     String? token = await SecureStorageUtils.getItem('token');
-    String bearerToken = 'Bearer $token';
+    String bearerToken = '';
+
+    if (token != null) {
+      bearerToken = 'Bearer $token';
+    }
 
     _instance ??= WebSocketManager._privateConstructor(
       url: EnvUtils.getEnv('WS_URL'),

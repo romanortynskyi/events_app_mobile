@@ -26,6 +26,10 @@ main() async {
   final AuthLink authLink = AuthLink(getToken: () async {
     String? token = await SecureStorageUtils.getItem('token');
 
+    if (token == null) {
+      return null;
+    }
+
     return 'Bearer $token';
   });
 

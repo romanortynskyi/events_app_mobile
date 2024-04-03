@@ -2,11 +2,11 @@ part of 'auth_bloc.dart';
 
 abstract class AuthState extends Equatable {
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [user, errorMessage, uploadImageProgress];
 
   final User? user;
   final String? errorMessage;
-  final int? uploadImageProgress;
+  final UploadUserImageProgress? uploadImageProgress;
   const AuthState({this.user, this.errorMessage, this.uploadImageProgress});
 }
 

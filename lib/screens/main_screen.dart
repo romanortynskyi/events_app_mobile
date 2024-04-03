@@ -54,6 +54,8 @@ class _MainScreenState extends State<MainScreen> {
     ProfileScreen(),
   ];
 
+  WebSocketManager? webSocketManager;
+
   bool _letIndexChange(int index) {
     User? user = context.read<auth_bloc.AuthBloc>().state.user;
 
@@ -74,7 +76,7 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void onInit() async {
-    WebSocketManager? wsManager = await WebSocketManager.getInstance(
+    webSocketManager = await WebSocketManager.getInstance(
       onMessage: (WebSocketMessage message) {
         if (message is WebSocketMessage<UploadUserImageProgress>) {
           context
@@ -92,9 +94,16 @@ class _MainScreenState extends State<MainScreen> {
     onInit();
   }
 
+  void _blocListener(BuildContext context, auth_bloc.AuthState state) {
+    if (state is auth_bloc.Authenticated) {
+      webSocketManager!.reconnect();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<auth_bloc.AuthBloc, auth_bloc.AuthState>(
+    return BlocConsumer<auth_bloc.AuthBloc, auth_bloc.AuthState>(
+      listener: _blocListener,
       builder: (BuildContext context, auth_bloc.AuthState state) => Scaffold(
         backgroundColor: LightThemeColors.white,
         bottomNavigationBar: CurvedNavigationBar(

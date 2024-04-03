@@ -1,10 +1,10 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'dart:io';
-import 'dart:math' as math;
 
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/models/upload_user_image_progress.dart';
 import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
@@ -35,8 +35,79 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  void _onDeleteImagePressed() {}
+
   void _onSignOut() {
     context.read<auth_bloc.AuthBloc>().add(auth_bloc.SignOutRequested());
+  }
+
+  Widget _getCircleContent(auth_bloc.AuthState state) {
+    bool isUserImageUpdating = state is auth_bloc.UploadingUserImage;
+    UploadUserImageProgress progress =
+        state.uploadImageProgress ?? UploadUserImageProgress();
+
+    int loaded = progress.loaded ?? 0;
+    int total = progress.total ?? 1;
+
+    int percentage = (loaded / total).round() * 100;
+
+    double progressValue = ((percentage) / 100).floor().toDouble();
+
+    double imageWidth = 200;
+    double imageHeight = 200;
+
+    if (isUserImageUpdating) {
+      return Center(
+        child: SizedBox(
+          height: imageHeight,
+          width: imageWidth,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              SizedBox(
+                height: imageHeight,
+                width: imageWidth,
+                child: CircularProgressIndicator(
+                  value: progressValue,
+                  backgroundColor: LightThemeColors.white,
+                  strokeCap: StrokeCap.round,
+                ),
+              ),
+              Text(
+                '$percentage%',
+                style: TextStyle(
+                  fontSize: 50,
+                  color: LightThemeColors.primary,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    User? user = state.user;
+
+    if (user?.image == null) {
+      String? firstNameFirstLetter = user?.firstName?.characters.first;
+      String? lastNameFirstLetter = user?.lastName?.characters.first;
+      String initials = '$firstNameFirstLetter$lastNameFirstLetter';
+
+      return Center(
+        child: Text(
+          initials,
+          style: TextStyle(
+            fontSize: 50,
+            color: LightThemeColors.white,
+          ),
+        ),
+      );
+    }
+
+    // otherwise user has an image
+    return CircleAvatar(
+      backgroundImage: NetworkImage(user?.image?.src ?? ''),
+    );
   }
 
   @override
@@ -48,6 +119,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
             context,
             MaterialPageRoute(builder: (_) => const MainScreen()),
           );
+        } else if (state is auth_bloc.UploadingUserImage) {
+          UploadUserImageProgress progress =
+              state.uploadImageProgress ?? UploadUserImageProgress();
+
+          int loaded = progress.loaded ?? 0;
+          int total = progress.total ?? 1;
+
+          int percentage = (loaded / total).round() * 100;
+
+          String imgSrc = progress.location ?? '';
+
+          if (percentage == 100) {
+            context
+                .read<auth_bloc.AuthBloc>()
+                .add(auth_bloc.UpdateUserImageEndRequested(imgSrc));
+          }
         }
       },
       builder: (BuildContext context, auth_bloc.AuthState state) {
@@ -57,10 +144,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         double imageLeft = screenWidth / 2 - imageWidth / 2;
 
         User? user = state.user;
-
-        String? firstNameFirstLetter = user?.firstName?.characters.first;
-        String? lastNameFirstLetter = user?.lastName?.characters.first;
-        String initials = '$firstNameFirstLetter$lastNameFirstLetter';
 
         Widget deleteImageButton = user?.image == null
             ? const SizedBox()
@@ -87,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: IconButton(
-                      onPressed: () {},
+                      onPressed: _onDeleteImagePressed,
                       icon: Icon(
                         Icons.delete,
                         color: LightThemeColors.white,
@@ -97,32 +180,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               );
 
+        Widget circleContent = _getCircleContent(state);
+
         bool isUserImageUpdating = state is auth_bloc.UploadingUserImage;
-
-        double progress =
-            ((state.uploadImageProgress ?? 0) / 100).floor().toDouble();
-
-        Widget circleContent = isUserImageUpdating
-            ? Center(
-                child: SizedBox(
-                  height: imageHeight,
-                  width: imageWidth,
-                  child: CircularProgressIndicator(
-                    value: progress,
-                    backgroundColor: LightThemeColors.white,
-                    strokeCap: StrokeCap.round,
-                  ),
-                ),
-              )
-            : Center(
-                child: Text(
-                  initials,
-                  style: TextStyle(
-                    fontSize: 50,
-                    color: LightThemeColors.white,
-                  ),
-                ),
-              );
 
         Color circleColor = isUserImageUpdating
             ? LightThemeColors.white
@@ -169,8 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 color: Colors.grey.withOpacity(0.5),
                                 spreadRadius: 2,
                                 blurRadius: 2,
-                                offset: const Offset(
-                                    0, 0), // changes position of shadow
+                                offset: const Offset(0, 0),
                               ),
                             ],
                           ),

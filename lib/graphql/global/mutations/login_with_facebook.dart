@@ -6,6 +6,9 @@ String loginWithFacebook = """
       lastName
       email
       token
+      image {
+        src
+      }
     }
   }
 """;

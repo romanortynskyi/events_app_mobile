@@ -6,6 +6,9 @@ String login = """
       lastName
       email
       token
+      image {
+        src
+      }
     }
   }
 """;

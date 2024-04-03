@@ -1,4 +1,5 @@
-String loginWithGoogle = """
+String loginWithGoogle =
+    """
   mutation LOGIN_WITH_GOOGLE(\$idToken: String!) {
     loginWithGoogle(idToken: \$idToken) {
       id
@@ -6,6 +7,9 @@ String loginWithGoogle = """
       lastName
       email
       token
+      image {
+        src
+      }
     }
   }
 """;

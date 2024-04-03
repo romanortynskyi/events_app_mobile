@@ -1,10 +1,14 @@
+import 'package:equatable/equatable.dart';
 import 'package:events_app_mobile/abstract/model.dart';
 
-class UploadUserImageProgress extends Model<UploadUserImageProgress> {
+class UploadUserImageProgress extends Model<UploadUserImageProgress>
+    implements Equatable {
   int? total;
   int? loaded;
   String? key;
   String? location;
+
+  UploadUserImageProgress({this.total, this.loaded, this.key, this.location});
 
   @override
   UploadUserImageProgress fromMap(Map<String, dynamic> map) {
@@ -17,4 +21,15 @@ class UploadUserImageProgress extends Model<UploadUserImageProgress> {
 
     return this;
   }
+
+  @override
+  List<Object?> get props => [
+        total,
+        loaded,
+        key,
+        location,
+      ];
+
+  @override
+  bool? get stringify => true;
 }

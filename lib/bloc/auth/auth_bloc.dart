@@ -10,6 +10,7 @@ import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/services/auth_service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:dart_numerics/dart_numerics.dart' as numerics;
 
 part 'auth_event.dart';
 part 'auth_state.dart';
@@ -30,6 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     on<UpdateUserImageRequested>(_onUpdateUserImageRequested);
     on<UpdateUserImageProgressRequested>(_onUploadUserImageProgressRequested);
+    on<UpdateUserImageEndRequested>(_onUpdateUserImageEndRequested);
   }
   final AuthService authService;
 
@@ -135,7 +137,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     UpdateUserImageRequested event,
     Emitter<AuthState> emit,
   ) async {
-    emit(UploadingUserImage(user: state.user, uploadImageProgress: 0));
+    UploadUserImageProgress progress = UploadUserImageProgress(
+      loaded: 0,
+      total: numerics.int64MaxValue,
+    );
+
+    emit(UploadingUserImage(user: state.user, uploadImageProgress: progress));
 
     await authService.updateUserImage(
       context: event.context,
@@ -147,21 +154,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     UpdateUserImageProgressRequested event,
     Emitter<AuthState> emit,
   ) async {
-    UploadUserImageProgress progress = event.progress;
-    int loaded = progress.loaded ?? 0;
-    int total = progress.total ?? 1;
+    emit(UploadingUserImage(
+      user: state.user,
+      uploadImageProgress: event.progress,
+    ));
+  }
 
-    int percentage = (loaded / total).round() * 100;
+  void _onUpdateUserImageEndRequested(
+    UpdateUserImageEndRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    await Future.delayed(const Duration(milliseconds: 500));
 
-    emit(UploadingUserImage(user: state.user, uploadImageProgress: percentage));
+    User updatedUser = state.user!.copyWith(image: Asset(src: event.imgSrc));
 
-    if (percentage == 100) {
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      User updatedUser =
-          state.user!.copyWith(image: Asset(src: progress.location));
-
-      emit(Authenticated(user: updatedUser));
-    }
+    emit(Authenticated(user: updatedUser));
   }
 }
