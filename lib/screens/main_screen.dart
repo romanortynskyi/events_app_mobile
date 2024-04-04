@@ -76,6 +76,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void onInit() async {
+    context.read<auth_bloc.AuthBloc>().add(auth_bloc.GetMeRequested(context));
+
     webSocketManager = await WebSocketManager.getInstance(
       onMessage: (WebSocketMessage message) {
         if (message is WebSocketMessage<UploadUserImageProgress>) {
@@ -104,22 +106,28 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<auth_bloc.AuthBloc, auth_bloc.AuthState>(
       listener: _blocListener,
-      builder: (BuildContext context, auth_bloc.AuthState state) => Scaffold(
-        backgroundColor: LightThemeColors.white,
-        bottomNavigationBar: CurvedNavigationBar(
-          items: icons,
-          color: LightThemeColors.primary,
+      builder: (BuildContext context, auth_bloc.AuthState state) {
+        if (state is auth_bloc.Loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return Scaffold(
           backgroundColor: LightThemeColors.white,
-          height: GlobalConsts.bottomNavigationBarHeight,
-          index: _index,
-          letIndexChange: (int index) {
-            return _letIndexChange(index, state);
-          },
-        ),
-        body: SafeArea(
-          child: items[_index],
-        ),
-      ),
+          bottomNavigationBar: CurvedNavigationBar(
+            items: icons,
+            color: LightThemeColors.primary,
+            backgroundColor: LightThemeColors.white,
+            height: GlobalConsts.bottomNavigationBarHeight,
+            index: _index,
+            letIndexChange: (int index) {
+              return _letIndexChange(index, state);
+            },
+          ),
+          body: SafeArea(
+            child: items[_index],
+          ),
+        );
+      },
     );
   }
 }

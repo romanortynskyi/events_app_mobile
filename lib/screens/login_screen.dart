@@ -25,17 +25,6 @@ class _LoginScreenState extends State<LoginScreen> {
   String _email = '';
   String _password = '';
 
-  @override
-  void initState() {
-    super.initState();
-
-    onInit();
-  }
-
-  Future<void> onInit() async {
-    context.read<auth_bloc.AuthBloc>().add(auth_bloc.GetMeRequested(context));
-  }
-
   void onPasswordHiddenPressed() {
     setState(() {
       _isPasswordHidden = !_isPasswordHidden;

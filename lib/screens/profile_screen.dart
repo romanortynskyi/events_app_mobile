@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/upload_user_image_progress.dart';
@@ -106,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     // otherwise user has an image
     return CircleAvatar(
-      backgroundImage: NetworkImage(user?.image?.src ?? ''),
+      backgroundImage: CachedNetworkImageProvider(user?.image?.src ?? ''),
     );
   }
 
