@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class EventImage extends StatelessWidget {
   final String src;
@@ -18,7 +19,7 @@ class EventImage extends StatelessWidget {
       borderRadius: BorderRadius.circular(10.0),
       child: Image(
         fit: BoxFit.cover,
-        image: NetworkImage(src),
+        image: CachedNetworkImageProvider(src),
         width: width,
         height: height,
       ),
