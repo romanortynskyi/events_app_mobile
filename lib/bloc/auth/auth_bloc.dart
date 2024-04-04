@@ -103,7 +103,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await authService.getMe(event.context, FetchPolicy.networkOnly);
 
     if (user != null) {
-      Authenticated(user: user);
+      emit(Authenticated(user: user));
     }
   }
 

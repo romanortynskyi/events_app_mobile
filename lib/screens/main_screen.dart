@@ -56,8 +56,8 @@ class _MainScreenState extends State<MainScreen> {
 
   WebSocketManager? webSocketManager;
 
-  bool _letIndexChange(int index) {
-    User? user = context.read<auth_bloc.AuthBloc>().state.user;
+  bool _letIndexChange(int index, auth_bloc.AuthState state) {
+    User? user = state.user;
 
     if (index == items.length - 1 && user == null) {
       Navigator.push(
@@ -112,7 +112,9 @@ class _MainScreenState extends State<MainScreen> {
           backgroundColor: LightThemeColors.white,
           height: GlobalConsts.bottomNavigationBarHeight,
           index: _index,
-          letIndexChange: _letIndexChange,
+          letIndexChange: (int index) {
+            return _letIndexChange(index, state);
+          },
         ),
         body: SafeArea(
           child: items[_index],
