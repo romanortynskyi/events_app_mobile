@@ -3,14 +3,23 @@ import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:flutter/material.dart';
 
 class HomeHeader extends StatelessWidget {
-  final String imgSrc;
+  final String? imgSrc;
   final Geolocation? geolocation;
 
   const HomeHeader({
     super.key,
-    required this.imgSrc,
+    this.imgSrc,
     required this.geolocation,
   });
+
+  Widget _getAvatar(String? imgSrc) {
+    return imgSrc == null
+        ? const SizedBox()
+        : CircleAvatar(
+            backgroundImage: CachedNetworkImageProvider(imgSrc),
+            radius: 30,
+          );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,10 +57,7 @@ class HomeHeader extends StatelessWidget {
             ),
           ],
         ),
-        CircleAvatar(
-          backgroundImage: CachedNetworkImageProvider(imgSrc),
-          radius: 30,
-        )
+        _getAvatar(imgSrc),
       ],
     );
   }

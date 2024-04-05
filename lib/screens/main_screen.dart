@@ -1,3 +1,5 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
@@ -11,6 +13,7 @@ import 'package:events_app_mobile/screens/login_screen.dart';
 import 'package:events_app_mobile/screens/search_screen.dart';
 import 'package:events_app_mobile/screens/profile_screen.dart';
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
+import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -76,17 +79,21 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void onInit() async {
-    context.read<auth_bloc.AuthBloc>().add(auth_bloc.GetMeRequested(context));
+    String? token = await SecureStorageUtils.getItem('token');
 
-    webSocketManager = await WebSocketManager.getInstance(
-      onMessage: (WebSocketMessage message) {
-        if (message is WebSocketMessage<UploadUserImageProgress>) {
-          context
-              .read<auth_bloc.AuthBloc>()
-              .add(auth_bloc.UpdateUserImageProgressRequested(message.data));
-        }
-      },
-    );
+    if (token != null) {
+      context.read<auth_bloc.AuthBloc>().add(auth_bloc.GetMeRequested(context));
+
+      webSocketManager = await WebSocketManager.getInstance(
+        onMessage: (WebSocketMessage message) {
+          if (message is WebSocketMessage<UploadUserImageProgress>) {
+            context
+                .read<auth_bloc.AuthBloc>()
+                .add(auth_bloc.UpdateUserImageProgressRequested(message.data));
+          }
+        },
+      );
+    }
   }
 
   @override

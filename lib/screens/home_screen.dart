@@ -208,18 +208,20 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (_months.isEmpty) {
-      return Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.all(20),
-            child: HomeHeader(
-              imgSrc: 'https://source.unsplash.com/random/',
-              geolocation: _geolocation,
+      return BlocBuilder<auth_bloc.AuthBloc, auth_bloc.AuthState>(
+        builder: (BuildContext context, auth_bloc.AuthState state) => Column(
+          children: [
+            Container(
+              margin: const EdgeInsets.all(20),
+              child: HomeHeader(
+                imgSrc: state.user?.image?.src,
+                geolocation: _geolocation,
+              ),
             ),
-          ),
-          autocomplete,
-          const NoEventsFound(),
-        ],
+            autocomplete,
+            const NoEventsFound(),
+          ],
+        ),
       );
     } else {
       return BlocBuilder<auth_bloc.AuthBloc, auth_bloc.AuthState>(
@@ -231,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Container(
                       margin: const EdgeInsets.all(20),
                       child: HomeHeader(
-                        imgSrc: state.user?.image?.src ?? '',
+                        imgSrc: state.user?.image?.src,
                         geolocation: _geolocation,
                       ),
                     ),
