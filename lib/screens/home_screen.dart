@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/controllers/home_screen_controller.dart';
 import 'package:events_app_mobile/graphql/home_screen/home_screen_queries.dart';
@@ -18,6 +19,7 @@ import 'package:events_app_mobile/widgets/month_tile.dart';
 import 'package:events_app_mobile/widgets/no_events_found.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -220,58 +222,63 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       );
     } else {
-      return RefreshIndicator(
-          onRefresh: () => _onRefresh(context),
-          child: Column(
-            children: [
-              Container(
-                margin: const EdgeInsets.all(20),
-                child: HomeHeader(
-                  imgSrc: 'https://source.unsplash.com/random/',
-                  geolocation: _geolocation,
-                ),
-              ),
-              autocomplete,
-              Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  shrinkWrap: true,
-                  itemCount: _months.length,
-                  itemBuilder: (context, index) {
-                    final month = _months[index];
+      return BlocBuilder<auth_bloc.AuthBloc, auth_bloc.AuthState>(
+        builder: (BuildContext context, auth_bloc.AuthState state) =>
+            RefreshIndicator(
+                onRefresh: () => _onRefresh(context),
+                child: Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.all(20),
+                      child: HomeHeader(
+                        imgSrc: state.user?.image?.src ?? '',
+                        geolocation: _geolocation,
+                      ),
+                    ),
+                    autocomplete,
+                    Expanded(
+                      child: ListView.builder(
+                        controller: _scrollController,
+                        shrinkWrap: true,
+                        itemCount: _months.length,
+                        itemBuilder: (context, index) {
+                          final month = _months[index];
 
-                    return Column(
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.only(bottom: 20),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          return Column(
                             children: [
-                              MonthTile(text: month.name),
-                              EventsCounter(count: month.events.length),
-                            ],
-                          ),
-                        ),
-                        ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: month.events.length,
-                          itemBuilder: (context, eventIndex) {
-                            Event event = month.events[eventIndex];
+                              Container(
+                                margin: const EdgeInsets.only(bottom: 20),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    MonthTile(text: month.name),
+                                    EventsCounter(count: month.events.length),
+                                  ],
+                                ),
+                              ),
+                              ListView.builder(
+                                physics: const NeverScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: month.events.length,
+                                itemBuilder: (context, eventIndex) {
+                                  Event event = month.events[eventIndex];
 
-                            return TouchableOpacity(
-                              onTap: () => _onEventPressed(context, event),
-                              child: EventCard(event: event),
-                            );
-                          },
-                        ).build(context),
-                      ],
-                    );
-                  },
-                ).build(context),
-              ),
-            ],
-          ));
+                                  return TouchableOpacity(
+                                    onTap: () =>
+                                        _onEventPressed(context, event),
+                                    child: EventCard(event: event),
+                                  );
+                                },
+                              ).build(context),
+                            ],
+                          );
+                        },
+                      ).build(context),
+                    ),
+                  ],
+                )),
+      );
     }
   }
 }

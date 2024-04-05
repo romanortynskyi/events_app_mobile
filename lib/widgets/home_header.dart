@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:flutter/material.dart';
 
@@ -48,7 +49,7 @@ class HomeHeader extends StatelessWidget {
           ],
         ),
         CircleAvatar(
-          backgroundImage: NetworkImage(imgSrc),
+          backgroundImage: CachedNetworkImageProvider(imgSrc),
           radius: 30,
         )
       ],

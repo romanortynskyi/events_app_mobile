@@ -175,23 +175,30 @@ class SearchScreenController {
 
     debounceTimer = Timer(const Duration(milliseconds: 500), () async {
       GoogleMapController controller = await completer.future;
+
+      if (!context.mounted) {
+        controller.dispose();
+
+        return;
+      }
+
       LatLngBounds currentPosition = await controller.getVisibleRegion();
 
       LatLng southwest = currentPosition.southwest;
       LatLng northeast = currentPosition.northeast;
 
-      Paginated<Event> paginatedEvents = await eventService.getEvents(
-        context: context,
-        graphqlDocument: graphqlDocument,
-        bounds: GetEventsBounds(
-          xMin: southwest.longitude,
-          yMin: southwest.latitude,
-          xMax: northeast.longitude,
-          yMax: northeast.latitude,
-        ),
-      );
-
       if (context.mounted) {
+        Paginated<Event> paginatedEvents = await eventService.getEvents(
+          context: context,
+          graphqlDocument: graphqlDocument,
+          bounds: GetEventsBounds(
+            xMin: southwest.longitude,
+            yMin: southwest.latitude,
+            xMax: northeast.longitude,
+            yMax: northeast.latitude,
+          ),
+        );
+
         List<Event> eventsFromBe = paginatedEvents.items ?? [];
 
         Map<String, List<Event>> groupedEvents =

@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/controllers/search_screen_controller.dart';
 import 'package:events_app_mobile/graphql/search_screen/search_screen_queries.dart';
@@ -16,6 +17,7 @@ import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/home_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -171,62 +173,64 @@ class _SearchScreenState extends State<SearchScreen> {
       }
     });
 
-    return _isLoading
-        ? const Center(
-            child: CircularProgressIndicator(),
-          )
-        : Column(
-            children: [
-              Column(
-                key: topBarKey,
-                children: [
-                  Container(
-                    margin: const EdgeInsets.all(20),
-                    child: HomeHeader(
-                      imgSrc: 'https://source.unsplash.com/random/',
-                      geolocation: _geolocation,
+    return BlocBuilder<auth_bloc.AuthBloc, auth_bloc.AuthState>(
+      builder: (BuildContext context, auth_bloc.AuthState state) => _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : Column(
+              children: [
+                Column(
+                  key: topBarKey,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.all(20),
+                      child: HomeHeader(
+                        imgSrc: state.user?.image?.src ?? '',
+                        geolocation: _geolocation,
+                      ),
                     ),
-                  ),
-                  Container(
-                    margin: const EdgeInsets.only(
-                      right: 20,
-                      bottom: 20,
-                      left: 20,
+                    Container(
+                      margin: const EdgeInsets.only(
+                        right: 20,
+                        bottom: 20,
+                        left: 20,
+                      ),
+                      child: AppAutocomplete<AutocompletePlacesResult>(
+                        textEditingController: _textEditingController,
+                        focusNode: _focusNode,
+                        borderRadius: 35,
+                        prefixIcon: const Icon(Icons.location_on_outlined),
+                        hintText: 'Search for locations...',
+                        optionsBuilder: _searchScreenController.optionsBuilder,
+                        optionsViewBuilder:
+                            _searchScreenController.optionsViewBuilder,
+                        onSelected: (AutocompletePlacesResult selection) {
+                          print('You just selected ${selection.originalId}');
+                        },
+                        onSubmitted: (String value) {
+                          print('You just selected $value');
+                        },
+                      ),
                     ),
-                    child: AppAutocomplete<AutocompletePlacesResult>(
-                      textEditingController: _textEditingController,
-                      focusNode: _focusNode,
-                      borderRadius: 35,
-                      prefixIcon: const Icon(Icons.location_on_outlined),
-                      hintText: 'Search for locations...',
-                      optionsBuilder: _searchScreenController.optionsBuilder,
-                      optionsViewBuilder:
-                          _searchScreenController.optionsViewBuilder,
-                      onSelected: (AutocompletePlacesResult selection) {
-                        print('You just selected ${selection.originalId}');
-                      },
-                      onSubmitted: (String value) {
-                        print('You just selected $value');
-                      },
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height -
-                    topBarHeight -
-                    GlobalConsts.bottomNavigationBarHeight * 2,
-                child: GoogleMap(
-                  onMapCreated: _onMapCreated,
-                  onCameraMove: _onCameraMove,
-                  initialCameraPosition: CameraPosition(
-                    target: _center,
-                    zoom: 11,
-                  ),
-                  markers: _markers.values.toSet(),
+                  ],
                 ),
-              ),
-            ],
-          );
+                SizedBox(
+                  height: MediaQuery.of(context).size.height -
+                      topBarHeight -
+                      GlobalConsts.bottomNavigationBarHeight * 2,
+                  child: GoogleMap(
+                    onMapCreated: _onMapCreated,
+                    onCameraMove: _onCameraMove,
+                    initialCameraPosition: CameraPosition(
+                      target: _center,
+                      zoom: 11,
+                    ),
+                    markers: _markers.values.toSet(),
+                  ),
+                ),
+              ],
+            ),
+    );
   }
 }
