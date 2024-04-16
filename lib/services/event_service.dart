@@ -1,5 +1,4 @@
 import 'package:events_app_mobile/models/event.dart';
-import 'package:events_app_mobile/models/get_events_bounds.dart';
 import 'package:events_app_mobile/models/paginated.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -10,7 +9,7 @@ class EventService {
     required String graphqlDocument,
     int? skip,
     int? limit,
-    GetEventsBounds? bounds,
+    bool? shouldReturnSoonest = false,
     FetchPolicy? fetchPolicy,
   }) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
@@ -22,14 +21,9 @@ class EventService {
         'skip': skip,
         'limit': limit,
       });
-    } else if (bounds != null) {
+    } else if (shouldReturnSoonest != null) {
       variables.addAll({
-        'bounds': {
-          'xMin': bounds.xMin,
-          'yMin': bounds.yMin,
-          'xMax': bounds.xMax,
-          'yMax': bounds.yMax,
-        },
+        'shouldReturnSoonest': shouldReturnSoonest,
       });
     }
 

@@ -12,8 +12,8 @@ class SearchScreenQueries {
   """;
 
   static const String getEvents = '''
-    query GET_EVENTS(\$bounds: GetEventsBounds) {
-      getEvents(bounds: \$bounds) {
+    query GET_EVENTS(\$shouldReturnSoonest: Boolean) {
+      getEvents(shouldReturnSoonest: \$shouldReturnSoonest) {
         items {
           id
           image {

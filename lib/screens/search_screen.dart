@@ -48,8 +48,6 @@ class _SearchScreenState extends State<SearchScreen> {
   );
   Map<int, Uint8List> eventImages = {};
 
-  Timer? _debounceTimer;
-
   final Completer<GoogleMapController> _completer = Completer();
 
   final LatLng _center = const LatLng(0, 0);
@@ -145,19 +143,8 @@ class _SearchScreenState extends State<SearchScreen> {
   void _getEvents() {
     _searchScreenController.getEvents(
       graphqlDocument: SearchScreenQueries.getEvents,
-      completer: _completer,
       onMarkerCreated: _onMarkerCreated,
     );
-  }
-
-  void _onCameraMove(CameraPosition cameraPosition) async {
-    _getEvents();
-  }
-
-  @override
-  void dispose() {
-    _debounceTimer?.cancel();
-    super.dispose();
   }
 
   @override
@@ -221,7 +208,6 @@ class _SearchScreenState extends State<SearchScreen> {
                       GlobalConsts.bottomNavigationBarHeight * 2,
                   child: GoogleMap(
                     onMapCreated: _onMapCreated,
-                    onCameraMove: _onCameraMove,
                     initialCameraPosition: CameraPosition(
                       target: _center,
                       zoom: 11,

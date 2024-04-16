@@ -7,7 +7,6 @@ import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/autocomplete_places_result.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
-import 'package:events_app_mobile/models/get_events_bounds.dart';
 import 'package:events_app_mobile/models/paginated.dart';
 import 'package:events_app_mobile/screens/event_screen.dart';
 import 'package:events_app_mobile/services/event_service.dart';
@@ -103,15 +102,6 @@ class SearchScreenController {
     return marker;
   }
 
-  Event? _getEarliestEvent(List<Event> eventList) {
-    if (eventList.isEmpty) {
-      return null;
-    }
-
-    return eventList.reduce(
-        (a, b) => a.startDate!.isBefore(b.startDate ?? DateTime.now()) ? a : b);
-  }
-
   Future<Uint8List?> _getEventImage(String src) async {
     var response = await http.get(Uri.parse(src));
 
@@ -165,75 +155,38 @@ class SearchScreenController {
 
   Future<void> getEvents({
     required String graphqlDocument,
-    required Completer<GoogleMapController> completer,
-    Timer? debounceTimer,
     Function(Marker)? onMarkerCreated,
   }) async {
-    if (debounceTimer?.isActive ?? false) {
-      debounceTimer?.cancel();
-    }
+    if (context.mounted) {
+      Paginated<Event> paginatedEvents = await eventService.getEvents(
+        context: context,
+        graphqlDocument: graphqlDocument,
+        shouldReturnSoonest: true,
+      );
 
-    debounceTimer = Timer(const Duration(milliseconds: 500), () async {
-      GoogleMapController controller = await completer.future;
+      List<Event> events = paginatedEvents.items ?? [];
 
-      if (!context.mounted) {
-        controller.dispose();
+      events.forEach((event) async {
+        double latitude = event.place?.location?.latitude ?? 0;
+        double longitude = event.place?.location?.longitude ?? 0;
 
-        return;
-      }
+        MarkerId markerId = MarkerId(event.id.toString());
+        LatLng position = LatLng(latitude, longitude);
 
-      LatLngBounds currentPosition = await controller.getVisibleRegion();
+        Uint8List? imageBytes = await _getEventImage(event.image?.src ?? '');
 
-      LatLng southwest = currentPosition.southwest;
-      LatLng northeast = currentPosition.northeast;
+        if (imageBytes != null) {
+          Marker marker = Marker(
+            markerId: markerId,
+            position: position,
+            onTap: () => {_showEventDetails(event.id ?? -1)},
+            icon: BitmapDescriptor.fromBytes(imageBytes),
+          );
 
-      if (context.mounted) {
-        Paginated<Event> paginatedEvents = await eventService.getEvents(
-          context: context,
-          graphqlDocument: graphqlDocument,
-          bounds: GetEventsBounds(
-            xMin: southwest.longitude,
-            yMin: southwest.latitude,
-            xMax: northeast.longitude,
-            yMax: northeast.latitude,
-          ),
-        );
-
-        List<Event> eventsFromBe = paginatedEvents.items ?? [];
-
-        Map<String, List<Event>> groupedEvents =
-            groupBy(eventsFromBe, (event) => event.place?.originalId ?? '');
-
-        Map<String, Event> firstEventsByPlace = {};
-
-        for (var entry in groupedEvents.entries) {
-          firstEventsByPlace[entry.key] = _getEarliestEvent(entry.value)!;
+          onMarkerCreated!(marker);
         }
-
-        List<Event> events = firstEventsByPlace.values.toList();
-
-        events.forEach((event) async {
-          double latitude = event.place?.location?.latitude ?? 0;
-          double longitude = event.place?.location?.longitude ?? 0;
-
-          MarkerId markerId = MarkerId(event.id.toString());
-          LatLng position = LatLng(latitude, longitude);
-
-          Uint8List? imageBytes = await _getEventImage(event.image?.src ?? '');
-
-          if (imageBytes != null) {
-            Marker marker = Marker(
-              markerId: markerId,
-              position: position,
-              onTap: () => {_showEventDetails(event.id ?? -1)},
-              icon: BitmapDescriptor.fromBytes(imageBytes),
-            );
-
-            onMarkerCreated!(marker);
-          }
-        });
-      }
-    });
+      });
+    }
   }
 
   Future<Iterable<AutocompletePlacesResult>> optionsBuilder(
