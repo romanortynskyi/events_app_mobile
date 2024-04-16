@@ -67,30 +67,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
     }
   }
 
-  String? titleValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a title';
-    }
-
-    return null;
-  }
-
-  String? descriptionValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a description';
-    }
-
-    if (value.length < 6) {
-      return 'Description must be at least 6 characters long';
-    }
-
-    if (value.length > 256) {
-      return 'Description must be up to 256 characters long';
-    }
-
-    return null;
-  }
-
   String? ticketPriceValidator(String? valueString) {
     if (valueString == null || valueString.isEmpty) {
       return 'Please enter a ticket price';

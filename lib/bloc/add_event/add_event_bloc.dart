@@ -9,10 +9,14 @@ part 'add_event_state.dart';
 
 class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
   AddEventBloc() : super(Initial(eventInput: EventInput(), step: 0)) {
-    on<AddEventSetVerticalImageRequested>(_onSetVerticalImage);
     on<AddEventIncrementStepRequested>(_onIncrementStep);
     on<AddEventDecrementStepRequested>(_onDecrementStep);
+
+    on<AddEventSetVerticalImageRequested>(_onSetVerticalImage);
     on<AddEventSetHorizontalImageRequested>(_onSetHorizontalImage);
+
+    on<AddEventSetTitleRequested>(_onSetTitleRequested);
+    on<AddEventSetDescriptionRequested>(_onSetDescriptionRequested);
   }
 
   void _onIncrementStep(
@@ -41,9 +45,26 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
   void _onSetHorizontalImage(
     AddEventSetHorizontalImageRequested event,
     Emitter<AddEventState> emit,
-  ) async {
+  ) {
     EventInput newEventInput =
         state.eventInput.copyWith(horizontalImage: event.imageFile);
     emit(SetHorizontalImage(eventInput: newEventInput, step: state.step));
+  }
+
+  void _onSetTitleRequested(
+    AddEventSetTitleRequested event,
+    Emitter<AddEventState> emit,
+  ) {
+    EventInput newEventInput = state.eventInput.copyWith(title: event.title);
+    emit(SetTitle(eventInput: newEventInput, step: state.step));
+  }
+
+  void _onSetDescriptionRequested(
+    AddEventSetDescriptionRequested event,
+    Emitter<AddEventState> emit,
+  ) {
+    EventInput newEventInput =
+        state.eventInput.copyWith(description: event.description);
+    emit(SetTitle(eventInput: newEventInput, step: state.step));
   }
 }

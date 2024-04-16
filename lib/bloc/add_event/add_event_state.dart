@@ -7,6 +7,7 @@ abstract class AddEventState extends Equatable {
   final EventInput eventInput;
   final int step;
   final String? errorMessage;
+
   const AddEventState({
     required this.eventInput,
     required this.step,
@@ -32,6 +33,22 @@ class SetVerticalImage extends AddEventState {
 
 class SetHorizontalImage extends AddEventState {
   const SetHorizontalImage({
+    required super.step,
+    required super.eventInput,
+    super.errorMessage,
+  });
+}
+
+class SetTitle extends AddEventState {
+  const SetTitle({
+    required super.step,
+    required super.eventInput,
+    super.errorMessage,
+  });
+}
+
+class SetDescription extends AddEventState {
+  const SetDescription({
     required super.step,
     required super.eventInput,
     super.errorMessage,

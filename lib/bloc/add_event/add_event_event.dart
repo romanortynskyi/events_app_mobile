@@ -40,3 +40,19 @@ class AddEventSetInitialEventInputRequested extends AddEventEvent {
     required this.eventInput,
   });
 }
+
+class AddEventSetTitleRequested extends AddEventEvent {
+  final String title;
+
+  const AddEventSetTitleRequested({
+    required this.title,
+  });
+}
+
+class AddEventSetDescriptionRequested extends AddEventEvent {
+  final String description;
+
+  const AddEventSetDescriptionRequested({
+    required this.description,
+  });
+}
