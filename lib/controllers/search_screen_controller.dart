@@ -131,8 +131,8 @@ class SearchScreenController {
           for (int x = -radius; x <= radius; x++) {
             if (x * x + y * y <= radius * radius) {
               markerImage.setPixel(
-                originX + x + 8,
-                originY + y + 10,
+                originX + x + 13,
+                originY + y + 8,
                 avatarImage.getPixelSafe(originX + x, originY + y),
               );
             }
