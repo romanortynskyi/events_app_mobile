@@ -20,6 +20,7 @@ class _SelectCategoriesScreenState extends State<SelectCategoriesScreen> {
 
   @override
   void initState() {
+    super.initState();
     _onInit();
   }
 

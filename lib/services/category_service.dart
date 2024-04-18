@@ -3,12 +3,13 @@ import 'package:events_app_mobile/models/paginated.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-class PlaceService {
+class CategoryService {
   Future<Paginated<Category>> getCategories({
     required BuildContext context,
     required String graphqlDocument,
-    required int skip,
-    required int limit,
+    int? skip,
+    int? limit,
+    bool shouldReturnAll = true,
   }) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
     var response = await client.query(QueryOptions(
@@ -17,6 +18,7 @@ class PlaceService {
         'input': {
           'skip': skip,
           'limit': limit,
+          'shouldReturnAll': shouldReturnAll,
         },
       },
     ));
@@ -29,7 +31,8 @@ class PlaceService {
         .map((map) => Category.create().fromMap(map))
         .toList()
         .cast<Category>();
-    int totalPagesCount = response.data!['getCategories']['totalPagesCount'];
+    int totalPagesCount =
+        response.data!['getCategories']['totalPagesCount'] ?? 1;
 
     return Paginated<Category>(
         items: categories, totalPagesCount: totalPagesCount);

@@ -1,11 +1,15 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:events_app_mobile/models/category.dart';
+import 'package:events_app_mobile/models/paginated.dart';
+import 'package:events_app_mobile/services/category_service.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart'
     as add_event_bloc;
+import 'package:events_app_mobile/graphql/add_event_step_three_screen/add_event_step_three_screen_queries.dart';
 
 class AddEventStepThreeScreen extends StatefulWidget {
   const AddEventStepThreeScreen({super.key});
@@ -19,6 +23,11 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
       TextEditingController();
   final TextEditingController _descriptionTextEditingController =
       TextEditingController();
+
+  bool isLoadingCategories = true;
+
+  List<Category> categories = [];
+  List<int> selectedCategoryIds = [];
 
   void _onTitleChanged(String value) {
     context
@@ -78,10 +87,17 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void _onCategorySelected(int index, bool selected) {
+    setState(() {
+      if (selected) {
+        selectedCategoryIds.add(index);
+      } else {
+        selectedCategoryIds.remove(index);
+      }
+    });
+  }
 
+  void _onInit() async {
     String defaultTitle =
         context.read<add_event_bloc.AddEventBloc>().state.eventInput.title ??
             '';
@@ -94,6 +110,34 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
 
     _setTitle(defaultTitle);
     _setDescription(defaultDescription);
+  }
+
+  void _didChangeDependencies() async {
+    Paginated<Category>? response = await CategoryService().getCategories(
+      context: context,
+      graphqlDocument: AddEventStepThreeScreenQueries.getCategories,
+      shouldReturnAll: true,
+    );
+
+    List<Category> categoriesFromBe = response.items ?? [];
+
+    setState(() {
+      categories = categoriesFromBe;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _onInit();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _didChangeDependencies();
   }
 
   @override
@@ -117,12 +161,35 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
                 controller: _titleTextEditingController,
                 maxLines: 1,
               ),
+              const SizedBox(height: 20),
               AppTextField(
                 hintText: 'Description',
                 obscureText: false,
                 onChanged: _onDescriptionChanged,
                 validator: _descriptionValidator,
                 controller: _descriptionTextEditingController,
+              ),
+              const SizedBox(height: 20),
+              Column(
+                children: [
+                  const Text('Select categories'),
+                  const SizedBox(height: 20),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 4,
+                    children: List<Widget>.generate(
+                      categories.length,
+                      (int index) {
+                        return ChoiceChip(
+                            label: Text(categories[index].name ?? ''),
+                            selected: selectedCategoryIds.contains(index),
+                            onSelected: (bool selected) {
+                              _onCategorySelected(index, selected);
+                            });
+                      },
+                    ).toList(),
+                  ),
+                ],
               ),
               const SizedBox(height: 20),
               AppButton(
