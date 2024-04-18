@@ -216,6 +216,8 @@ class _HomeScreenState extends State<HomeScreen> {
               child: HomeHeader(
                 imgSrc: state.user?.image?.src,
                 geolocation: _geolocation,
+                firstName: state.user?.firstName,
+                lastName: state.user?.lastName,
               ),
             ),
             autocomplete,
@@ -234,6 +236,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       margin: const EdgeInsets.all(20),
                       child: HomeHeader(
                         imgSrc: state.user?.image?.src,
+                        firstName: state.user?.firstName,
+                        lastName: state.user?.lastName,
                         geolocation: _geolocation,
                       ),
                     ),

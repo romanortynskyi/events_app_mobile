@@ -2,13 +2,13 @@
 
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/upload_user_image_progress.dart';
 import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
+import 'package:events_app_mobile/widgets/user_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -40,75 +40,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   void _onSignOut() {
     context.read<auth_bloc.AuthBloc>().add(auth_bloc.SignOutRequested());
-  }
-
-  Widget _getCircleContent(auth_bloc.AuthState state) {
-    bool isUserImageUpdating = state is auth_bloc.UploadingUserImage;
-    UploadUserImageProgress progress =
-        state.uploadImageProgress ?? UploadUserImageProgress();
-
-    int loaded = progress.loaded ?? 0;
-    int total = progress.total ?? 1;
-
-    int percentage = (loaded / total).round() * 100;
-
-    double progressValue = ((percentage) / 100).floor().toDouble();
-
-    double imageWidth = 200;
-    double imageHeight = 200;
-
-    if (isUserImageUpdating) {
-      return Center(
-        child: SizedBox(
-          height: imageHeight,
-          width: imageWidth,
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              SizedBox(
-                height: imageHeight,
-                width: imageWidth,
-                child: CircularProgressIndicator(
-                  value: progressValue,
-                  backgroundColor: LightThemeColors.white,
-                  strokeCap: StrokeCap.round,
-                ),
-              ),
-              Text(
-                '$percentage%',
-                style: TextStyle(
-                  fontSize: 50,
-                  color: LightThemeColors.primary,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    User? user = state.user;
-
-    if (user?.image == null) {
-      String? firstNameFirstLetter = user?.firstName?.characters.first;
-      String? lastNameFirstLetter = user?.lastName?.characters.first;
-      String initials = '$firstNameFirstLetter$lastNameFirstLetter';
-
-      return Center(
-        child: Text(
-          initials,
-          style: TextStyle(
-            fontSize: 50,
-            color: LightThemeColors.white,
-          ),
-        ),
-      );
-    }
-
-    // otherwise user has an image
-    return CircleAvatar(
-      backgroundImage: CachedNetworkImageProvider(user?.image?.src ?? ''),
-    );
   }
 
   @override
@@ -181,8 +112,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               );
 
-        Widget circleContent = _getCircleContent(state);
-
         bool isUserImageUpdating = state is auth_bloc.UploadingUserImage;
 
         Color circleColor = isUserImageUpdating
@@ -199,22 +128,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   left: imageLeft,
                   child: Stack(
                     children: [
-                      Container(
+                      UserImage(
                         width: imageWidth,
                         height: imageHeight,
-                        decoration: BoxDecoration(
-                          color: circleColor,
-                          borderRadius: BorderRadius.circular(200),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.5),
-                              spreadRadius: 5,
-                              blurRadius: 7,
-                              offset: const Offset(0, 0),
-                            ),
-                          ],
-                        ),
-                        child: circleContent,
+                        imgSrc: user?.image?.src,
+                        circleColor: circleColor,
+                        firstName: user?.firstName ?? '',
+                        lastName: user?.lastName ?? '',
+                        isUserImageUpdating: isUserImageUpdating,
+                        fontSize: 50,
                       ),
                       deleteImageButton,
                       Positioned(
