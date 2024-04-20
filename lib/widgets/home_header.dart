@@ -54,16 +54,18 @@ class HomeHeader extends StatelessWidget {
             ),
           ],
         ),
-        UserImage(
-          imgSrc: imgSrc,
-          width: 60,
-          height: 60,
-          circleColor: LightThemeColors.primary,
-          firstName: firstName ?? '',
-          lastName: lastName ?? '',
-          isUserImageUpdating: false,
-          fontSize: 12,
-        ),
+        imgSrc == null
+            ? const SizedBox()
+            : UserImage(
+                imgSrc: imgSrc,
+                width: 60,
+                height: 60,
+                circleColor: LightThemeColors.primary,
+                firstName: firstName ?? '',
+                lastName: lastName ?? '',
+                isUserImageUpdating: false,
+                fontSize: 12,
+              ),
       ],
     );
   }

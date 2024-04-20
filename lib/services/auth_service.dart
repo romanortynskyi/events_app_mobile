@@ -191,10 +191,15 @@ class AuthService {
       ),
     );
 
-    var data = getMeResult.data ?? {};
-    final user = User.create().fromMap(data['getMe'] ?? {});
+    var data = getMeResult.data;
 
-    return user;
+    if (data != null) {
+      final user = User.create().fromMap(data['getMe']);
+
+      return user;
+    }
+
+    return null;
   }
 
   Future<Asset> updateUserImage({

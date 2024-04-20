@@ -137,6 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         lastName: user?.lastName ?? '',
                         isUserImageUpdating: isUserImageUpdating,
                         fontSize: 50,
+                        shouldDropShadow: true,
                       ),
                       deleteImageButton,
                       Positioned(
