@@ -1,7 +1,8 @@
-// ignore_for_file: use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, prefer_conditional_assignment
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:events_app_mobile/consts/enums/route_name.dart';
+import 'package:events_app_mobile/consts/enums/web_socket_message_type.dart';
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/managers/web_socket_manager.dart';
@@ -13,6 +14,7 @@ import 'package:events_app_mobile/screens/home_screen.dart';
 import 'package:events_app_mobile/screens/search_screen.dart';
 import 'package:events_app_mobile/screens/profile_screen.dart';
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
+import 'package:events_app_mobile/utils/env_utils.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -77,10 +79,10 @@ class _MainScreenState extends State<MainScreen> {
     return true;
   }
 
-  void onInit() async {
+  void _onInit() async {
     String? token = await SecureStorageUtils.getItem('token');
 
-    if (token != null) {
+    if (token != null && mounted) {
       context.read<auth_bloc.AuthBloc>().add(auth_bloc.GetMeRequested(context));
 
       webSocketManager = await WebSocketManager.getInstance(
@@ -99,10 +101,11 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     super.initState();
 
-    onInit();
+    _onInit();
   }
 
-  void _blocListener(BuildContext context, auth_bloc.AuthState state) {
+  Future<void> _blocListener(
+      BuildContext context, auth_bloc.AuthState state) async {
     if (state is auth_bloc.Authenticated && webSocketManager != null) {
       webSocketManager?.reconnect();
     }

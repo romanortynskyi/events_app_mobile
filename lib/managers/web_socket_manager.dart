@@ -63,7 +63,8 @@ class WebSocketManager {
     required this.onMessage,
     this.headers = const {},
   }) {
-    channel = IOWebSocketChannel.connect(url, headers: headers);
+    channel = WebSocketChannel.connect(
+        Uri.parse('$url?authorization=${headers?['Authorization']}'));
 
     subscription = channel!.stream.listen(
       (message) {

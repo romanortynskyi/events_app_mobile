@@ -158,8 +158,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    print(
-        'eventsloding: $_isLoadingEvents, locatonloading: $_isLoadingLocation');
     if (_isLoadingEvents || _isLoadingLocation) {
       return Center(
         child: CircularProgressIndicator(
