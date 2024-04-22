@@ -1,5 +1,6 @@
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart';
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart';
+import 'package:events_app_mobile/links/custom_link.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/services/auth_service.dart';
 import 'package:events_app_mobile/utils/env_utils.dart';
@@ -33,15 +34,16 @@ main() async {
     return 'Bearer $token';
   });
 
-  final WebSocketLink webSocketLink = WebSocketLink(
-    EnvUtils.getEnv('WS_URL'),
-  );
+  final customLink = CustomLink(getHeaders: () async {
+    return {
+      'Accept-Language': 'en',
+    };
+  });
 
-  final link = Link.split(
-    (request) => request.isSubscription,
-    webSocketLink,
+  final link = Link.from([
+    customLink,
     httpLink,
-  );
+  ]);
 
   ValueNotifier<GraphQLClient> client = ValueNotifier(
     GraphQLClient(

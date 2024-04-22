@@ -115,10 +115,10 @@ class _EventScreenState extends State<EventScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Image.network(_event?.image?.src ?? '',
-                      height: 300,
-                      width: MediaQuery.of(context).size.width,
-                      fit: BoxFit.cover),
+                  // Image.network(_event?.image?.src ?? '',
+                  //     height: 300,
+                  //     width: MediaQuery.of(context).size.width,
+                  //     fit: BoxFit.cover),
                   Container(
                       margin: const EdgeInsets.only(left: 20),
                       child: Column(
