@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/controllers/event_screen_controller.dart';
 import 'package:events_app_mobile/graphql/home_screen/event_screen_queries.dart';
@@ -115,10 +116,11 @@ class _EventScreenState extends State<EventScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Image.network(_event?.image?.src ?? '',
-                  //     height: 300,
-                  //     width: MediaQuery.of(context).size.width,
-                  //     fit: BoxFit.cover),
+                  CachedNetworkImage(
+                      imageUrl: _event?.image?.src ?? '',
+                      height: 300,
+                      width: MediaQuery.of(context).size.width,
+                      fit: BoxFit.cover),
                   Container(
                       margin: const EdgeInsets.only(left: 20),
                       child: Column(
