@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
+import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/controllers/home_screen_controller.dart';
 import 'package:events_app_mobile/graphql/home_screen/home_screen_queries.dart';
@@ -123,9 +124,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onAutocompleteSelected(BuildContext context, String text) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SearchResultsScreen(query: text)),
+    Navigator.of(context).pushNamed(
+      RouteName.searchResults.value,
+      arguments: SearchResultsScreenArguments(text),
     );
   }
 
@@ -157,6 +158,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print(
+        'eventsloding: $_isLoadingEvents, locatonloading: $_isLoadingLocation');
     if (_isLoadingEvents || _isLoadingLocation) {
       return Center(
         child: CircularProgressIndicator(

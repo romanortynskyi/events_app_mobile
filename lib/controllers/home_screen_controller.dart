@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
@@ -216,9 +217,9 @@ class HomeScreenController {
   }
 
   void onEventPressed(BuildContext context, Event event) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => EventScreen(id: event.id ?? -1)),
+    Navigator.of(context).pushNamed(
+      RouteName.event.value,
+      arguments: EventScreenArguments(event.id ?? -1),
     );
   }
 }

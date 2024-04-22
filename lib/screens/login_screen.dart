@@ -2,7 +2,7 @@
 
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/screens/main_screen.dart';
+import 'package:events_app_mobile/controllers/login_screen_controler.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:events_app_mobile/widgets/or_continue_with.dart';
@@ -25,6 +25,8 @@ class _LoginScreenState extends State<LoginScreen> {
   String _email = '';
   String _password = '';
 
+  late LoginScreenController _loginScreenController;
+
   void onPasswordHiddenPressed() {
     setState(() {
       _isPasswordHidden = !_isPasswordHidden;
@@ -34,49 +36,20 @@ class _LoginScreenState extends State<LoginScreen> {
   void onForgotPasswordPressed() {}
 
   void onLoginPressed() {
-    if (_formKey.currentState!.validate()) {
-      context.read<auth_bloc.AuthBloc>().add(auth_bloc.EmailSignInRequested(
-            context: context,
-            email: _email,
-            password: _password,
-          ));
-    }
+    _loginScreenController.onLoginPressed(
+      context: context,
+      formKey: _formKey,
+      email: _email,
+      password: _password,
+    );
   }
 
-  void onSignUpPressed() {}
+  void onSignUpPressed() {
+    _loginScreenController.onSignUpPressed(context);
+  }
 
   void onLoginError(BuildContext context, String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
-    );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
-  }
-
-  String? emailValidator(String? value) {
-    final RegExp emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-
-    if (value == null || value.isEmpty) {
-      return 'Please enter your email';
-    }
-
-    if (!emailRegExp.hasMatch(value)) {
-      return 'Please enter a valid email';
-    }
-
-    return null;
-  }
-
-  String? passwordValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your password';
-    }
-
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters long';
-    }
-
-    return null;
+    _loginScreenController.onLoginError(context, message);
   }
 
   void onEmailChanged(String value) {
@@ -88,31 +61,25 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void onLoginWithGoogle() async {
-    context
-        .read<auth_bloc.AuthBloc>()
-        .add(auth_bloc.GoogleSignInRequested(context));
+    _loginScreenController.onLoginWithGoogle(context);
   }
 
   void onLoginWithFacebook() async {
-    context
-        .read<auth_bloc.AuthBloc>()
-        .add(auth_bloc.FacebookSignInRequested(context));
+    _loginScreenController.onLoginWithFacebook(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _loginScreenController = LoginScreenController();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<auth_bloc.AuthBloc, auth_bloc.AuthState>(
         listener: (BuildContext context, auth_bloc.AuthState state) {
-      if (state is auth_bloc.Authenticated) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MainScreen()),
-        );
-      }
-
-      if (state is auth_bloc.Error) {
-        onLoginError(context, state.errorMessage ?? '');
-      }
+      _loginScreenController.blocListener(context, state);
     }, builder: (BuildContext context, auth_bloc.AuthState state) {
       bool isLoading = state is auth_bloc.Loading;
 
@@ -136,7 +103,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 50),
                           AppTextField(
-                            validator: emailValidator,
+                            validator: _loginScreenController.emailValidator,
                             hintText: 'Email',
                             obscureText: false,
                             onChanged: onEmailChanged,
@@ -145,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           AppTextField(
                             maxLines: 1,
                             keyboardType: TextInputType.text,
-                            validator: passwordValidator,
+                            validator: _loginScreenController.passwordValidator,
                             hintText: 'Password',
                             obscureText: _isPasswordHidden,
                             onChanged: onPasswordChanged,

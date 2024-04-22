@@ -2,13 +2,11 @@
 
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/screens/main_screen.dart';
+import 'package:events_app_mobile/controllers/sign_up_screen_controller.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:events_app_mobile/widgets/or_continue_with.dart';
-import 'package:events_app_mobile/widgets/sign_up_button.dart';
 import 'package:events_app_mobile/widgets/social_button.dart';
-import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -27,60 +25,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
   String _firstName = '';
   String _lastName = '';
 
+  late SignUpScreenController _signUpScreenController;
+
   void onPasswordHiddenPressed() {
     setState(() {
       _isPasswordHidden = !_isPasswordHidden;
     });
   }
 
-  void onForgotPasswordPressed() {}
-
-  void onSignupPressed() {
-    if (_formKey.currentState!.validate()) {
-      context.read<auth_bloc.AuthBloc>().add(auth_bloc.EmailSignUpRequested(
-            context: context,
-            email: _email,
-            password: _password,
-            firstName: _firstName,
-            lastName: _lastName,
-          ));
-    }
-  }
-
-  void onLoginPressed() {}
-
-  void onLoginError(BuildContext context, String message) {
-    final snackBar = SnackBar(
-      content: Text(message),
+  void onSignUpPressed() {
+    _signUpScreenController.onSignUpPressed(
+      formKey: _formKey,
+      context: context,
+      email: _email,
+      password: _password,
+      firstName: _firstName,
+      lastName: _lastName,
     );
-
-    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  String? emailValidator(String? value) {
-    final RegExp emailRegExp = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-
-    if (value == null || value.isEmpty) {
-      return 'Please enter your email';
-    }
-
-    if (!emailRegExp.hasMatch(value)) {
-      return 'Please enter a valid email';
-    }
-
-    return null;
-  }
-
-  String? passwordValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter your password';
-    }
-
-    if (value.length < 6) {
-      return 'Password must be at least 6 characters long';
-    }
-
-    return null;
+  void onSignUpError(BuildContext context, String message) {
+    _signUpScreenController.onSignUpError(context, message);
   }
 
   void onEmailChanged(String value) {
@@ -91,32 +56,34 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() => _password = value);
   }
 
+  void onFirstNameChanged(String value) {
+    setState(() => _firstName = value);
+  }
+
+  void onLastNameChanged(String value) {
+    setState(() => _lastName = value);
+  }
+
   void onLoginWithGoogle() async {
-    context
-        .read<auth_bloc.AuthBloc>()
-        .add(auth_bloc.GoogleSignInRequested(context));
+    _signUpScreenController.onLoginWithGoogle(context);
   }
 
   void onLoginWithFacebook() async {
-    context
-        .read<auth_bloc.AuthBloc>()
-        .add(auth_bloc.FacebookSignInRequested(context));
+    _signUpScreenController.onLoginWithFacebook(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _signUpScreenController = SignUpScreenController();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<auth_bloc.AuthBloc, auth_bloc.AuthState>(
         listener: (context, state) {
-      if (state is auth_bloc.Authenticated) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MainScreen()),
-        );
-      }
-
-      if (state is auth_bloc.Error) {
-        onLoginError(context, state.errorMessage ?? '');
-      }
+      _signUpScreenController.blocListener(context, state);
     }, builder: (BuildContext context, auth_bloc.AuthState state) {
       bool isLoading = state is auth_bloc.Loading;
 
@@ -140,7 +107,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                           const SizedBox(height: 50),
                           AppTextField(
-                            validator: emailValidator,
+                            validator: _signUpScreenController.emailValidator,
                             hintText: 'Email',
                             obscureText: false,
                             onChanged: onEmailChanged,
@@ -149,7 +116,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           AppTextField(
                             maxLines: 1,
                             keyboardType: TextInputType.text,
-                            validator: passwordValidator,
+                            validator:
+                                _signUpScreenController.passwordValidator,
                             hintText: 'Password',
                             obscureText: _isPasswordHidden,
                             onChanged: onPasswordChanged,
@@ -160,30 +128,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   : Icons.visibility_off_outlined),
                             ),
                           ),
-                          const SizedBox(height: 10),
-                          TouchableOpacity(
-                            onTap: onForgotPasswordPressed,
-                            child: Padding(
-                              padding: const EdgeInsets.only(right: 25.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  GestureDetector(
-                                    child: Text(
-                                      'Forgot password?',
-                                      style: TextStyle(
-                                          color: LightThemeColors.text),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                          const SizedBox(height: 20),
+                          AppTextField(
+                            validator:
+                                _signUpScreenController.firstNameValidator,
+                            hintText: 'First name',
+                            obscureText: false,
+                            onChanged: onFirstNameChanged,
                           ),
+                          const SizedBox(height: 20),
+                          AppTextField(
+                            validator:
+                                _signUpScreenController.lastNameValidator,
+                            hintText: 'Last name',
+                            obscureText: false,
+                            onChanged: onLastNameChanged,
+                          ),
+                          const SizedBox(height: 20),
                           Container(
                             margin: const EdgeInsets.symmetric(vertical: 20),
                             child: AppButton(
-                              onPressed: onLoginPressed,
-                              text: 'Login',
+                              onPressed: onSignUpPressed,
+                              text: 'Sign up',
                             ),
                           ),
                           const OrContinueWith(),
@@ -202,8 +168,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 20),
-                          SignUpButton(onPressed: () {}),
                         ],
                       ),
                     ),

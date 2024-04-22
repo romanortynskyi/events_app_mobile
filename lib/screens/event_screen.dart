@@ -16,9 +16,16 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 
-class EventScreen extends StatefulWidget {
+class EventScreenArguments {
   final int id;
-  const EventScreen({super.key, required this.id});
+
+  const EventScreenArguments(this.id);
+}
+
+class EventScreen extends StatefulWidget {
+  final EventScreenArguments arguments;
+
+  const EventScreen(this.arguments, {super.key});
 
   @override
   State<StatefulWidget> createState() => _EventScreenState();
@@ -86,7 +93,7 @@ class _EventScreenState extends State<EventScreen> {
       _onGeolocationLoaded(geolocation);
 
       _eventScreenController.getEventById(
-        id: widget.id,
+        id: widget.arguments.id,
         originId: geolocation.placeId ?? '',
         mapCompleter: _mapCompleter,
         callback: _onEventLoaded,

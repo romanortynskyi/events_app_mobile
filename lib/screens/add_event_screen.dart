@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart';
+import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/mutations/add_event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
@@ -177,10 +178,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         },
       ));
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MainScreen()),
-      );
+      Navigator.of(context).popUntil(ModalRoute.withName(RouteName.main.value));
     }
   }
 

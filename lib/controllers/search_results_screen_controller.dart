@@ -1,3 +1,4 @@
+import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/paginated.dart';
@@ -101,9 +102,9 @@ class SearchResultsScreenController {
   }
 
   void onAutocompleteSelected(BuildContext context, String text) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => SearchResultsScreen(query: text)),
+    Navigator.of(context).pushNamed(
+      RouteName.searchResults.value,
+      arguments: SearchResultsScreenArguments(text),
     );
   }
 }

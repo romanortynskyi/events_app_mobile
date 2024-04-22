@@ -3,10 +3,10 @@
 import 'dart:io';
 
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
+import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/upload_user_image_progress.dart';
 import 'package:events_app_mobile/models/user.dart';
-import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/user_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,9 +47,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return BlocConsumer<auth_bloc.AuthBloc, auth_bloc.AuthState>(
       listener: (context, state) {
         if (state is auth_bloc.UnAuthenticated) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const MainScreen()),
+          Navigator.of(context).pushReplacementNamed(
+            RouteName.main.value,
           );
         } else if (state is auth_bloc.UploadingUserImage) {
           UploadUserImageProgress progress =

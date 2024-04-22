@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/controllers/search_results_screen_controller.dart';
 import 'package:events_app_mobile/graphql/search_results_screen/search_results_screen_queries.dart';
@@ -16,10 +17,16 @@ import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-class SearchResultsScreen extends StatefulWidget {
+class SearchResultsScreenArguments {
   final String query;
 
-  const SearchResultsScreen({super.key, required this.query});
+  const SearchResultsScreenArguments(this.query);
+}
+
+class SearchResultsScreen extends StatefulWidget {
+  final SearchResultsScreenArguments arguments;
+
+  const SearchResultsScreen(this.arguments, {super.key});
 
   @override
   State<StatefulWidget> createState() => _SearchResultsScreenState();
@@ -48,7 +55,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     List<Event> events = await _searchResultsScreenController.searchEvents(
       context: context,
       graphqlDocument: SearchResultsScreenQueries.searchEvents,
-      query: widget.query,
+      query: widget.arguments.query,
       skip: _skip,
       limit: 10,
       fetchPolicy: fetchPolicy,
@@ -70,7 +77,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     super.initState();
 
     _scrollController = ScrollController();
-    _textEditingController = TextEditingController(text: widget.query);
+    _textEditingController =
+        TextEditingController(text: widget.arguments.query);
 
     _eventService = EventService();
 
@@ -98,9 +106,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   void _onEventPressed(BuildContext context, Event event) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => EventScreen(id: event.id ?? -1)),
+    Navigator.of(context).pushNamed(
+      RouteName.event.value,
+      arguments: EventScreenArguments(event.id ?? -1),
     );
   }
 

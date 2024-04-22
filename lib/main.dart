@@ -1,7 +1,12 @@
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart';
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart';
+import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/links/custom_link.dart';
+import 'package:events_app_mobile/screens/event_screen.dart';
+import 'package:events_app_mobile/screens/login_screen.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
+import 'package:events_app_mobile/screens/profile_screen.dart';
+import 'package:events_app_mobile/screens/sign_up_screen.dart';
 import 'package:events_app_mobile/services/auth_service.dart';
 import 'package:events_app_mobile/utils/env_utils.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
@@ -81,20 +86,28 @@ class MyApp extends StatelessWidget {
           ),
         ],
         child: MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Events App',
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          theme: ThemeData(
-            useMaterial3: true,
-          ),
-          home: const MainScreen(),
-        ),
+            debugShowCheckedModeBanner: false,
+            title: 'Events App',
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            theme: ThemeData(
+              useMaterial3: true,
+            ),
+            initialRoute: '/',
+            routes: {
+              RouteName.main.value: (context) => const MainScreen(),
+              RouteName.login.value: (context) => const LoginScreen(),
+              RouteName.signUp.value: (context) => const SignUpScreen(),
+              RouteName.profile.value: (context) => const ProfileScreen(),
+              RouteName.event.value: (context) => EventScreen(
+                  ModalRoute.of(context)?.settings.arguments
+                      as EventScreenArguments),
+            }),
       ),
     );
   }

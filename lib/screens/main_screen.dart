@@ -1,6 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/managers/web_socket_manager.dart';
@@ -63,9 +64,8 @@ class _MainScreenState extends State<MainScreen> {
     User? user = state.user;
 
     if (index == items.length - 1 && user == null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      Navigator.of(context).pushNamed(
+        RouteName.login.value,
       );
 
       return false;
@@ -104,8 +104,8 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _blocListener(BuildContext context, auth_bloc.AuthState state) {
-    if (state is auth_bloc.Authenticated) {
-      webSocketManager!.reconnect();
+    if (state is auth_bloc.Authenticated && webSocketManager != null) {
+      webSocketManager?.reconnect();
     }
   }
 
