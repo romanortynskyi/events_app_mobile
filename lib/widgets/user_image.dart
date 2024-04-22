@@ -105,7 +105,7 @@ class UserImage extends StatelessWidget {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: circleColor,
+        color: user == null ? Colors.transparent : circleColor,
         borderRadius: BorderRadius.circular(200),
         boxShadow: shouldDropShadow!
             ? [
