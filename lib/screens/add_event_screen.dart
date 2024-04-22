@@ -10,7 +10,6 @@ import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/screens/add_event_step_one_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_three_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_two_screen.dart';
-import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/screens/map_screen.dart';
 import 'package:events_app_mobile/widgets/app_progress_bar.dart';
 import 'package:flutter/material.dart';
@@ -18,8 +17,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:http/http.dart';
-import 'package:intl/intl.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:path/path.dart' as path;
@@ -163,7 +160,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
 
       GraphQLClient client = GraphQLProvider.of(context).value;
 
-      var response = await client.mutate(MutationOptions(
+      await client.mutate(MutationOptions(
         document: gql(addEvent),
         variables: {
           'input': {

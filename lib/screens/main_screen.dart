@@ -10,7 +10,6 @@ import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/models/web_socket_message.dart';
 import 'package:events_app_mobile/screens/add_event_screen.dart';
 import 'package:events_app_mobile/screens/home_screen.dart';
-import 'package:events_app_mobile/screens/login_screen.dart';
 import 'package:events_app_mobile/screens/search_screen.dart';
 import 'package:events_app_mobile/screens/profile_screen.dart';
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;

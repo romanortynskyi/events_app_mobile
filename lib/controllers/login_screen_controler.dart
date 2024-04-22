@@ -1,7 +1,5 @@
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/enums/route_name.dart';
-import 'package:events_app_mobile/screens/main_screen.dart';
-import 'package:events_app_mobile/screens/sign_up_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

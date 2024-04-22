@@ -3,12 +3,10 @@
 import 'dart:async';
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:graphql_flutter/graphql_flutter.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
