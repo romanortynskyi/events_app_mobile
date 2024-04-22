@@ -1,32 +1,31 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/models/asset.dart';
 import 'package:events_app_mobile/models/upload_user_image_progress.dart';
+import 'package:events_app_mobile/models/user.dart';
 import 'package:flutter/material.dart';
 
 class UserImage extends StatelessWidget {
   final double width;
   final double height;
   final Color circleColor;
-  final String firstName;
-  final String lastName;
   final bool isUserImageUpdating;
   final double fontSize;
 
-  final String? imgSrc;
   final UploadUserImageProgress? uploadImageProgress;
   final bool? shouldDropShadow;
+
+  final User? user;
 
   const UserImage({
     super.key,
     required this.width,
     required this.height,
     required this.circleColor,
-    required this.firstName,
-    required this.lastName,
     required this.isUserImageUpdating,
     required this.fontSize,
     this.uploadImageProgress,
-    this.imgSrc,
+    this.user,
     this.shouldDropShadow = false,
   });
 
@@ -68,7 +67,13 @@ class UserImage extends StatelessWidget {
       );
     }
 
-    if (imgSrc == null && firstName.isNotEmpty && lastName.isNotEmpty) {
+    String firstName = user?.firstName ?? '';
+    String lastName = user?.lastName ?? '';
+    Asset image = user?.image ?? Asset();
+
+    if (user?.image?.src == null &&
+        firstName.isNotEmpty &&
+        lastName.isNotEmpty) {
       String? firstNameFirstLetter = firstName.characters.first;
       String? lastNameFirstLetter = lastName.characters.first;
       String initials = '$firstNameFirstLetter$lastNameFirstLetter';
@@ -85,9 +90,9 @@ class UserImage extends StatelessWidget {
     }
 
     // otherwise user has an image
-    if (imgSrc != null) {
+    if (image.src != null) {
       return CircleAvatar(
-        backgroundImage: CachedNetworkImageProvider(imgSrc!),
+        backgroundImage: CachedNetworkImageProvider(image.src!),
       );
     }
 

@@ -1,19 +1,16 @@
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
+import 'package:events_app_mobile/models/user.dart';
 import 'package:events_app_mobile/widgets/user_image.dart';
 import 'package:flutter/material.dart';
 
 class HomeHeader extends StatelessWidget {
-  final String? imgSrc;
-  final String? firstName;
-  final String? lastName;
+  final User? user;
   final Geolocation? geolocation;
 
   const HomeHeader({
     super.key,
-    this.imgSrc,
-    this.firstName,
-    this.lastName,
+    this.user,
     required this.geolocation,
   });
 
@@ -53,18 +50,14 @@ class HomeHeader extends StatelessWidget {
             ),
           ],
         ),
-        imgSrc == null
-            ? const SizedBox()
-            : UserImage(
-                imgSrc: imgSrc,
-                width: 60,
-                height: 60,
-                circleColor: LightThemeColors.primary,
-                firstName: firstName ?? '',
-                lastName: lastName ?? '',
-                isUserImageUpdating: false,
-                fontSize: 12,
-              ),
+        UserImage(
+          width: 60,
+          height: 60,
+          circleColor: LightThemeColors.primary,
+          isUserImageUpdating: false,
+          fontSize: 12,
+          user: user,
+        ),
       ],
     );
   }

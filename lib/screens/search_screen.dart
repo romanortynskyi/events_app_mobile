@@ -173,7 +173,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     Container(
                       margin: const EdgeInsets.all(20),
                       child: HomeHeader(
-                        imgSrc: state.user?.image?.src,
+                        user: state.user,
                         geolocation: _geolocation,
                       ),
                     ),

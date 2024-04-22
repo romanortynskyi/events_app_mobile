@@ -130,10 +130,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       UserImage(
                         width: imageWidth,
                         height: imageHeight,
-                        imgSrc: user?.image?.src,
+                        user: user,
                         circleColor: circleColor,
-                        firstName: user?.firstName ?? '',
-                        lastName: user?.lastName ?? '',
                         isUserImageUpdating: isUserImageUpdating,
                         fontSize: 50,
                         shouldDropShadow: true,
