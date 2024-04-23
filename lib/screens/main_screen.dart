@@ -2,7 +2,6 @@
 
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
 import 'package:events_app_mobile/consts/enums/route_name.dart';
-import 'package:events_app_mobile/consts/enums/web_socket_message_type.dart';
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/managers/web_socket_manager.dart';
@@ -14,7 +13,6 @@ import 'package:events_app_mobile/screens/home_screen.dart';
 import 'package:events_app_mobile/screens/search_screen.dart';
 import 'package:events_app_mobile/screens/profile_screen.dart';
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
-import 'package:events_app_mobile/utils/env_utils.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';

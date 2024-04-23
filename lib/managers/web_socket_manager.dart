@@ -7,7 +7,6 @@ import 'package:events_app_mobile/models/web_socket_message.dart';
 import 'package:events_app_mobile/utils/env_utils.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:web_socket_channel/io.dart';
 
 class WebSocketManager {
   final String url;
