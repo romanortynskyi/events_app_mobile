@@ -3,6 +3,7 @@
 import 'dart:io';
 
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/controllers/add_event_step_two_screen_controller.dart';
 import 'package:events_app_mobile/utils/widget_utils.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:flutter/material.dart';
@@ -23,24 +24,24 @@ class _AddEventStepTwoScreenState extends State<AddEventStepTwoScreen> {
   bool tapToChooseImageTextWidthReceived = false;
   double tapToChooseImageTextWidth = 0;
 
+  late AddEventStepTwoScreenController _addEventStepTwoScreenController;
+
   final _imagePicker = ImagePicker();
 
   void _onChooseImagePressed() async {
-    XFile? pickedFile =
-        await _imagePicker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      File file = File(pickedFile.path);
-
-      context.read<add_event_bloc.AddEventBloc>().add(
-          add_event_bloc.AddEventSetHorizontalImageRequested(imageFile: file));
-    }
+    _addEventStepTwoScreenController.onChooseImagePressed(
+        context, _imagePicker);
   }
 
-  void _onContinue() {
-    context
-        .read<add_event_bloc.AddEventBloc>()
-        .add(const add_event_bloc.AddEventIncrementStepRequested());
+  void _onContinuePressed() {
+    _addEventStepTwoScreenController.onContinuePressed(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _addEventStepTwoScreenController = AddEventStepTwoScreenController();
   }
 
   @override
@@ -113,7 +114,7 @@ class _AddEventStepTwoScreenState extends State<AddEventStepTwoScreen> {
               const SizedBox(height: 20),
               AppButton(
                 isDisabled: image == null,
-                onPressed: image == null ? null : _onContinue,
+                onPressed: image == null ? null : _onContinuePressed,
                 text: 'Continue',
               ),
             ],
