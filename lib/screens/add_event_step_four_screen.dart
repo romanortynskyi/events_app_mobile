@@ -53,6 +53,20 @@ class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
       placeService: placeService,
       context: context,
     );
+
+    String defaultQuery =
+        _addEventStepFourScreenController.getDefaultQuery(context);
+
+    _textEditingController.text = defaultQuery;
+    _textEditingController.selection =
+        TextSelection.collapsed(offset: defaultQuery.length);
+
+    _textEditingController.addListener(() {
+      _addEventStepFourScreenController.onQueryChanged(
+        context,
+        _textEditingController.text,
+      );
+    });
   }
 
   @override

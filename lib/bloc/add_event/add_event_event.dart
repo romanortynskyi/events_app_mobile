@@ -73,3 +73,10 @@ class AddEventSetPlaceIdRequested extends AddEventEvent {
   });
 }
 
+class AddEventSetPlaceQueryRequested extends AddEventEvent {
+  final String placeQuery;
+
+  const AddEventSetPlaceQueryRequested({
+    required this.placeQuery,
+  });
+}

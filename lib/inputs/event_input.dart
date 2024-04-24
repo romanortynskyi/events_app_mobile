@@ -5,6 +5,7 @@ import 'package:events_app_mobile/abstract/copyable.dart';
 
 class EventInput implements Copyable, Equatable {
   final String? placeId;
+  final String? placeQuery;
   final String? title;
   final String? description;
   final DateTime? startDate;
@@ -16,6 +17,7 @@ class EventInput implements Copyable, Equatable {
 
   EventInput({
     this.placeId,
+    this.placeQuery,
     this.title,
     this.description,
     this.startDate,
@@ -42,6 +44,7 @@ class EventInput implements Copyable, Equatable {
   @override
   EventInput copyWith({
     String? placeId,
+    String? placeQuery,
     String? title,
     String? description,
     DateTime? startDate,
@@ -64,6 +67,7 @@ class EventInput implements Copyable, Equatable {
 
     return EventInput(
       placeId: placeId ?? this.placeId,
+      placeQuery: placeQuery ?? this.placeQuery,
       title: title ?? this.title,
       description: description ?? this.description,
       startDate: startDate ?? this.startDate,

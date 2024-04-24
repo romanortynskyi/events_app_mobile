@@ -17,6 +17,23 @@ class AddEventStepFourScreenController {
     required this.context,
   });
 
+  String getDefaultQuery(BuildContext context) {
+    String query = context
+            .read<add_event_bloc.AddEventBloc>()
+            .state
+            .eventInput
+            .placeQuery ??
+        '';
+
+    return query;
+  }
+
+  void onQueryChanged(BuildContext context, String text) {
+    context
+        .read<add_event_bloc.AddEventBloc>()
+        .add(add_event_bloc.AddEventSetPlaceQueryRequested(placeQuery: text));
+  }
+
   Future<Iterable<AutocompletePlacesPrediction>>
       autocompletePlacesOptionsBuilder({
     required BuildContext context,

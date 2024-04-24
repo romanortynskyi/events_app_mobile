@@ -19,6 +19,7 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
     on<AddEventSetDescriptionRequested>(_onSetDescriptionRequested);
     on<AddEventSetCategoriesRequested>(_onSetCategoriesRequested);
     on<AddEventSetPlaceIdRequested>(_onSetPlaceIdRequested);
+    on<AddEventSetPlaceQueryRequested>(_onSetPlaceQueryRequested);
   }
 
   void _onIncrementStep(
@@ -86,5 +87,14 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
     EventInput newEventInput =
         state.eventInput.copyWith(placeId: event.placeId);
     emit(SetPlaceId(eventInput: newEventInput, step: state.step));
+  }
+
+  void _onSetPlaceQueryRequested(
+    AddEventSetPlaceQueryRequested event,
+    Emitter<AddEventState> emit,
+  ) {
+    EventInput newEventInput =
+        state.eventInput.copyWith(placeQuery: event.placeQuery);
+    emit(SetPlaceQuery(eventInput: newEventInput, step: state.step));
   }
 }

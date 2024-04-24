@@ -71,6 +71,14 @@ class SetPlaceId extends AddEventState {
   });
 }
 
+class SetPlaceQuery extends AddEventState {
+  const SetPlaceQuery({
+    required super.step,
+    required super.eventInput,
+    super.errorMessage,
+  });
+}
+
 class SetStep extends AddEventState {
   const SetStep({
     required super.step,
