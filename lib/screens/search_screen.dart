@@ -6,7 +6,7 @@ import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/global_consts.dart';
 import 'package:events_app_mobile/controllers/search_screen_controller.dart';
 import 'package:events_app_mobile/graphql/search_screen/search_screen_queries.dart';
-import 'package:events_app_mobile/models/autocomplete_places_result.dart';
+import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/services/event_service.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
@@ -193,7 +193,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         optionsViewBuilder:
                             _searchScreenController.optionsViewBuilder,
                         onSelected: (AutocompletePlacesPrediction selection) {
-                          print('You just selected ${selection.originalId}');
+                          print('You just selected ${selection.placeId}');
                         },
                         onSubmitted: (String value) {
                           print('You just selected $value');

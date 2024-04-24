@@ -1,5 +1,5 @@
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/models/autocomplete_places_result.dart';
+import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
 import 'package:events_app_mobile/models/paginated.dart';
 import 'package:events_app_mobile/services/place_service.dart';
 import 'package:flutter/material.dart';
@@ -38,6 +38,7 @@ class AddEventStepFourScreenController {
       skip: skip,
       limit: limit,
       fetchPolicy: fetchPolicy,
+      shouldGetFromGooglePlaces: true,
     );
 
     return paginatedPlacePredictions.items ?? [];
@@ -70,12 +71,17 @@ class AddEventStepFourScreenController {
                       options.elementAt(index);
 
                   if (options.isNotEmpty) {
+                    String? secondaryText =
+                        prediction.structuredFormatting.secondaryText;
+
                     return GestureDetector(
                       onTap: () => onAutoCompleteSelect(prediction),
-                      child: const Column(
+                      child: Column(
                         children: [
-                          Text('Rynok Square, 23'),
-                          Text('Lviv, Ukraine'),
+                          Text(prediction.structuredFormatting.mainText),
+                          secondaryText == null
+                              ? const SizedBox()
+                              : Text(secondaryText),
                         ],
                       ),
                     );

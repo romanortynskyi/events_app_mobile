@@ -2,7 +2,7 @@
 
 import 'package:events_app_mobile/controllers/add_event_step_four_screen_controller.dart';
 import 'package:events_app_mobile/graphql/add_event_step_four_screen/add_event_step_four_screen_queries.dart';
-import 'package:events_app_mobile/models/autocomplete_places_result.dart';
+import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
 import 'package:events_app_mobile/services/place_service.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +39,8 @@ class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
   @override
   void initState() {
     super.initState();
+
+    _scrollController = ScrollController();
 
     PlaceService placeService = PlaceService();
 

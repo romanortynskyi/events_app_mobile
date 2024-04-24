@@ -1,4 +1,4 @@
-import 'package:events_app_mobile/models/autocomplete_places_result.dart';
+import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
 import 'package:events_app_mobile/models/paginated.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -35,7 +35,9 @@ class PlaceService {
     } else {
       List<AutocompletePlacesPrediction> places = data['autocompletePlaces']
               ['items']
-          .map((item) => AutocompletePlacesPrediction.fromMap(item));
+          .map((item) => AutocompletePlacesPrediction.fromMap(item))
+          .toList()
+          .cast<AutocompletePlacesPrediction>();
       int totalPagesCount = data['autocompletePlaces']['totalPagesCount'];
 
       Paginated<AutocompletePlacesPrediction> paginatedPlaces =

@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/search_screen/search_screen_queries.dart';
-import 'package:events_app_mobile/models/autocomplete_places_result.dart';
+import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/paginated.dart';
