@@ -59,12 +59,41 @@ class AddEventStepThreeScreenController {
         TextSelection.collapsed(offset: value.length);
   }
 
+  void onCategorySelected({
+    required BuildContext context,
+    required int index,
+    required bool isSelected,
+    required List<Category> categories,
+  }) {
+    List<int> selectedCategoryIds = context
+            .read<add_event_bloc.AddEventBloc>()
+            .state
+            .eventInput
+            .categories ??
+        [];
+
+    if (isSelected) {
+      selectedCategoryIds.add(categories[index].id ?? -1);
+    } else {
+      selectedCategoryIds.remove(categories[index].id);
+    }
+
+    context.read<add_event_bloc.AddEventBloc>().add(
+        add_event_bloc.AddEventSetCategoriesRequested(
+            categories: selectedCategoryIds));
+  }
+
   void onContinuePressed({
     required BuildContext context,
     required GlobalKey<FormState> formKey,
-    required List<int> selectedCategoryIds,
   }) {
     bool isFormValid = formKey.currentState!.validate();
+    List<int> selectedCategoryIds = context
+            .read<add_event_bloc.AddEventBloc>()
+            .state
+            .eventInput
+            .categories ??
+        [];
 
     if (selectedCategoryIds.isEmpty) {
       const snackBar = SnackBar(

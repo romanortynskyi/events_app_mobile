@@ -27,7 +27,6 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
   bool _isLoadingCategories = true;
 
   List<Category> _categories = [];
-  final List<int> _selectedCategoryIds = [];
 
   late AddEventStepThreeScreenController _addEventStepThreeScreenController;
 
@@ -39,21 +38,19 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
     _addEventStepThreeScreenController.onDescriptionChanged(context, value);
   }
 
-  void _onCategorySelected(int index, bool selected) {
-    setState(() {
-      if (selected) {
-        _selectedCategoryIds.add(index);
-      } else {
-        _selectedCategoryIds.remove(index);
-      }
-    });
+  void _onCategorySelected(int index, bool isSelected) {
+    _addEventStepThreeScreenController.onCategorySelected(
+      context: context,
+      index: index,
+      isSelected: isSelected,
+      categories: _categories,
+    );
   }
 
   void _onContinuePressed() {
     _addEventStepThreeScreenController.onContinuePressed(
       context: context,
       formKey: _formKey,
-      selectedCategoryIds: _selectedCategoryIds,
     );
   }
 
@@ -116,6 +113,8 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
         _blocListener(context, state);
       },
       builder: (BuildContext context, add_event_bloc.AddEventState state) {
+        List<int> selectedCategories = state.eventInput.categories ?? [];
+
         return _isLoadingCategories
             ? const Center(
                 child: CircularProgressIndicator(),
@@ -159,8 +158,8 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
                               (int index) {
                                 return ChoiceChip(
                                     label: Text(_categories[index].name ?? ''),
-                                    selected:
-                                        _selectedCategoryIds.contains(index),
+                                    selected: selectedCategories
+                                        .contains(_categories[index].id),
                                     onSelected: (bool selected) {
                                       _onCategorySelected(index, selected);
                                     });
