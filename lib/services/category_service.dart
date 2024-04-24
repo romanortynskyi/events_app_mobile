@@ -10,6 +10,7 @@ class CategoryService {
     int? skip,
     int? limit,
     bool shouldReturnAll = true,
+    FetchPolicy fetchPolicy = FetchPolicy.cacheFirst,
   }) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
     var response = await client.query(QueryOptions(

@@ -3,7 +3,10 @@ import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
 import 'package:events_app_mobile/models/paginated.dart';
 import 'package:events_app_mobile/services/place_service.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart'
+    as add_event_bloc;
 
 class AddEventStepFourScreenController {
   PlaceService placeService;
@@ -91,5 +94,31 @@ class AddEventStepFourScreenController {
                 },
               )),
         ));
+  }
+
+  void onAutocompleteSelected({
+    required BuildContext context,
+    required AutocompletePlacesPrediction prediction,
+    required TextEditingController textEditingController,
+  }) {
+    String mainText = prediction.structuredFormatting.mainText;
+    String? secondaryText = prediction.structuredFormatting.secondaryText;
+    String placeId = prediction.placeId;
+
+    String newText = '';
+
+    if (secondaryText == null) {
+      newText = mainText;
+    }
+
+    newText = '$mainText, $secondaryText';
+
+    textEditingController.text = newText;
+    textEditingController.selection =
+        TextSelection.collapsed(offset: newText.length);
+
+    context
+        .read<add_event_bloc.AddEventBloc>()
+        .add(add_event_bloc.AddEventSetPlaceIdRequested(placeId: placeId));
   }
 }

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart'
     as add_event_bloc;
+import 'package:graphql_flutter/graphql_flutter.dart';
 
 class AddEventStepThreeScreenController {
   final CategoryService categoryService;
@@ -111,6 +112,7 @@ class AddEventStepThreeScreenController {
       context: context,
       graphqlDocument: AddEventStepThreeScreenQueries.getCategories,
       shouldReturnAll: true,
+      fetchPolicy: FetchPolicy.networkOnly,
     );
 
     List<Category> categories = response.items ?? [];

@@ -63,6 +63,14 @@ class SetCategories extends AddEventState {
   });
 }
 
+class SetPlaceId extends AddEventState {
+  const SetPlaceId({
+    required super.step,
+    required super.eventInput,
+    super.errorMessage,
+  });
+}
+
 class SetStep extends AddEventState {
   const SetStep({
     required super.step,

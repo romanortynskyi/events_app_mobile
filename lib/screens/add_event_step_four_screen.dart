@@ -25,8 +25,13 @@ class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
   late ScrollController _scrollController;
   late AddEventStepFourScreenController _addEventStepFourScreenController;
 
-  void _onAutocompleteSelected(
-      BuildContext context, AutocompletePlacesPrediction prediction) {}
+  void _onAutocompleteSelected(AutocompletePlacesPrediction prediction) {
+    _addEventStepFourScreenController.onAutocompleteSelected(
+      context: context,
+      prediction: prediction,
+      textEditingController: _textEditingController,
+    );
+  }
 
   void _onAutocompleteSubmitted(BuildContext context, String value) {}
 
@@ -91,9 +96,7 @@ class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
                   options: options,
                   scrollController: _scrollController,
                 ),
-                onSelected: (AutocompletePlacesPrediction selection) {
-                  _onAutocompleteSelected(context, selection);
-                },
+                onSelected: _onAutocompleteSelected,
                 onSubmitted: (String value) {
                   _onAutocompleteSubmitted(context, value);
                 },

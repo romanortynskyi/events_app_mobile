@@ -64,3 +64,12 @@ class AddEventSetCategoriesRequested extends AddEventEvent {
     required this.categories,
   });
 }
+
+class AddEventSetPlaceIdRequested extends AddEventEvent {
+  final String placeId;
+
+  const AddEventSetPlaceIdRequested({
+    required this.placeId,
+  });
+}
+
