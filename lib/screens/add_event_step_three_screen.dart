@@ -142,6 +142,7 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
 
     setState(() {
       _categories = categoriesFromBe;
+      _isLoadingCategories = false;
     });
   }
 
@@ -167,61 +168,66 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
         _blocListener(context, state);
       },
       builder: (BuildContext context, add_event_bloc.AddEventState state) {
-        return Container(
-          margin: const EdgeInsets.all(20),
-          child: Form(
-            key: _formKey,
-            autovalidateMode: AutovalidateMode.onUserInteraction,
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-                AppTextField(
-                  hintText: 'Title',
-                  obscureText: false,
-                  onChanged: _onTitleChanged,
-                  validator: _titleValidator,
-                  controller: _titleTextEditingController,
-                  maxLines: 1,
+        return _isLoadingCategories
+            ? const Center(
+                child: CircularProgressIndicator(),
+              )
+            : Container(
+                margin: const EdgeInsets.all(20),
+                child: Form(
+                  key: _formKey,
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 20),
+                      AppTextField(
+                        hintText: 'Title',
+                        obscureText: false,
+                        onChanged: _onTitleChanged,
+                        validator: _titleValidator,
+                        controller: _titleTextEditingController,
+                        maxLines: 1,
+                      ),
+                      const SizedBox(height: 20),
+                      AppTextField(
+                        hintText: 'Description',
+                        obscureText: false,
+                        onChanged: _onDescriptionChanged,
+                        validator: _descriptionValidator,
+                        controller: _descriptionTextEditingController,
+                      ),
+                      const SizedBox(height: 20),
+                      Column(
+                        children: [
+                          const Text('Select categories'),
+                          const SizedBox(height: 20),
+                          Wrap(
+                            spacing: 8,
+                            runSpacing: 4,
+                            children: List<Widget>.generate(
+                              _categories.length,
+                              (int index) {
+                                return ChoiceChip(
+                                    label: Text(_categories[index].name ?? ''),
+                                    selected:
+                                        _selectedCategoryIds.contains(index),
+                                    onSelected: (bool selected) {
+                                      _onCategorySelected(index, selected);
+                                    });
+                              },
+                            ).toList(),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      AppButton(
+                        onPressed: _onContinue,
+                        text: 'Continue',
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 20),
-                AppTextField(
-                  hintText: 'Description',
-                  obscureText: false,
-                  onChanged: _onDescriptionChanged,
-                  validator: _descriptionValidator,
-                  controller: _descriptionTextEditingController,
-                ),
-                const SizedBox(height: 20),
-                Column(
-                  children: [
-                    const Text('Select categories'),
-                    const SizedBox(height: 20),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: List<Widget>.generate(
-                        _categories.length,
-                        (int index) {
-                          return ChoiceChip(
-                              label: Text(_categories[index].name ?? ''),
-                              selected: _selectedCategoryIds.contains(index),
-                              onSelected: (bool selected) {
-                                _onCategorySelected(index, selected);
-                              });
-                        },
-                      ).toList(),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                AppButton(
-                  onPressed: _onContinue,
-                  text: 'Continue',
-                ),
-              ],
-            ),
-          ),
-        );
+              );
       },
     );
   }

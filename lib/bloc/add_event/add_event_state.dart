@@ -55,6 +55,14 @@ class SetDescription extends AddEventState {
   });
 }
 
+class SetCategories extends AddEventState {
+  const SetCategories({
+    required super.step,
+    required super.eventInput,
+    super.errorMessage,
+  });
+}
+
 class SetStep extends AddEventState {
   const SetStep({
     required super.step,

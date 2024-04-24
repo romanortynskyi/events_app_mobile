@@ -17,6 +17,7 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
 
     on<AddEventSetTitleRequested>(_onSetTitleRequested);
     on<AddEventSetDescriptionRequested>(_onSetDescriptionRequested);
+    on<AddEventSetCategoriesRequested>(_onSetCategoriesRequested);
   }
 
   void _onIncrementStep(
@@ -66,5 +67,14 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
     EventInput newEventInput =
         state.eventInput.copyWith(description: event.description);
     emit(SetTitle(eventInput: newEventInput, step: state.step));
+  }
+
+  void _onSetCategoriesRequested(
+    AddEventSetCategoriesRequested event,
+    Emitter<AddEventState> emit,
+  ) {
+    EventInput newEventInput =
+        state.eventInput.copyWith(categories: event.categories);
+    emit(SetCategories(eventInput: newEventInput, step: state.step));
   }
 }

@@ -56,3 +56,11 @@ class AddEventSetDescriptionRequested extends AddEventEvent {
     required this.description,
   });
 }
+
+class AddEventSetCategoriesRequested extends AddEventEvent {
+  final List<int> categories;
+
+  const AddEventSetCategoriesRequested({
+    required this.categories,
+  });
+}
