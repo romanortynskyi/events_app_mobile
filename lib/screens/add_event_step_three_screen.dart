@@ -1,7 +1,7 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:events_app_mobile/controllers/add_event_step_three_screen_controller.dart';
 import 'package:events_app_mobile/models/category.dart';
-import 'package:events_app_mobile/models/paginated.dart';
 import 'package:events_app_mobile/services/category_service.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart'
     as add_event_bloc;
-import 'package:events_app_mobile/graphql/add_event_step_three_screen/add_event_step_three_screen_queries.dart';
 
 class AddEventStepThreeScreen extends StatefulWidget {
   const AddEventStepThreeScreen({super.key});
@@ -30,58 +29,14 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
   List<Category> _categories = [];
   final List<int> _selectedCategoryIds = [];
 
+  late AddEventStepThreeScreenController _addEventStepThreeScreenController;
+
   void _onTitleChanged(String value) {
-    context
-        .read<add_event_bloc.AddEventBloc>()
-        .add(add_event_bloc.AddEventSetTitleRequested(title: value));
+    _addEventStepThreeScreenController.onTitleChanged(context, value);
   }
 
   void _onDescriptionChanged(String value) {
-    context.read<add_event_bloc.AddEventBloc>().add(
-        add_event_bloc.AddEventSetDescriptionRequested(description: value));
-  }
-
-  String? _titleValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a title';
-    }
-
-    return null;
-  }
-
-  String? _descriptionValidator(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a description';
-    }
-
-    if (value.length > 256) {
-      return 'Description must be up to 256 characters long';
-    }
-
-    return null;
-  }
-
-  void _setTitle(String value) {
-    _titleTextEditingController.text = value;
-    _titleTextEditingController.selection =
-        TextSelection.collapsed(offset: value.length);
-  }
-
-  void _setDescription(String value) {
-    _descriptionTextEditingController.text = value;
-    _descriptionTextEditingController.selection =
-        TextSelection.collapsed(offset: value.length);
-  }
-
-  void _blocListener(BuildContext context, add_event_bloc.AddEventState state) {
-    if (state.eventInput.title != _titleTextEditingController.text) {
-      _setTitle(state.eventInput.title ?? '');
-    }
-
-    if (state.eventInput.description !=
-        _descriptionTextEditingController.text) {
-      _setDescription(state.eventInput.description ?? '');
-    }
+    _addEventStepThreeScreenController.onDescriptionChanged(context, value);
   }
 
   void _onCategorySelected(int index, bool selected) {
@@ -94,70 +49,63 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
     });
   }
 
-  void _onContinue() {
-    bool isFormValid = _formKey.currentState!.validate();
-
-    if (_selectedCategoryIds.isEmpty) {
-      const snackBar = SnackBar(
-        content: Text('Select at least one category'),
-      );
-
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
-      return;
-    }
-
-    if (isFormValid) {
-      context
-          .read<add_event_bloc.AddEventBloc>()
-          .add(const add_event_bloc.AddEventIncrementStepRequested());
-
-      ScaffoldMessenger.of(context).hideCurrentSnackBar();
-    }
-  }
-
-  void _onInit() async {
-    String defaultTitle =
-        context.read<add_event_bloc.AddEventBloc>().state.eventInput.title ??
-            '';
-    String defaultDescription = context
-            .read<add_event_bloc.AddEventBloc>()
-            .state
-            .eventInput
-            .description ??
-        '';
-
-    _setTitle(defaultTitle);
-    _setDescription(defaultDescription);
-  }
-
-  void _didChangeDependencies() async {
-    Paginated<Category>? response = await CategoryService().getCategories(
+  void _onContinuePressed() {
+    _addEventStepThreeScreenController.onContinuePressed(
       context: context,
-      graphqlDocument: AddEventStepThreeScreenQueries.getCategories,
-      shouldReturnAll: true,
+      formKey: _formKey,
+      selectedCategoryIds: _selectedCategoryIds,
     );
+  }
 
-    List<Category> categoriesFromBe = response.items ?? [];
+  void _blocListener(BuildContext context, add_event_bloc.AddEventState state) {
+    if (state.eventInput.title != _titleTextEditingController.text) {
+      _addEventStepThreeScreenController.setTitle(
+        _titleTextEditingController,
+        state.eventInput.title ?? '',
+      );
+    }
 
-    setState(() {
-      _categories = categoriesFromBe;
-      _isLoadingCategories = false;
-    });
+    if (state.eventInput.description !=
+        _descriptionTextEditingController.text) {
+      _addEventStepThreeScreenController.setDescription(
+        _descriptionTextEditingController,
+        state.eventInput.description ?? '',
+      );
+    }
   }
 
   @override
   void initState() {
     super.initState();
 
-    _onInit();
+    CategoryService categoryService = CategoryService();
+
+    _addEventStepThreeScreenController = AddEventStepThreeScreenController(
+      categoryService: categoryService,
+    );
+
+    _addEventStepThreeScreenController.onInit(
+      context: context,
+      titleTextEditingController: _titleTextEditingController,
+      descriptionTextEditingController: _descriptionTextEditingController,
+    );
+  }
+
+  void _onDidChangeDependencies(List<Category> categories) {
+    setState(() {
+      _categories = categories;
+      _isLoadingCategories = false;
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    _didChangeDependencies();
+    _addEventStepThreeScreenController.didChangeDependencies(
+      context,
+      _onDidChangeDependencies,
+    );
   }
 
   @override
@@ -184,7 +132,8 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
                         hintText: 'Title',
                         obscureText: false,
                         onChanged: _onTitleChanged,
-                        validator: _titleValidator,
+                        validator:
+                            _addEventStepThreeScreenController.titleValidator,
                         controller: _titleTextEditingController,
                         maxLines: 1,
                       ),
@@ -193,7 +142,8 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
                         hintText: 'Description',
                         obscureText: false,
                         onChanged: _onDescriptionChanged,
-                        validator: _descriptionValidator,
+                        validator: _addEventStepThreeScreenController
+                            .descriptionValidator,
                         controller: _descriptionTextEditingController,
                       ),
                       const SizedBox(height: 20),
@@ -221,7 +171,7 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
                       ),
                       const SizedBox(height: 20),
                       AppButton(
-                        onPressed: _onContinue,
+                        onPressed: _onContinuePressed,
                         text: 'Continue',
                       ),
                     ],
