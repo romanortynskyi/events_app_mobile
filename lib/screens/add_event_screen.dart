@@ -7,6 +7,7 @@ import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/graphql/mutations/add_event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
+import 'package:events_app_mobile/screens/add_event_step_four_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_one_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_three_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_two_screen.dart';
@@ -42,12 +43,14 @@ class _AddEventScreenState extends State<AddEventScreen> {
     'Vertical Image',
     'Horizontal Image',
     'Add Event Details',
+    'Choose Location',
   ];
 
   List<Widget> steps = [
     const AddEventStepOneScreen(),
     const AddEventStepTwoScreen(),
     const AddEventStepThreeScreen(),
+    const AddEventStepFourScreen(),
   ];
 
   void onSelectLocationPressed() async {
@@ -77,14 +80,6 @@ class _AddEventScreenState extends State<AddEventScreen> {
     }
 
     return null;
-  }
-
-  void onTitleChanged(String value) {
-    setState(() => _title = value);
-  }
-
-  void onDescriptionChanged(String value) {
-    setState(() => _description = value);
   }
 
   void onTicketPriceChanged(String value) {

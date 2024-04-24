@@ -183,7 +183,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         bottom: 20,
                         left: 20,
                       ),
-                      child: AppAutocomplete<AutocompletePlacesResult>(
+                      child: AppAutocomplete<AutocompletePlacesPrediction>(
                         textEditingController: _textEditingController,
                         focusNode: _focusNode,
                         borderRadius: 35,
@@ -192,7 +192,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         optionsBuilder: _searchScreenController.optionsBuilder,
                         optionsViewBuilder:
                             _searchScreenController.optionsViewBuilder,
-                        onSelected: (AutocompletePlacesResult selection) {
+                        onSelected: (AutocompletePlacesPrediction selection) {
                           print('You just selected ${selection.originalId}');
                         },
                         onSubmitted: (String value) {

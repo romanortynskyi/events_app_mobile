@@ -11,6 +11,18 @@ class SearchScreenQueries {
     }
   """;
 
+  static const String autocompletePlaces = '''
+    query AUTOCOMPLETE_PLACES(\$input: AutocompletePlacesInput!) {
+      autocompletePlaces(input: \$input) {
+        items {
+          place {
+            originalId
+          }
+        }
+      }
+    }
+  ''';
+
   static const String getEvents = '''
     query GET_EVENTS(\$shouldReturnSoonest: Boolean) {
       getEvents(shouldReturnSoonest: \$shouldReturnSoonest) {

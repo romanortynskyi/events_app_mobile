@@ -3,33 +3,25 @@ import 'package:events_app_mobile/models/paginated.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 
-String autocompletePlacesQuery = '''
-  query AUTOCOMPLETE_PLACES(\$input: AutocompletePlacesInput!) {
-    autocompletePlaces(input: \$input) {
-      items {
-        place {
-          originalId
-        }
-      }
-    }
-  }
-''';
-
 class PlaceService {
-  Future<Paginated<AutocompletePlacesResult>> autocompletePlaces({
+  Future<Paginated<AutocompletePlacesPrediction>> autocompletePlaces({
     required BuildContext context,
-    required String text,
+    required String graphqlDocument,
+    required String query,
     required int skip,
     required int limit,
+    bool shouldGetFromGooglePlaces = false,
+    FetchPolicy? fetchPolicy = FetchPolicy.cacheFirst,
   }) async {
     GraphQLClient client = GraphQLProvider.of(context).value;
     var response = await client.query(QueryOptions(
-      document: gql(autocompletePlacesQuery),
+      document: gql(graphqlDocument),
       variables: {
         'input': {
-          'query': text,
+          'query': query,
           'skip': skip,
           'limit': limit,
+          'shouldGetFromGooglePlaces': shouldGetFromGooglePlaces,
         },
       },
     ));
@@ -41,14 +33,16 @@ class PlaceService {
       print(response.exception?.graphqlErrors[0].message);
       throw Exception();
     } else {
-      List<AutocompletePlacesResult> places = data['autocompletePlaces']
+      List<AutocompletePlacesPrediction> places = data['autocompletePlaces']
               ['items']
-          .map((item) => AutocompletePlacesResult.fromMap(item));
+          .map((item) => AutocompletePlacesPrediction.fromMap(item));
       int totalPagesCount = data['autocompletePlaces']['totalPagesCount'];
 
-      Paginated<AutocompletePlacesResult> paginatedPlaces =
-          Paginated<AutocompletePlacesResult>(
-              items: places, totalPagesCount: totalPagesCount);
+      Paginated<AutocompletePlacesPrediction> paginatedPlaces =
+          Paginated<AutocompletePlacesPrediction>(
+        items: places,
+        totalPagesCount: totalPagesCount,
+      );
 
       return paginatedPlaces;
     }

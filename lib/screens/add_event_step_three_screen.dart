@@ -23,11 +23,12 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
       TextEditingController();
   final TextEditingController _descriptionTextEditingController =
       TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
-  bool isLoadingCategories = true;
+  bool _isLoadingCategories = true;
 
-  List<Category> categories = [];
-  List<int> selectedCategoryIds = [];
+  List<Category> _categories = [];
+  final List<int> _selectedCategoryIds = [];
 
   void _onTitleChanged(String value) {
     context
@@ -51,10 +52,6 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
   String? _descriptionValidator(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter a description';
-    }
-
-    if (value.length < 6) {
-      return 'Description must be at least 6 characters long';
     }
 
     if (value.length > 256) {
@@ -90,11 +87,33 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
   void _onCategorySelected(int index, bool selected) {
     setState(() {
       if (selected) {
-        selectedCategoryIds.add(index);
+        _selectedCategoryIds.add(index);
       } else {
-        selectedCategoryIds.remove(index);
+        _selectedCategoryIds.remove(index);
       }
     });
+  }
+
+  void _onContinue() {
+    bool isFormValid = _formKey.currentState!.validate();
+
+    if (_selectedCategoryIds.isEmpty) {
+      const snackBar = SnackBar(
+        content: Text('Select at least one category'),
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      return;
+    }
+
+    if (isFormValid) {
+      context
+          .read<add_event_bloc.AddEventBloc>()
+          .add(const add_event_bloc.AddEventIncrementStepRequested());
+
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    }
   }
 
   void _onInit() async {
@@ -122,7 +141,7 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
     List<Category> categoriesFromBe = response.items ?? [];
 
     setState(() {
-      categories = categoriesFromBe;
+      _categories = categoriesFromBe;
     });
   }
 
@@ -150,53 +169,57 @@ class _AddEventStepThreeScreenState extends State<AddEventStepThreeScreen> {
       builder: (BuildContext context, add_event_bloc.AddEventState state) {
         return Container(
           margin: const EdgeInsets.all(20),
-          child: Column(
-            children: [
-              const SizedBox(height: 20),
-              AppTextField(
-                hintText: 'Title',
-                obscureText: false,
-                onChanged: _onTitleChanged,
-                validator: _titleValidator,
-                controller: _titleTextEditingController,
-                maxLines: 1,
-              ),
-              const SizedBox(height: 20),
-              AppTextField(
-                hintText: 'Description',
-                obscureText: false,
-                onChanged: _onDescriptionChanged,
-                validator: _descriptionValidator,
-                controller: _descriptionTextEditingController,
-              ),
-              const SizedBox(height: 20),
-              Column(
-                children: [
-                  const Text('Select categories'),
-                  const SizedBox(height: 20),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 4,
-                    children: List<Widget>.generate(
-                      categories.length,
-                      (int index) {
-                        return ChoiceChip(
-                            label: Text(categories[index].name ?? ''),
-                            selected: selectedCategoryIds.contains(index),
-                            onSelected: (bool selected) {
-                              _onCategorySelected(index, selected);
-                            });
-                      },
-                    ).toList(),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-              AppButton(
-                onPressed: () {},
-                text: 'Continue',
-              ),
-            ],
+          child: Form(
+            key: _formKey,
+            autovalidateMode: AutovalidateMode.onUserInteraction,
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                AppTextField(
+                  hintText: 'Title',
+                  obscureText: false,
+                  onChanged: _onTitleChanged,
+                  validator: _titleValidator,
+                  controller: _titleTextEditingController,
+                  maxLines: 1,
+                ),
+                const SizedBox(height: 20),
+                AppTextField(
+                  hintText: 'Description',
+                  obscureText: false,
+                  onChanged: _onDescriptionChanged,
+                  validator: _descriptionValidator,
+                  controller: _descriptionTextEditingController,
+                ),
+                const SizedBox(height: 20),
+                Column(
+                  children: [
+                    const Text('Select categories'),
+                    const SizedBox(height: 20),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children: List<Widget>.generate(
+                        _categories.length,
+                        (int index) {
+                          return ChoiceChip(
+                              label: Text(_categories[index].name ?? ''),
+                              selected: _selectedCategoryIds.contains(index),
+                              onSelected: (bool selected) {
+                                _onCategorySelected(index, selected);
+                              });
+                        },
+                      ).toList(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                AppButton(
+                  onPressed: _onContinue,
+                  text: 'Continue',
+                ),
+              ],
+            ),
           ),
         );
       },

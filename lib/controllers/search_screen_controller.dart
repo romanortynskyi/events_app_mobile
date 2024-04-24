@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/graphql/search_screen/search_screen_queries.dart';
 import 'package:events_app_mobile/models/autocomplete_places_result.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
@@ -190,18 +191,19 @@ class SearchScreenController {
     }
   }
 
-  Future<Iterable<AutocompletePlacesResult>> optionsBuilder(
+  Future<Iterable<AutocompletePlacesPrediction>> optionsBuilder(
       TextEditingValue textEditingValue) async {
     String text = textEditingValue.text;
 
     if (text == '') {
-      return const Iterable<AutocompletePlacesResult>.empty();
+      return const Iterable<AutocompletePlacesPrediction>.empty();
     }
 
-    Paginated<AutocompletePlacesResult> response =
+    Paginated<AutocompletePlacesPrediction> response =
         await placeService.autocompletePlaces(
       context: context,
-      text: text,
+      graphqlDocument: SearchScreenQueries.autocompletePlaces,
+      query: text,
       skip: 0,
       limit: 10,
     );
@@ -212,7 +214,7 @@ class SearchScreenController {
   Widget optionsViewBuilder(
     BuildContext context,
     onAutoCompleteSelect,
-    Iterable<AutocompletePlacesResult> options,
+    Iterable<AutocompletePlacesPrediction> options,
   ) {
     return Container(
       margin: const EdgeInsets.only(left: 20),
@@ -232,7 +234,7 @@ class SearchScreenController {
                   },
                   itemBuilder: (BuildContext context, int index) {
                     if (options.isNotEmpty) {
-                      AutocompletePlacesResult result =
+                      AutocompletePlacesPrediction result =
                           options.elementAt(index);
 
                       return GestureDetector(
