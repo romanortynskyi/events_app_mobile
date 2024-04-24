@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart'
     as add_event_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/controllers/add_event_step_one_screen_controller.dart';
 import 'package:events_app_mobile/utils/widget_utils.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:flutter/material.dart';
@@ -24,23 +25,22 @@ class _AddEventStepOneScreenState extends State<AddEventStepOneScreen> {
   double tapToChooseImageTextWidth = 0;
 
   final _imagePicker = ImagePicker();
+  late AddEventStepOneScreenController _addEventStepOneScreenController;
 
-  void _onChooseImagePressed() async {
-    XFile? pickedFile =
-        await _imagePicker.pickImage(source: ImageSource.gallery);
-
-    if (pickedFile != null) {
-      File file = File(pickedFile.path);
-
-      context.read<add_event_bloc.AddEventBloc>().add(
-          add_event_bloc.AddEventSetVerticalImageRequested(imageFile: file));
-    }
+  void _onChooseImagePressed() {
+    _addEventStepOneScreenController.onChooseImagePressed(
+        context, _imagePicker);
   }
 
-  void _onContinue() {
-    context
-        .read<add_event_bloc.AddEventBloc>()
-        .add(const add_event_bloc.AddEventIncrementStepRequested());
+  void _onContinuePressed() {
+    _addEventStepOneScreenController.onContinuePressed(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _addEventStepOneScreenController = AddEventStepOneScreenController();
   }
 
   @override
@@ -72,7 +72,7 @@ class _AddEventStepOneScreenState extends State<AddEventStepOneScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             GestureDetector(
-              onTap: image == null ? _onChooseImagePressed : () {},
+              onTap: image == null ? _onChooseImagePressed : null,
               child: Stack(
                 alignment: Alignment.center,
                 children: [
@@ -117,7 +117,7 @@ class _AddEventStepOneScreenState extends State<AddEventStepOneScreen> {
             const SizedBox(height: 20),
             AppButton(
               isDisabled: image == null,
-              onPressed: image == null ? null : _onContinue,
+              onPressed: image == null ? null : _onContinuePressed,
               text: 'Continue',
             ),
           ],
