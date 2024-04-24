@@ -18,7 +18,7 @@ class AddEventStepTwoScreenController {
       File file = File(pickedFile.path);
 
       context.read<add_event_bloc.AddEventBloc>().add(
-          add_event_bloc.AddEventSetVerticalImageRequested(imageFile: file));
+          add_event_bloc.AddEventSetHorizontalImageRequested(imageFile: file));
     }
   }
 
