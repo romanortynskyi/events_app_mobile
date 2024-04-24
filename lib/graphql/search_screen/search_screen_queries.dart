@@ -15,10 +15,17 @@ class SearchScreenQueries {
     query AUTOCOMPLETE_PLACES(\$input: AutocompletePlacesInput!) {
       autocompletePlaces(input: \$input) {
         items {
-          place {
-            originalId
+          placeId
+          structuredFormatting {
+            mainText
+            mainTextMatchedSubstrings {
+              length
+              offset
+            }
+            secondaryText
           }
         }
+        totalPagesCount
       }
     }
   ''';

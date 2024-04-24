@@ -189,6 +189,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         borderRadius: 35,
                         prefixIcon: const Icon(Icons.location_on_outlined),
                         hintText: 'Search for locations...',
+                        maxLines: 1,
                         optionsBuilder: _searchScreenController.optionsBuilder,
                         optionsViewBuilder:
                             _searchScreenController.optionsViewBuilder,
