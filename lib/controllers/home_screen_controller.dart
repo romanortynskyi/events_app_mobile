@@ -9,6 +9,7 @@ import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/month.dart';
 import 'package:events_app_mobile/models/paginated.dart';
 import 'package:events_app_mobile/screens/event_screen.dart';
+import 'package:events_app_mobile/screens/search_results_screen.dart';
 import 'package:events_app_mobile/services/event_service.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
 import 'package:events_app_mobile/services/location_service.dart';
@@ -214,6 +215,13 @@ class HomeScreenController {
                 },
               )),
         ));
+  }
+
+  void onAutocompleteSelected(BuildContext context, String text) {
+    Navigator.of(context).pushNamed(
+      RouteName.searchResults.value,
+      arguments: SearchResultsScreenArguments(text),
+    );
   }
 
   void onEventPressed(BuildContext context, Event event) {

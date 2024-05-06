@@ -1,14 +1,12 @@
 // ignore_for_file: use_build_context_synchronously
 
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
-import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/controllers/home_screen_controller.dart';
 import 'package:events_app_mobile/graphql/home_screen/home_screen_queries.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/models/month.dart';
-import 'package:events_app_mobile/screens/search_results_screen.dart';
 import 'package:events_app_mobile/services/event_service.dart';
 import 'package:events_app_mobile/services/geolocation_service.dart';
 import 'package:events_app_mobile/services/location_service.dart';
@@ -124,10 +122,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onAutocompleteSelected(BuildContext context, String text) {
-    Navigator.of(context).pushNamed(
-      RouteName.searchResults.value,
-      arguments: SearchResultsScreenArguments(text),
-    );
+    _homeScreenController.onAutocompleteSelected(context, text);
   }
 
   void _onEventPressed(BuildContext context, Event event) {

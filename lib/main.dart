@@ -7,6 +7,7 @@ import 'package:events_app_mobile/screens/login_screen.dart';
 import 'package:events_app_mobile/screens/main_screen.dart';
 import 'package:events_app_mobile/screens/profile_screen.dart';
 import 'package:events_app_mobile/screens/sign_up_screen.dart';
+import 'package:events_app_mobile/screens/search_results_screen.dart';
 import 'package:events_app_mobile/services/auth_service.dart';
 import 'package:events_app_mobile/utils/env_utils.dart';
 import 'package:events_app_mobile/utils/secure_storage_utils.dart';
@@ -107,6 +108,9 @@ class MyApp extends StatelessWidget {
               RouteName.event.value: (context) => EventScreen(
                   ModalRoute.of(context)?.settings.arguments
                       as EventScreenArguments),
+              RouteName.searchResults.value: (context) => SearchResultsScreen(
+                  ModalRoute.of(context)?.settings.arguments
+                      as SearchResultsScreenArguments),
             }),
       ),
     );
