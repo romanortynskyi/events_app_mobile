@@ -13,6 +13,7 @@ import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/event_card.dart';
 import 'package:events_app_mobile/widgets/events_counter.dart';
 import 'package:events_app_mobile/widgets/month_tile.dart';
+import 'package:events_app_mobile/widgets/no_events_found.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -151,6 +152,58 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     _searchResultsScreenController.onAutocompleteSelected(context, text);
   }
 
+  Widget getBody() {
+    if (_isLoadingEvents) {
+      return Center(
+        child: CircularProgressIndicator(
+          color: LightThemeColors.primary,
+        ),
+      );
+    }
+
+    if (_months.isEmpty) {
+      return const NoEventsFound();
+    }
+
+    return RefreshIndicator(
+        onRefresh: () => _onRefresh(context),
+        child: Expanded(
+          child: ListView.builder(
+            controller: _scrollController,
+            shrinkWrap: true,
+            itemCount: _months.length,
+            itemBuilder: (context, index) {
+              final month = _months[index];
+
+              return Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      MonthTile(text: month.name),
+                      EventsCounter(count: month.events.length),
+                    ],
+                  ),
+                  ListView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    shrinkWrap: true,
+                    itemCount: month.events.length,
+                    itemBuilder: (context, eventIndex) {
+                      Event event = month.events[eventIndex];
+
+                      return TouchableOpacity(
+                        onTap: () => _onEventPressed(context, event),
+                        child: EventCard(event: event),
+                      );
+                    },
+                  ).build(context),
+                ],
+              );
+            },
+          ).build(context),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -158,7 +211,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: [Colors.deepPurple.shade200, LightThemeColors.primary],
+              colors: [
+                const Color.fromARGB(255, 89, 82, 103),
+                LightThemeColors.primary
+              ],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -185,49 +241,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           maxLines: 1,
         ),
       ),
-      body: _isLoadingEvents
-          ? Center(
-              child: CircularProgressIndicator(
-                color: LightThemeColors.primary,
-              ),
-            )
-          : RefreshIndicator(
-              onRefresh: () => _onRefresh(context),
-              child: Expanded(
-                child: ListView.builder(
-                  controller: _scrollController,
-                  shrinkWrap: true,
-                  itemCount: _months.length,
-                  itemBuilder: (context, index) {
-                    final month = _months[index];
-
-                    return Column(
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            MonthTile(text: month.name),
-                            EventsCounter(count: month.events.length),
-                          ],
-                        ),
-                        ListView.builder(
-                          physics: const NeverScrollableScrollPhysics(),
-                          shrinkWrap: true,
-                          itemCount: month.events.length,
-                          itemBuilder: (context, eventIndex) {
-                            Event event = month.events[eventIndex];
-
-                            return TouchableOpacity(
-                              onTap: () => _onEventPressed(context, event),
-                              child: EventCard(event: event),
-                            );
-                          },
-                        ).build(context),
-                      ],
-                    );
-                  },
-                ).build(context),
-              )),
+      body: getBody(),
     );
   }
 }
