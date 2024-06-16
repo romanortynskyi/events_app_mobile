@@ -35,7 +35,7 @@ class SearchScreenQueries {
       getEvents(shouldReturnSoonest: \$shouldReturnSoonest) {
         items {
           id
-          image {
+          verticalImage {
             src
           }
           createdAt
@@ -52,7 +52,7 @@ class SearchScreenQueries {
           description
           startDate
           endDate
-          ticketPrice
+          minTicketPrice
         }
         totalPagesCount
       }

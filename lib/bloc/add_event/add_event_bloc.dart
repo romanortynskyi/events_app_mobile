@@ -18,7 +18,7 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
     on<AddEventSetTitleRequested>(_onSetTitleRequested);
     on<AddEventSetDescriptionRequested>(_onSetDescriptionRequested);
     on<AddEventSetCategoriesRequested>(_onSetCategoriesRequested);
-    on<AddEventSetPlaceIdRequested>(_onSetPlaceIdRequested);
+    on<AddEventSetPlaceOriginalIdRequested>(_onSetPlaceOriginalIdRequested);
     on<AddEventSetPlaceQueryRequested>(_onSetPlaceQueryRequested);
   }
 
@@ -80,12 +80,12 @@ class AddEventBloc extends Bloc<AddEventEvent, AddEventState> {
     emit(SetCategories(eventInput: newEventInput, step: state.step));
   }
 
-  void _onSetPlaceIdRequested(
-    AddEventSetPlaceIdRequested event,
+  void _onSetPlaceOriginalIdRequested(
+    AddEventSetPlaceOriginalIdRequested event,
     Emitter<AddEventState> emit,
   ) {
     EventInput newEventInput =
-        state.eventInput.copyWith(placeId: event.placeId);
+        state.eventInput.copyWith(placeOriginalId: event.placeOriginalId);
     emit(SetPlaceId(eventInput: newEventInput, step: state.step));
   }
 

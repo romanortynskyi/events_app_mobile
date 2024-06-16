@@ -2,7 +2,7 @@
 
 import 'dart:async';
 
-import 'package:events_app_mobile/graphql/home_screen/event_screen_queries.dart';
+import 'package:events_app_mobile/graphql/event_screen/event_screen_queries.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/services/event_service.dart';

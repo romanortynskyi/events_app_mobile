@@ -5,7 +5,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/controllers/event_screen_controller.dart';
-import 'package:events_app_mobile/graphql/home_screen/event_screen_queries.dart';
+import 'package:events_app_mobile/graphql/event_screen/event_screen_queries.dart';
 import 'package:events_app_mobile/models/event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/services/event_service.dart';
@@ -124,7 +124,7 @@ class _EventScreenState extends State<EventScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CachedNetworkImage(
-                      imageUrl: _event?.image?.src ?? '',
+                      imageUrl: _event?.horizontalImage?.src ?? '',
                       height: 300,
                       width: MediaQuery.of(context).size.width,
                       fit: BoxFit.cover),

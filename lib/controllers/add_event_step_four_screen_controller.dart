@@ -1,6 +1,7 @@
-import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/graphql/add_event_step_four_screen/add_event_step_four_screen_queries.dart';
 import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
 import 'package:events_app_mobile/models/paginated.dart';
+import 'package:events_app_mobile/models/place.dart';
 import 'package:events_app_mobile/services/place_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -28,114 +29,70 @@ class AddEventStepFourScreenController {
     return query;
   }
 
-  void onQueryChanged(BuildContext context, String text) {
+  void onQueryChanged({
+    required BuildContext context,
+    required String text,
+    required int skip,
+    required int limit,
+    required double maxImageHeight,
+    FetchPolicy? fetchPolicy,
+    Function? callback,
+  }) async {
     context
         .read<add_event_bloc.AddEventBloc>()
         .add(add_event_bloc.AddEventSetPlaceQueryRequested(placeQuery: text));
-  }
 
-  Future<Iterable<AutocompletePlacesPrediction>>
-      autocompletePlacesOptionsBuilder({
-    required BuildContext context,
-    required TextEditingValue textEditingValue,
-    required String graphqlDocument,
-    required String query,
-    required int skip,
-    required int limit,
-    FetchPolicy? fetchPolicy,
-  }) async {
-    String text = textEditingValue.text;
-
-    if (text == '') {
-      return const Iterable<AutocompletePlacesPrediction>.empty();
-    }
-
-    Paginated<AutocompletePlacesPrediction> paginatedPlacePredictions =
+    Paginated<AutocompletePlacesPrediction> paginatedPlaces =
         await placeService.autocompletePlaces(
       context: context,
-      graphqlDocument: graphqlDocument,
-      query: query,
+      graphqlDocument: AddEventStepFourScreenQueries.autocompletePlaces,
       skip: skip,
       limit: limit,
+      query: text,
+      maxImageHeight: maxImageHeight,
       fetchPolicy: fetchPolicy,
       shouldGetFromGooglePlaces: true,
     );
 
-    return paginatedPlacePredictions.items ?? [];
+    List<Place> places =
+        paginatedPlaces.items!.map((AutocompletePlacesPrediction prediction) {
+      return Place(
+          imgSrc: prediction.imgSrc,
+          originalId: prediction.originalId,
+          name: prediction.structuredFormatting.secondaryText == null
+              ? prediction.structuredFormatting.mainText
+              : '${prediction.structuredFormatting.mainText}, ${prediction.structuredFormatting.secondaryText}');
+    }).toList();
+
+    callback!(places);
   }
 
-  Widget autocompletePlacesOptionsViewBuilder({
+  void onPlaceSelected({
     required BuildContext context,
-    required onAutoCompleteSelect,
-    required Iterable<AutocompletePlacesPrediction> options,
-    required ScrollController scrollController,
+    required String placeOriginalId,
   }) {
-    return Align(
-        alignment: Alignment.topLeft,
-        child: Material(
-          color: LightThemeColors.grey,
-          elevation: 4.0,
-          child: SizedBox(
-              width: MediaQuery.of(context).size.width - 40,
-              child: ListView.separated(
-                physics: const AlwaysScrollableScrollPhysics(),
-                controller: scrollController,
-                shrinkWrap: true,
-                padding: const EdgeInsets.all(8.0),
-                itemCount: options.length,
-                separatorBuilder: (context, i) {
-                  return const Divider();
-                },
-                itemBuilder: (BuildContext context, int index) {
-                  AutocompletePlacesPrediction prediction =
-                      options.elementAt(index);
-
-                  if (options.isNotEmpty) {
-                    String? secondaryText =
-                        prediction.structuredFormatting.secondaryText;
-
-                    return GestureDetector(
-                      onTap: () => onAutoCompleteSelect(prediction),
-                      child: Column(
-                        children: [
-                          Text(prediction.structuredFormatting.mainText),
-                          secondaryText == null
-                              ? const SizedBox()
-                              : Text(secondaryText),
-                        ],
-                      ),
-                    );
-                  }
-
-                  return null;
-                },
-              )),
-        ));
+    context.read<add_event_bloc.AddEventBloc>().add(
+        add_event_bloc.AddEventSetPlaceOriginalIdRequested(
+            placeOriginalId: placeOriginalId));
   }
 
-  void onAutocompleteSelected({
+  Future<List<Place>> getRecommendedPlaces({
     required BuildContext context,
-    required AutocompletePlacesPrediction prediction,
-    required TextEditingController textEditingController,
-  }) {
-    String mainText = prediction.structuredFormatting.mainText;
-    String? secondaryText = prediction.structuredFormatting.secondaryText;
-    String placeId = prediction.placeId;
+    required String graphqlDocument,
+    required int skip,
+    required int limit,
+    required int maxImageHeight,
+    FetchPolicy? fetchPolicy,
+  }) async {
+    Paginated<Place> paginatedPlaces = await placeService.getRecommendedPlaces(
+      context: context,
+      graphqlDocument: graphqlDocument,
+      skip: skip,
+      limit: limit,
+      maxImageHeight: maxImageHeight,
+      fetchPolicy: fetchPolicy,
+    );
 
-    String newText = '';
-
-    if (secondaryText == null) {
-      newText = mainText;
-    }
-
-    newText = '$mainText, $secondaryText';
-
-    textEditingController.text = newText;
-    textEditingController.selection =
-        TextSelection.collapsed(offset: newText.length);
-
-    context
-        .read<add_event_bloc.AddEventBloc>()
-        .add(add_event_bloc.AddEventSetPlaceIdRequested(placeId: placeId));
+    return paginatedPlaces.items ?? [];
   }
 }

@@ -1,24 +1,47 @@
+import 'package:events_app_mobile/abstract/model.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 
-class Place {
+class Place extends Model<Place> {
   late Geolocation? location;
   late String? country;
   late String? locality;
   late String? googleMapsUri;
   late String? originalId;
+  late String? imgSrc;
+  late String? name;
+  late double? predictedSales;
 
   Place(
-      {this.location,
+      {int? id,
+      DateTime? createdAt,
+      DateTime? updatedAt,
+      this.location,
       this.country,
       this.locality,
       this.googleMapsUri,
-      this.originalId});
+      this.originalId,
+      this.imgSrc,
+      this.name,
+      this.predictedSales})
+      : super(
+          id: id,
+          createdAt: createdAt,
+          updatedAt: updatedAt,
+        );
 
   Place.fromMap(Map<String, dynamic> map) {
+    super.fromMap(map);
+
     originalId = map['originalId'];
-    location = Geolocation.fromMap(map['location']);
+    location =
+        map['location'] == null ? null : Geolocation.fromMap(map['location']);
     country = map['country'];
     locality = map['locality'];
     googleMapsUri = map['googleMapsUri'];
+    imgSrc = map['imgSrc'];
+    name = map['name'];
+    predictedSales = map['predictedSales'] == null
+        ? null
+        : double.parse(map['predictedSales'].toString());
   }
 }

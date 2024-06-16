@@ -4,7 +4,7 @@ class HomeScreenQueries {
       getEvents(skip: \$skip, limit: \$limit) {
         items {
           id
-          image {
+          verticalImage {
             src
           }
           createdAt
@@ -20,7 +20,7 @@ class HomeScreenQueries {
           description
           startDate
           endDate
-          ticketPrice
+          minTicketPrice
         }
         totalPagesCount
       }
@@ -49,7 +49,7 @@ class HomeScreenQueries {
           description
           startDate
           endDate
-          ticketPrice
+          minTicketPrice
         }
         totalPagesCount
       }

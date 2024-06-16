@@ -21,6 +21,7 @@ class AppTextField extends StatelessWidget {
   final Color? focusedBorderColor;
   final Color? placeholderColor;
   final TextInputAction? textInputAction;
+  final String? initialValue;
   final void Function()? onTap;
   final void Function(String)? onSubmitted;
 
@@ -42,6 +43,7 @@ class AppTextField extends StatelessWidget {
     this.focusedBorderColor,
     this.placeholderColor,
     this.textInputAction,
+    this.initialValue,
     this.onTap,
     this.onSubmitted,
     this.inputFormatters,
@@ -61,6 +63,7 @@ class AppTextField extends StatelessWidget {
       onTap: onTap,
       validator: validator,
       obscureText: obscureText,
+      initialValue: initialValue,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(color: placeholderColor ?? LightThemeColors.hint),

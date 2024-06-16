@@ -46,7 +46,7 @@ class EventCard extends StatelessWidget {
           ),
           const SizedBox(width: 30),
           EventImage(
-            src: event.image?.src ?? '',
+            src: event.verticalImage?.src ?? '',
             width: 120,
             height: 180,
           ),

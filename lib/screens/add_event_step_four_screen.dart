@@ -3,8 +3,12 @@
 import 'package:events_app_mobile/controllers/add_event_step_four_screen_controller.dart';
 import 'package:events_app_mobile/graphql/add_event_step_four_screen/add_event_step_four_screen_queries.dart';
 import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
+import 'package:events_app_mobile/models/place.dart';
 import 'package:events_app_mobile/services/place_service.dart';
 import 'package:events_app_mobile/widgets/app_autocomplete.dart';
+import 'package:events_app_mobile/widgets/app_text_field.dart';
+import 'package:events_app_mobile/widgets/place_card.dart';
+import 'package:events_app_mobile/widgets/touchable_opacity.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart'
@@ -19,21 +23,23 @@ class AddEventStepFourScreen extends StatefulWidget {
 }
 
 class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
-  final TextEditingController _textEditingController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
 
-  late ScrollController _scrollController;
   late AddEventStepFourScreenController _addEventStepFourScreenController;
 
-  void _onAutocompleteSelected(AutocompletePlacesPrediction prediction) {
-    _addEventStepFourScreenController.onAutocompleteSelected(
+  String? _defaultQuery;
+  List<Place> _places = [];
+
+  void _onQueryChanged(String query) {
+    _addEventStepFourScreenController.onQueryChanged(
       context: context,
-      prediction: prediction,
-      textEditingController: _textEditingController,
+      skip: 0,
+      limit: 10,
+      text: query,
+      maxImageHeight: 300,
+      callback: _onPlacesLoaded,
     );
   }
-
-  void _onAutocompleteSubmitted(BuildContext context, String value) {}
 
   void _onContinue() {
     context
@@ -41,12 +47,20 @@ class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
         .add(const add_event_bloc.AddEventIncrementStepRequested());
   }
 
-  @override
-  void initState() {
-    super.initState();
+  void _onPlacePressed(BuildContext context, Place place) {
+    _addEventStepFourScreenController.onPlaceSelected(
+      context: context,
+      placeOriginalId: place.originalId ?? '',
+    );
+  }
 
-    _scrollController = ScrollController();
+  void _onPlacesLoaded(List<Place> places) {
+    setState(() {
+      _places = places;
+    });
+  }
 
+  void _onInit() async {
     PlaceService placeService = PlaceService();
 
     _addEventStepFourScreenController = AddEventStepFourScreenController(
@@ -57,16 +71,43 @@ class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
     String defaultQuery =
         _addEventStepFourScreenController.getDefaultQuery(context);
 
-    _textEditingController.text = defaultQuery;
-    _textEditingController.selection =
-        TextSelection.collapsed(offset: defaultQuery.length);
+    _defaultQuery = defaultQuery;
+  }
 
-    _textEditingController.addListener(() {
-      _addEventStepFourScreenController.onQueryChanged(
-        context,
-        _textEditingController.text,
+  void _onChangeDependencies() async {
+    if (_defaultQuery!.isEmpty) {
+      List<Place> recommendedPlaces =
+          await _addEventStepFourScreenController.getRecommendedPlaces(
+        context: context,
+        graphqlDocument: AddEventStepFourScreenQueries.getRecommendedPlaces,
+        skip: 0,
+        limit: 10,
+        maxImageHeight: 300,
       );
-    });
+
+      _addEventStepFourScreenController.onPlaceSelected(
+        context: context,
+        placeOriginalId: recommendedPlaces.first.originalId ?? '',
+      );
+
+      _onPlacesLoaded(recommendedPlaces);
+    } else {
+      _onQueryChanged(_defaultQuery!);
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _onInit();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    _onChangeDependencies();
   }
 
   @override
@@ -79,42 +120,36 @@ class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
           margin: const EdgeInsets.all(20),
           child: Column(
             children: [
-              AppAutocomplete<AutocompletePlacesPrediction>(
-                textEditingController: _textEditingController,
+              AppTextField(
                 focusNode: _focusNode,
                 borderRadius: 35,
                 prefixIcon: const Icon(Icons.search),
                 hintText: 'Search for places...',
                 maxLines: 1,
-                optionsBuilder: (TextEditingValue textEditingValue) =>
-                    _addEventStepFourScreenController
-                        .autocompletePlacesOptionsBuilder(
-                  context: context,
-                  textEditingValue: textEditingValue,
-                  graphqlDocument:
-                      AddEventStepFourScreenQueries.autocompletePlaces,
-                  query: _textEditingController.text,
-                  skip: 0,
-                  limit: 10,
-                  fetchPolicy: FetchPolicy.networkOnly,
-                ),
-                optionsViewBuilder: (
-                  BuildContext context,
-                  onAutoCompleteSelect,
-                  Iterable<AutocompletePlacesPrediction> options,
-                ) =>
-                    _addEventStepFourScreenController
-                        .autocompletePlacesOptionsViewBuilder(
-                  context: context,
-                  onAutoCompleteSelect: onAutoCompleteSelect,
-                  options: options,
-                  scrollController: _scrollController,
-                ),
-                onSelected: _onAutocompleteSelected,
-                onSubmitted: (String value) {
-                  _onAutocompleteSubmitted(context, value);
-                },
+                obscureText: false,
+                onChanged: _onQueryChanged,
+                initialValue: _defaultQuery,
+                validator: (String? value) => null,
               ),
+              const SizedBox(height: 30),
+              ListView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true,
+                itemCount: _places.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Place place = _places[index];
+                  bool isSelected =
+                      place.originalId == state.eventInput.placeOriginalId;
+
+                  return TouchableOpacity(
+                    onTap: () => _onPlacePressed(context, place),
+                    child: PlaceCard(
+                      place: place,
+                      isSelected: isSelected,
+                    ),
+                  );
+                },
+              ).build(context),
             ],
           ),
         );

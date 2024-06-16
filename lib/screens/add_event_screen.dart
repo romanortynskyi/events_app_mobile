@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:events_app_mobile/bloc/add_event/add_event_bloc.dart';
 import 'package:events_app_mobile/consts/enums/route_name.dart';
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
+import 'package:events_app_mobile/controllers/add_event_screen_controller.dart';
 import 'package:events_app_mobile/graphql/mutations/add_event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
 import 'package:events_app_mobile/screens/add_event_step_four_screen.dart';
@@ -39,11 +40,14 @@ class _AddEventScreenState extends State<AddEventScreen> {
   File? _imageFile;
   String? _placeId;
 
+  late AddEventScreenController _addEventScreenController;
+
   List<String> titles = [
     'Vertical Image',
     'Horizontal Image',
     'Add Event Details',
     'Choose Location',
+    'Five',
   ];
 
   List<Widget> steps = [
@@ -51,6 +55,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
     const AddEventStepTwoScreen(),
     const AddEventStepThreeScreen(),
     const AddEventStepFourScreen(),
+    Text('five'),
   ];
 
   void onSelectLocationPressed() async {
@@ -178,16 +183,42 @@ class _AddEventScreenState extends State<AddEventScreen> {
     context.read<AddEventBloc>().add(const AddEventDecrementStepRequested());
   }
 
+  void _onContinue() {
+    _addEventScreenController.onContinue(context);
+  }
+
+  void _onInit() {
+    _addEventScreenController = AddEventScreenController();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    _onInit();
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AddEventBloc, AddEventState>(
       builder: (BuildContext context, AddEventState state) {
+        int stepIndex = state.step;
         Widget step = steps[state.step];
         double progressBarValue = ((state.step + 1) / steps.length) * 100;
         String title = titles[state.step];
 
         return Scaffold(
             backgroundColor: LightThemeColors.background,
+            floatingActionButton: stepIndex == 3
+                ? FloatingActionButton(
+                    onPressed: _onContinue,
+                    backgroundColor: LightThemeColors.primary,
+                    child: Icon(
+                      Icons.arrow_forward,
+                      color: LightThemeColors.white,
+                    ),
+                  )
+                : null,
             appBar: AppBar(
               title: Text(title),
               bottom: PreferredSize(

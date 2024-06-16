@@ -2,7 +2,7 @@
 
 import 'package:events_app_mobile/bloc/auth/auth_bloc.dart' as auth_bloc;
 import 'package:events_app_mobile/consts/light_theme_colors.dart';
-import 'package:events_app_mobile/controllers/login_screen_controler.dart';
+import 'package:events_app_mobile/controllers/login_screen_controller.dart';
 import 'package:events_app_mobile/widgets/app_button.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:events_app_mobile/widgets/or_continue_with.dart';

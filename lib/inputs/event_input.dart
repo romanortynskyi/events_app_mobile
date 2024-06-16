@@ -4,7 +4,7 @@ import 'package:equatable/equatable.dart';
 import 'package:events_app_mobile/abstract/copyable.dart';
 
 class EventInput implements Copyable, Equatable {
-  final String? placeId;
+  final String? placeOriginalId;
   final String? placeQuery;
   final String? title;
   final String? description;
@@ -16,7 +16,7 @@ class EventInput implements Copyable, Equatable {
   final List<int>? categories;
 
   EventInput({
-    this.placeId,
+    this.placeOriginalId,
     this.placeQuery,
     this.title,
     this.description,
@@ -30,7 +30,7 @@ class EventInput implements Copyable, Equatable {
 
   @override
   EventInput copy() => EventInput(
-        placeId: placeId,
+        placeOriginalId: placeOriginalId,
         title: title,
         description: description,
         startDate: startDate,
@@ -43,7 +43,7 @@ class EventInput implements Copyable, Equatable {
 
   @override
   EventInput copyWith({
-    String? placeId,
+    String? placeOriginalId,
     String? placeQuery,
     String? title,
     String? description,
@@ -66,7 +66,7 @@ class EventInput implements Copyable, Equatable {
     }
 
     return EventInput(
-      placeId: placeId ?? this.placeId,
+      placeOriginalId: placeOriginalId ?? this.placeOriginalId,
       placeQuery: placeQuery ?? this.placeQuery,
       title: title ?? this.title,
       description: description ?? this.description,
@@ -81,7 +81,7 @@ class EventInput implements Copyable, Equatable {
 
   @override
   List<Object?> get props => [
-        placeId,
+        placeOriginalId,
         title,
         description,
         startDate,

@@ -194,7 +194,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         optionsViewBuilder:
                             _searchScreenController.optionsViewBuilder,
                         onSelected: (AutocompletePlacesPrediction selection) {
-                          print('You just selected ${selection.placeId}');
+                          print('You just selected ${selection.originalId}');
                         },
                         onSubmitted: (String value) {
                           print('You just selected $value');

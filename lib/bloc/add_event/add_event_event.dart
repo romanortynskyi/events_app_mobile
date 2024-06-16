@@ -65,11 +65,11 @@ class AddEventSetCategoriesRequested extends AddEventEvent {
   });
 }
 
-class AddEventSetPlaceIdRequested extends AddEventEvent {
-  final String placeId;
+class AddEventSetPlaceOriginalIdRequested extends AddEventEvent {
+  final String placeOriginalId;
 
-  const AddEventSetPlaceIdRequested({
-    required this.placeId,
+  const AddEventSetPlaceOriginalIdRequested({
+    required this.placeOriginalId,
   });
 }
 

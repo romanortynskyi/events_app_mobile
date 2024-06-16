@@ -10,8 +10,8 @@ class EventScreenQueries {
         description
         startDate
         endDate
-        ticketPrice
-        image {
+        minTicketPrice
+        horizontalImage {
           src
         }
         place {

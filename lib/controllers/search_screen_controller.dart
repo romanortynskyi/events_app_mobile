@@ -175,7 +175,8 @@ class SearchScreenController {
         MarkerId markerId = MarkerId(event.id.toString());
         LatLng position = LatLng(latitude, longitude);
 
-        Uint8List? imageBytes = await _getEventImage(event.image?.src ?? '');
+        Uint8List? imageBytes =
+            await _getEventImage(event.verticalImage?.src ?? '');
 
         if (imageBytes != null) {
           Marker marker = Marker(

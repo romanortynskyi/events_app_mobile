@@ -8,7 +8,8 @@ class Event extends Model<Event> {
   late String? description;
   late DateTime? startDate;
   late DateTime? endDate;
-  late Asset? image;
+  late Asset? horizontalImage;
+  late Asset? verticalImage;
   late int? distance;
   late Geolocation? geolocation;
   late Place? place;
@@ -21,7 +22,8 @@ class Event extends Model<Event> {
     this.description,
     this.startDate,
     this.endDate,
-    this.image,
+    this.horizontalImage,
+    this.verticalImage,
     this.distance,
     this.geolocation,
     this.place,
@@ -44,8 +46,11 @@ class Event extends Model<Event> {
     geolocation = Geolocation(
         latitude: map['geolocation']?['latitude'] ?? 0,
         longitude: map['geolocation']?['longitude'] ?? 0);
-    image = Asset(
-      src: map['image']?['src'] ?? '',
+    horizontalImage = Asset(
+      src: map['horizontalImage']?['src'] ?? '',
+    );
+    verticalImage = Asset(
+      src: map['verticalImage']?['src'] ?? '',
     );
     place = Place.fromMap(map['place']);
 
