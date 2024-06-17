@@ -44,7 +44,7 @@ class PlaceCard extends StatelessWidget {
           ),
           const SizedBox(height: 15),
           Text(
-            'Predicted sales: ${place.predictedSales}%',
+            'Predicted sales: ${place.predictedSalesPercentage}%',
           ),
         ],
       ),

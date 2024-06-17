@@ -9,7 +9,7 @@ class Place extends Model<Place> {
   late String? originalId;
   late String? imgSrc;
   late String? name;
-  late double? predictedSales;
+  late double? predictedSalesPercentage;
 
   Place(
       {int? id,
@@ -22,7 +22,7 @@ class Place extends Model<Place> {
       this.originalId,
       this.imgSrc,
       this.name,
-      this.predictedSales})
+      this.predictedSalesPercentage})
       : super(
           id: id,
           createdAt: createdAt,
@@ -40,8 +40,8 @@ class Place extends Model<Place> {
     googleMapsUri = map['googleMapsUri'];
     imgSrc = map['imgSrc'];
     name = map['name'];
-    predictedSales = map['predictedSales'] == null
+    predictedSalesPercentage = map['predictedSalesPercentage'] == null
         ? null
-        : double.parse(map['predictedSales'].toString());
+        : double.parse(map['predictedSalesPercentage'].toString());
   }
 }

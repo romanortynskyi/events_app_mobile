@@ -69,6 +69,7 @@ class PlaceService {
         'limit': limit,
         'maxImageHeight': maxImageHeight,
       },
+      fetchPolicy: fetchPolicy,
     ));
 
     Map<String, dynamic>? data = response.data;

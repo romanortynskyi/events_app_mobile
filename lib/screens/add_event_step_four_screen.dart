@@ -2,10 +2,8 @@
 
 import 'package:events_app_mobile/controllers/add_event_step_four_screen_controller.dart';
 import 'package:events_app_mobile/graphql/add_event_step_four_screen/add_event_step_four_screen_queries.dart';
-import 'package:events_app_mobile/models/autocomplete_places_prediction.dart';
 import 'package:events_app_mobile/models/place.dart';
 import 'package:events_app_mobile/services/place_service.dart';
-import 'package:events_app_mobile/widgets/app_autocomplete.dart';
 import 'package:events_app_mobile/widgets/app_text_field.dart';
 import 'package:events_app_mobile/widgets/place_card.dart';
 import 'package:events_app_mobile/widgets/touchable_opacity.dart';
@@ -38,6 +36,7 @@ class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
       text: query,
       maxImageHeight: 300,
       callback: _onPlacesLoaded,
+      fetchPolicy: FetchPolicy.networkOnly,
     );
   }
 
@@ -83,6 +82,7 @@ class _AddEventStepFourScreenState extends State<AddEventStepFourScreen> {
         skip: 0,
         limit: 10,
         maxImageHeight: 300,
+        fetchPolicy: FetchPolicy.cacheFirst,
       );
 
       _addEventStepFourScreenController.onPlaceSelected(
