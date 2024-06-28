@@ -8,6 +8,7 @@ import 'package:events_app_mobile/consts/light_theme_colors.dart';
 import 'package:events_app_mobile/controllers/add_event_screen_controller.dart';
 import 'package:events_app_mobile/graphql/mutations/add_event.dart';
 import 'package:events_app_mobile/models/geolocation.dart';
+import 'package:events_app_mobile/screens/add_event_step_five_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_four_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_one_screen.dart';
 import 'package:events_app_mobile/screens/add_event_step_three_screen.dart';
@@ -55,7 +56,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
     const AddEventStepTwoScreen(),
     const AddEventStepThreeScreen(),
     const AddEventStepFourScreen(),
-    Text('five'),
+    const AddEventStepFiveScreen(),
   ];
 
   void onSelectLocationPressed() async {

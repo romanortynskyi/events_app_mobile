@@ -17,9 +17,12 @@ import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 main() async {
   await dotenv.load(fileName: '.env');
+
+  Stripe.publishableKey = EnvUtils.getEnv('STRIPE_PUBLISHABLE_KEY');
 
   await initHiveForFlutter();
 
